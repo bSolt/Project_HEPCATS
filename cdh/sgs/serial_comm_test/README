@@ -7,7 +7,7 @@ Make sure you install xterm:
 Running the test
 
 1. Create virtual comm ports:
-	  $socat -d -d pty,raw,echo=0 pty,raw,echo=0
+	$socat -d -d pty,raw,echo=0 pty,raw,echo=0
 
 2. Run bash wrapper script:
-	  $./serial_comm_test.sh
+	$./serial_comm_test.sh
