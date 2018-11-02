@@ -59,7 +59,7 @@ struct pkt_dat_fld
 	unsigned int pkt_sec_hdr_p_red:   3; //  3 bits
 
 	// Packet User Data Field:
-	int pkt_usr_dat[1064]; // Placeholder for 1064 bytes
+	uint8_t pkt_usr_dat[1064]; // Placeholder for 1064 bytes
 
 	// Packet Error Control:
 	uint16_t pkt_err_cnt: 16; // 16 bits
@@ -99,7 +99,8 @@ void main(int argc, char const *argv[])
 	pkt_dat_fld.pkt_sec_hdr_p_red = 1; // "001" (subsecond resolution)
 
 	// Populate user data field:
-	pkt_dat_fld.pkt_usr_dat = 2147483647; // "1s" (idle packet user data)
+	for (int i = 0; i < 1063; ++i)
+		pkt_dat_fld.pkt_usr_dat[i] = 255; // "1s" (idle packet user data)
 
 	// Populate packer error control field:
 	pkt_dat_fld.pkt_err_cnt = 0; // "0000000000000000" (not researched yet)
