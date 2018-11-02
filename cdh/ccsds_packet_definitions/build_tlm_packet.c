@@ -59,7 +59,7 @@ struct pkt_dat_fld
 	unsigned int pkt_sec_hdr_p_red:   3; //  3 bits
 
 	// Packet User Data Field:
-	unsigned int pkt_usr_dat: 32; // Placeholder for 1064 bytes
+	int pkt_usr_dat[1064]; // Placeholder for 1064 bytes
 
 	// Packet Error Control:
 	uint16_t pkt_err_cnt: 16; // 16 bits
