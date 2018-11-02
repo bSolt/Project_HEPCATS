@@ -53,7 +53,7 @@ struct pkt_dat_fld
 	uint8_t pkt_sec_hdr_t_hour; 	     //  8 bits  
 	uint8_t pkt_sec_hdr_t_min; 		     //  8 bits
 	uint8_t pkt_sec_hdr_t_sec; 			 //  8 bits
-	uint8_t pkt_sec_hdr_t_subs;          //  8 bits
+	unsigned int pkt_sec_hdr_p_ext:   1; //  1 bit
 	unsigned int pkt_sec_hdr_p_id:    3; //  3 bits
 	unsigned int pkt_sec_hdr_p_cal:   1; //  1 bit
 	unsigned int pkt_sec_hdr_p_red:   3; //  3 bits
@@ -83,7 +83,7 @@ void main(int argc, char const *argv[])
 	                                      // (idle packet name)
 
 	// Populate packet length field:
-	pkt_hdr.pkt_len = ; // "C" (Octets in packet data field - 1)
+	pkt_hdr.pkt_len = 13; // "C" (Octets in packet data field - 1)
 
 	// Populate packet secondary header T fields:
 	pkt_dat_fld.pkt_sec_hdr_t_year = 2018; // "00000011111100010"
@@ -91,9 +91,9 @@ void main(int argc, char const *argv[])
 	pkt_dat_fld.pkt_sec_hdr_t_hour =    0; // "00000000"
 	pkt_dat_fld.pkt_sec_hdr_t_min =    33; // "00100001"
 	pkt_dat_fld.pkt_sec_hdr_t_sec =    27; // "00011011"
-	pkt_dat_fld.pkt_sec_hdr_t_subs =    0; // "00000000"
 
 	// Populate packet secondary header P fields:
+	pkt_dat_fld.pkt_sec_hdr_p_ext = 0; // "0"   (no extension)
 	pkt_dat_fld.pkt_sec_hdr_p_id =  5; // "101" (time code I.D)
 	pkt_dat_fld.pkt_sec_hdr_p_cal = 1; // "1"   (DOY variation)
 	pkt_dat_fld.pkt_sec_hdr_p_red = 1; // "001" (subsecond resolution)
