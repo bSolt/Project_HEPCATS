@@ -6,10 +6,10 @@
 // -------------------------------------------------------------------------- /
 //
 // Input Arguments:
-// - 
+// - N/A
 //
 // Output Arguments:
-// - 
+// - N/A
 // 
 // -------------------------------------------------------------------------- /
 //
@@ -50,9 +50,9 @@ struct pkt_dat_fld
 	// Packet Secondary Header:
 	uint16_t pkt_sec_hdr_t_year;         // 16 bits
 	uint16_t pkt_sec_hdr_t_doy;          // 16 bits 
-	uint8_t pkt_sec_hdr_t_hour; 	     //  8 bits  
-	uint8_t pkt_sec_hdr_t_min; 		     //  8 bits
-	uint8_t pkt_sec_hdr_t_sec; 			 //  8 bits
+	uint8_t pkt_sec_hdr_t_hour;          //  8 bits  
+	uint8_t pkt_sec_hdr_t_min;           //  8 bits
+	uint8_t pkt_sec_hdr_t_sec;           //  8 bits
 	unsigned int pkt_sec_hdr_p_ext:   1; //  1 bit
 	unsigned int pkt_sec_hdr_p_id:    3; //  3 bits
 	unsigned int pkt_sec_hdr_p_cal:   1; //  1 bit
@@ -80,7 +80,7 @@ void main(int argc, char const *argv[])
 	// Populate packet sequence control fields: 
 	pkt_hdr.pkt_seq_cnt_grp_flg = 3; // "11" (unsegmented data)  
 	pkt_hdr.pkt_seq_cnt_seq_cnt = 0; // "00000000000000" 
-									 // (first packet in count)
+	                                 // (first packet in count)
 
 	// Populate packet length field:
 	pkt_hdr.pkt_len = 1079; // "C" (Octets in packet data field - 1)

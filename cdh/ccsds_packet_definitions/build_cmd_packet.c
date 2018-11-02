@@ -6,10 +6,10 @@
 // -------------------------------------------------------------------------- /
 //
 // Input Arguments:
-// -
+// - N/A
 //
 // Output Arguments:
-// - 
+// - N/A
 // 
 // -------------------------------------------------------------------------- /
 //
@@ -50,9 +50,9 @@ struct pkt_dat_fld
 	// Packet Secondary Header:
 	uint16_t pkt_sec_hdr_t_year;         // 16 bits
 	uint16_t pkt_sec_hdr_t_doy;          // 16 bits 
-	uint8_t pkt_sec_hdr_t_hour; 	     //  8 bits  
-	uint8_t pkt_sec_hdr_t_min; 		     //  8 bits
-	uint8_t pkt_sec_hdr_t_sec; 			 //  8 bits
+	uint8_t pkt_sec_hdr_t_hour;          //  8 bits  
+	uint8_t pkt_sec_hdr_t_min;           //  8 bits
+	uint8_t pkt_sec_hdr_t_sec;           //  8 bits
 	unsigned int pkt_sec_hdr_p_ext:   1; //  1 bit
 	unsigned int pkt_sec_hdr_p_id:    3; //  3 bits
 	unsigned int pkt_sec_hdr_p_cal:   1; //  1 bit
@@ -100,7 +100,7 @@ void main(int argc, char const *argv[])
 
 	// Populate user data field:
 	pkt_dat_fld.pkt_app_dat = 2147483647; // "1s" 
-										  // (idle packet application data)
+	                                      // (idle packet application data)
 
 	// Populate packer error control field:
 	pkt_dat_fld.pkt_err_cnt = 0; // "0000000000000000" (not researched yet)
