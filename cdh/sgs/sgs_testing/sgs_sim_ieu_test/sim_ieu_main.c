@@ -1,6 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Define Example CCSDS Telecommand Packet 
+// SGS and Simulated IEU Communication Test
+// 
+// Simulated IEU Main
 //
 // -------------------------------------------------------------------------- /
 //
@@ -16,7 +18,7 @@
 // ASEN 4018
 // Project HEPCATS
 // Subsystem: C&DH
-// Created: October 31, 2018
+// Created: November 1, 2018
 // 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -26,10 +28,12 @@
 #include <unistd.h>  // UNIX standard function definitions 
 #include <stdint.h>  // Integer types
 
+#include "sim_ieu_tlm_proc.h"
+
 // Packet header structure:
 struct pkt_hdr
 {
-	// Packet I.D.:
+	// Packet I.D:
 	unsigned int pkt_id_vrs:          3;  //  3 bits
 	unsigned int pkt_id_typ:          1;  //  1 bit
 	unsigned int pkt_id_sec_hdr_flg:  1;  //  1 bit
@@ -70,7 +74,7 @@ void main(int argc, char const *argv[])
 	struct pkt_hdr pkt_hdr;
 	struct pkt_dat_fld pkt_dat_fld;
 
-	// Populate packet I.D. fields:
+	// Populate packet I.D fields:
 	pkt_hdr.pkt_id_vrs =         0; // "000"           (always)
 	pkt_hdr.pkt_id_typ =         1; // "0"             (telecommand packet)
 	pkt_hdr.pkt_id_sec_hdr_flg = 0; // "0"             (idle packet)
@@ -93,7 +97,7 @@ void main(int argc, char const *argv[])
 
 	// Populate packet secondary header P fields:
 	pkt_dat_fld.pkt_sec_hdr_p_ext = 0; // "0"   (no extension)
-	pkt_dat_fld.pkt_sec_hdr_p_id =  5; // "101" (time code I.D.)
+	pkt_dat_fld.pkt_sec_hdr_p_id =  5; // "101" (time code I.D)
 	pkt_dat_fld.pkt_sec_hdr_p_cal = 1; // "1"   (DOY variation)
 	pkt_dat_fld.pkt_sec_hdr_p_red = 1; // "001" (subsecond resolution)
 
@@ -103,6 +107,16 @@ void main(int argc, char const *argv[])
 
 	// Populate packer error control field:
 	pkt_dat_fld.pkt_err_cnt = 0; // "0000000000000000" (not researched yet)
+
+	// Initialize buffer:
+	char buffer[20];
+
+	// Write to buffer:
+	memcpy(buffer+0,&pkt_hdr,6);      // Copy Packet Header struct
+	memcpy(buffer+6,&pkt_dat_fld,14); // Copy Packet Data Field struct
+
+	// Pass buffer to processor:
+	cmd_pkt_proc(buffer);
 
 	return;
 }
