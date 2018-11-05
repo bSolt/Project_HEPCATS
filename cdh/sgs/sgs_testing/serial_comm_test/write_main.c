@@ -80,8 +80,7 @@ void main(int argc, char const *argv[])
 		// Check for success:
 		if (bytes_sent != sizeof(buffer)) {
 		    printf("Error from write: %d, %d\n", bytes_sent, errno);
-		}
-		else {
+		} else {
 			printf("Packet sent!\n");
 			printf("(%d bytes sent)\n",bytes_sent);
 			printf("\n");

@@ -1,14 +1,17 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Define Example CCSDS Telecommand Packet 
+// SGS and Simulated IEU Communication Test
+// 
+// SGS Create Telecommand Packet
 //
 // -------------------------------------------------------------------------- /
 //
 // Input Arguments:
-// - N/A
+// - telecmd_pkt_inputs (APID, Packet Name, Packet Secondary Header, 
+//                       and Application Data)
 //
 // Output Arguments:
-// - N/A
+// - buffer
 // 
 // -------------------------------------------------------------------------- /
 //
@@ -16,7 +19,7 @@
 // ASEN 4018
 // Project HEPCATS
 // Subsystem: C&DH
-// Created: October 31, 2018
+// Created: November 4, 2018
 // 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -25,6 +28,8 @@
 #include <string.h>  // String function definitions 
 #include <unistd.h>  // UNIX standard function definitions 
 #include <stdint.h>  // Integer types
+
+#include "telecmd_inputs_struct.h" // Structure definition
 
 // Packet header structure:
 struct pkt_hdr
@@ -64,32 +69,33 @@ struct pkt_dat_fld
 	unsigned int pkt_err_cnt: 16; // 16 bits
 };
 
-void main(int argc, char const *argv[])
+char* crt_telecmd_pkt(struct telecmd_pkt_inputs telecmd_pkt_inputs,char* buffer)
 {
 	// Define packet structure:
 	struct pkt_hdr pkt_hdr;
 	struct pkt_dat_fld pkt_dat_fld;
 
 	// Populate packet I.D. fields:
-	pkt_hdr.pkt_id_vrs =         0; // "000"           (always)
-	pkt_hdr.pkt_id_typ =         1; // "0"             (telecommand packet)
-	pkt_hdr.pkt_id_sec_hdr_flg = 0; // "0"             (idle packet)
-	pkt_hdr.pkt_id_apid =     2047; // "11111111111"   (idle packet APID)
+	pkt_hdr.pkt_id_vrs =         0; // "000" (always)
+	pkt_hdr.pkt_id_typ =         1; // "0"   (telecommand packet)
+	pkt_hdr.pkt_id_sec_hdr_flg = 1; // "1"   (not idle packet)
+	pkt_hdr.pkt_id_apid = \
+		telecmd_pkt_inputs.pkt_apid;
 
 	// Populate packet sequence control fields: 
-	pkt_hdr.pkt_seq_cnt_grp_flg =      3; // "11" (unsegmented data)  
-	pkt_hdr.pkt_seq_cnt_pkt_name = 16383; // "11111111111111" 
-	                                      // (idle packet name)
+	pkt_hdr.pkt_seq_cnt_grp_flg =  3; // "11" (unsegmented data) 
+	pkt_hdr.pkt_seq_cnt_pkt_name = \
+		telecmd_pkt_inputs.pkt_name;
 
 	// Populate packet length field:
 	pkt_hdr.pkt_len = 13; // "C" (Octets in packet data field - 1)
 
 	// Populate packet secondary header T fields:
-	pkt_dat_fld.pkt_sec_hdr_t_year = 2018; // "00000011111100010"
-	pkt_dat_fld.pkt_sec_hdr_t_doy =   305; // "00000000100110001"
-	pkt_dat_fld.pkt_sec_hdr_t_hour =    0; // "00000000"
-	pkt_dat_fld.pkt_sec_hdr_t_min =    33; // "00100001"
-	pkt_dat_fld.pkt_sec_hdr_t_sec =    27; // "00011011"
+	pkt_dat_fld.pkt_sec_hdr_t_year = telecmd_pkt_inputs.pkt_t_year;
+	pkt_dat_fld.pkt_sec_hdr_t_doy =  telecmd_pkt_inputs.pkt_t_doy;
+	pkt_dat_fld.pkt_sec_hdr_t_hour = telecmd_pkt_inputs.pkt_t_hour;
+	pkt_dat_fld.pkt_sec_hdr_t_min =  telecmd_pkt_inputs.pkt_t_min;
+	pkt_dat_fld.pkt_sec_hdr_t_sec =  telecmd_pkt_inputs.pkt_t_sec; 
 
 	// Populate packet secondary header P fields:
 	pkt_dat_fld.pkt_sec_hdr_p_ext = 0; // "0"   (no extension)
@@ -98,11 +104,14 @@ void main(int argc, char const *argv[])
 	pkt_dat_fld.pkt_sec_hdr_p_red = 1; // "001" (subsecond resolution)
 
 	// Populate user data field:
-	pkt_dat_fld.pkt_app_dat = 2147483647; // "1s" 
-	                                      // (idle packet application data)
+	pkt_dat_fld.pkt_app_dat = telecmd_pkt_inputs.pkt_app_data;
 
 	// Populate packer error control field:
-	pkt_dat_fld.pkt_err_cnt = 0; // "0000000000000000" (not researched yet)
+	pkt_dat_fld.pkt_err_cnt = 0; // "0000000000000000" (no error detection)
 
-	return;
+	// Copy Packet Header and Data Field to buffer:
+	memcpy(buffer+0,&pkt_hdr,6);
+	memcpy(buffer+6,&pkt_dat_fld,14);
+
+	return buffer;
 }

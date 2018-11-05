@@ -28,7 +28,7 @@
 #include <unistd.h>  // UNIX standard function definitions 
 #include <stdint.h>  // Integer types
 
-void cmd_pkt_proc(char* buffer)
+void telecmd_pkt_proc(char* buffer)
 {	
 	// Initialize:
 	uint16_t pkt_hdr_pkt_id;
@@ -78,12 +78,13 @@ void cmd_pkt_proc(char* buffer)
     printf("      Secondary Header Flag : %d\n",pkt_id_sec_hdr_flg);
     printf("      APID                  : %d\n",pkt_id_apid);
 
-	unsigned int mask=1<<((sizeof(uint16_t)<<3)-1);
+	/*unsigned int mask=1<<((sizeof(uint16_t)<<3)-1);
     while(mask) 
     {
-        printf("%d", (pkt_id_apid&mask ? 1 : 0));
+        printf("%d", (pkt_hdr_pkt_id&mask ? 1 : 0));
         mask >>= 1;
     } printf("\n");
+	*/
 
  	// Mask key:
 	// (Bits are counted from Right --> Left)
@@ -91,4 +92,6 @@ void cmd_pkt_proc(char* buffer)
 	// Packet Header Packet I.D. Type:             0x08   = 0000000000001000
 	// Packet Header Packet Secondary Header Flag: 0x10   = 0000000000010000
 	/// Packet Header Packet APID:                 0xFFE0 = 1111111111100000
+
+	return;
 }

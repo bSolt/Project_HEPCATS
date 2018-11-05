@@ -1,5 +1,5 @@
-build_tlm_packets: build_tlm_packet.c	
-	gcc -o build_tlm_packet build_tlm_packet.c
+tlm_packets: tlm_pkt.c	
+	gcc -o tlm_pkt tlm_pkt.c
 
-build_cmd_packets: build_cmd_packet.c	
-	gcc -o build_cmd_packet build_cmd_packet.c
+telecmd_packets: telecmd_pkt.c	
+	gcc -o telecmd_pkt telecmd_pkt.c
