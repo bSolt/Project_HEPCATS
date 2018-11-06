@@ -2,7 +2,7 @@
 which uses transfer learning to distinguish between two types of images 
 downloaded from imagenet
 
-Usage: python3 [-i] transfer_demo.py [-h] [-model modelkey] [-s savename] [-p] [-t]"""
+Usage: python3 [-i] transfer_demo.py [-h] [-model MODEL] [-s SAVEAS] [-e EPOCHS] [-p] [-t]"""
 
 import os
 import sys
@@ -244,6 +244,8 @@ model.summary()
 classifier.compile(optimizer=tf.keras.optimizers.RMSprop(lr=2e-4),
               loss='binary_crossentropy',
               metrics=['acc',recall,f1])
+model.compile(optimizer=tf.keras.optimizers.RMSprop(lr=2e-4),
+              loss='binary_crossentropy')
 
 print('[INFO] Models compiled successfully')
 
@@ -379,7 +381,7 @@ if(args['plotting']):
   predictions = model.predict(test_inputs).reshape((300,))
   #find where the errors in the testing data are
   errors = np.where((predictions>0.5) != ground_truth)[0]
-  print("No of errors = {}/{}".format(len(errors),nTest))
+  print("Number of Errors = {}/{}".format(len(errors),nTest))
   # Create this list thing for plotting examples
   from itertools import chain
   images = chain(errors,range(10))
