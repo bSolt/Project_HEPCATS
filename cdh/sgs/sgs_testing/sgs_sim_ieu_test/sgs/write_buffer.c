@@ -35,15 +35,12 @@
 void write_buffer(int fd, char* buffer)
 {
 	// Write buffer to port:
-	int bytes_sent = write(fd,buffer,sizeof(buffer));
+	int bytes_sent = write(fd,buffer,20); // 20 byte telecommand packet
 
-	// Check for success:
-	if (bytes_sent != sizeof(buffer)) {
+	// Check for success (20 bytes sent):
+	if (bytes_sent != 20) {
 		// Print error message:
 	    printf("Error from write: %d, %d\n", bytes_sent, errno);
-	} else {
-		// Print success message:
-		printf("Telecommand Packet Sent\n");
 	}
 
 	return;

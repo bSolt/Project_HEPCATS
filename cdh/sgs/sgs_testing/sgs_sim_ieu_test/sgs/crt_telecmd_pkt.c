@@ -31,7 +31,7 @@
 
 #include "telecmd_inputs_struct.h" // Structure definition
 
-// Packet header structure:
+// Packet header structure
 struct pkt_hdr
 {
 	// Packet I.D.:
@@ -48,7 +48,7 @@ struct pkt_hdr
 	unsigned int pkt_len: 16; // 16 bits	
 };
 
-// Packet data field structure:
+// Packet data field structure
 struct pkt_dat_fld
 {
 	// Packet Secondary Header:
@@ -69,6 +69,7 @@ struct pkt_dat_fld
 	unsigned int pkt_err_cnt: 16; // 16 bits
 };
 
+// Function to create telecommand packet 
 char* crt_telecmd_pkt(struct telecmd_pkt_inputs telecmd_pkt_inputs,char* buffer)
 {
 	// Define packet structure:
@@ -101,7 +102,7 @@ char* crt_telecmd_pkt(struct telecmd_pkt_inputs telecmd_pkt_inputs,char* buffer)
 	pkt_dat_fld.pkt_sec_hdr_p_ext = 0; // "0"   (no extension)
 	pkt_dat_fld.pkt_sec_hdr_p_id =  5; // "101" (time code I.D.)
 	pkt_dat_fld.pkt_sec_hdr_p_cal = 1; // "1"   (DOY variation)
-	pkt_dat_fld.pkt_sec_hdr_p_red = 1; // "001" (subsecond resolution)
+	pkt_dat_fld.pkt_sec_hdr_p_red = 0; // "000" (second resolution)
 
 	// Populate user data field:
 	pkt_dat_fld.pkt_app_dat = telecmd_pkt_inputs.pkt_app_data;
