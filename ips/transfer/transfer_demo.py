@@ -12,6 +12,7 @@ import tensorflow as tf
 import argparse
 
 K = tf.keras.backend
+default_net = "inceptionresnetv2"
 
 def recall(y_true, y_pred):
     """Recall metric.
@@ -51,7 +52,7 @@ def f1(y_true, y_pred):
 ap = argparse.ArgumentParser()
 # ap.add_argument("-i", "--image", required=True,
 #   help="path to the input image")
-ap.add_argument("-model", "--model", type=str, default="inceptionresnetv2",
+ap.add_argument("-model", "--model", type=str, default=default_net,
   help="name of pre-trained network to use")
 args = vars(ap.parse_args())
 
@@ -121,19 +122,21 @@ test_list  = ([pos_dir + f for f in np.array(pos_l)[ind_pos[nTrain//2:]]] +
 
 # Plot the example images here
 # Where the example images will be the first of the ordered images
-fig,ax = plt.subplots(1,2,figsize=(12,6))
-plt.subplot(1,2,1)
-plt.grid(False)
-plt.title("Example posellite Image")
-im = Image.open(pos_dir+pos_l[ind_pos[0]])
-plt.imshow(im);
+# This code can be uncommeneted to view the example images with show()
 
-# Example of negative image
-plt.subplot(1,2,2)
-plt.grid(False)
-plt.title("Example No posellite Image")
-im = Image.open(neg_dir+neg_l[ind_neg[0]])
-plt.imshow(im);
+# fig,ax = plt.subplots(1,2,figsize=(12,6))
+# plt.subplot(1,2,1)
+# plt.grid(False)
+# plt.title("Example posellite Image")
+# im = Image.open(pos_dir+pos_l[ind_pos[0]])
+# plt.imshow(im);
+
+# # Example of negative image
+# plt.subplot(1,2,2)
+# plt.grid(False)
+# plt.title("Example No posellite Image")
+# im = Image.open(neg_dir+neg_l[ind_neg[0]])
+# plt.imshow(im);
 
 """# Pre-Trained Network Setup & Feature Extraction
 
@@ -162,34 +165,43 @@ if args["model"] not in MODELS.keys():
   raise AssertionError("The --model command line argument should "
     "be a key in the `MODELS` dictionary")
 
-model = tf.keras.models.Sequential()
 # Note that the input_shape chosen here is to help with future datasets
 # The feature detector is taken from a pre-trained, deep network, built into keras
-model.add( MODELS[args['model']](
-                  weights='imagenet',
-                  include_top=False,
-                  input_shape=(256, 256, 3)),
-          )
-# The classifier input is dense, or fully connected
-model.add(tf.keras.layers.Dense(256, activation='relu'))
-# The flatten layer reduces the dimensions of the output
-model.add(tf.keras.layers.Flatten())
-# Dropout layer prevents overfitting
-model.add(tf.keras.layers.Dropout(0.5))
-# Output layer is a single neuron sigmoid
-model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
+ptdnn = MODELS[args['model']](
+          weights='imagenet',
+          include_top=False,
+          input_shape=(256, 256, 3))
 
+feature_shape = ptdnn.output_shape
+
+classifier = tf.keras.models.Sequential(name='Classifier')
+# The classifier input is dense, or fully connected
+classifier.add(tf.keras.layers.Dense(256, activation='relu',
+  input_shape=feature_shape[1:]))
+# The flatten layer reduces the dimensions of the output
+classifier.add(tf.keras.layers.Flatten())
+# Dropout layer prevents overfitting
+classifier.add(tf.keras.layers.Dropout(0.5))
+# Output layer is a single neuron sigmoid
+classifier.add(tf.keras.layers.Dense(1, activation='sigmoid'))
+
+model = tf.keras.models.Sequential()
+model.add(ptdnn)
+model.add(classifier)
 model.layers[0].trainable=False
 # Display layer information for reference
 model.summary()
 
-# Model options including metrics and loss function
-model.compile(optimizer=tf.keras.optimizers.RMSprop(lr=2e-4),
+# classifier options including metrics and loss function
+ptdnn.compile()
+classifier.compile(optimizer=tf.keras.optimizers.RMSprop(lr=2e-4),
               loss='binary_crossentropy',
               metrics=['acc',recall,f1])
-print('[INFO] Model was compiled successfully')
+print('[INFO] Models compiled successfully')
 
-input("Press Enter to Continue, but also it won't work k thanks.")
+# from keras.utils import plot_model
+# plot_model(model, to_file='model.png')
+
 """This is the part where we load in the data and organize it into batches
 
 The next block generates batches of training data. The feature array output by the 
@@ -202,8 +214,8 @@ The subsequent block does the same for validation data.
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 datagen = ImageDataGenerator(rescale=1./255)
-batch_size = 20
-epochs = 20
+batch_size = 32
+epochs = 10
 
 x_train = np.array([np.array(Image.open(fname).resize((256,256)).convert("RGB")) 
                     for fname in train_list])
@@ -212,52 +224,61 @@ y_train = np.concatenate((np.ones(nTrain//2), np.zeros(nTrain//2)))
 # print(x_train.shape)
 
 train_generator = datagen.flow(x_train, y_train, batch_size=batch_size)
-
-train_features = np.zeros(shape=(nTrain, 256, 256, 3))
+ 
+train_featrs = np.zeros(
+  shape=np.concatenate(([nTrain], feature_shape[1:]))
+  )
 train_labels = np.zeros(shape=(nTrain))
 
 i = 0
 for inputs_batch, labels_batch in train_generator:
-    print("Working on training batch {}".format(i),end='\r')
-    # features_batch = inc_conv.predict(inputs_batch)
+    print("[INFO] Computing Features and Labels for training batch {}".format(i),end='\r')
+    features_batch = ptdnn.predict(inputs_batch)
     if ((i+1) * batch_size < nTrain):
-      train_inputs[i * batch_size : (i + 1) * batch_size] = inputs_batch
+      train_featrs[i * batch_size : (i + 1) * batch_size] = features_batch
       train_labels[i * batch_size : (i + 1) * batch_size] = labels_batch
     else:
-      train_inputs[i * batch_size : ] = inputs_batch[0:nTrain-i*batch_size]
+      train_featrs[i * batch_size : ] = features_batch[0:nTrain-i*batch_size]
       train_labels[i * batch_size : ] = labels_batch[0:nTrain-i*batch_size]
     i += 1
     if i * batch_size >= nTrain:
         break
         
-train_inputs = np.reshape(train_inputs, (nTrain, 6 * 6 * 1536))
+print('')
+# train_featrs = np.reshape(train_featrs, (nTrain, 6 * 6 * 1536))
 
 x_test = np.array([np.array(Image.open(fname).resize((256,256)).convert("RGB")) 
                    for fname in test_list])
 y_test = np.concatenate((np.ones(nTest//2), np.zeros(nTest//2)))
 
-print(x_test[0].shape)
+# print(x_test[0].shape)
 
 test_generator = datagen.flow(x_test, y_test, batch_size=batch_size)
 
+test_featrs = np.zeros(
+  shape=np.concatenate(([nTest], feature_shape[1:]))
+  )
 test_inputs = np.zeros(shape=(nTest, 256, 256, 3))
 test_labels = np.zeros(shape=(nTest))
 
 i = 0
 for inputs_batch, labels_batch in test_generator:
-    print("Working on test batch {}".format(i),end='\r')
-    # inputs_batch = inc_conv.predict(inputs_batch)
+    print("[INFO] Computing Features and Labels for test batch {}".format(i),end='\r')
+    featrs_batch = ptdnn.predict(inputs_batch)
     if((i+1)*batch_size < nTest):
+      test_featrs[i * batch_size : (i + 1) * batch_size] = featrs_batch
       test_inputs[i * batch_size : (i + 1) * batch_size] = inputs_batch
       test_labels[i * batch_size : (i + 1) * batch_size] = labels_batch
     else:
+      test_featrs[i * batch_size : ] = featrs_batch[0:nTest-i*batch_size]
       test_inputs[i * batch_size : ] = inputs_batch[0:nTest-i*batch_size]
       test_labels[i * batch_size : ] = labels_batch[0:nTest-i*batch_size]
     i += 1
     if i * batch_size >= nTest:
         break
         
-test_inputs = np.reshape(test_inputs, (nTest, 6 * 6 * 1536))
+print('[INFO] All Features computed successfully')
+# test_inputs = np.reshape(test_inputs, (nTest, 6 * 6 * 1536))
 
 """# Building the Classifier Network
 
@@ -267,11 +288,11 @@ The first block of code defines several metrics which will be used to gauge the 
 """
 
 # Fit this to our data please!
-history = model.fit(train_inputs,
+history = classifier.fit(train_featrs,
                     train_labels,
                     epochs=epochs,
                     batch_size=batch_size,
-                    validation_data=(test_features,test_labels))
+                    validation_data=(test_featrs,test_labels))
 
 """The next code block sets up and trains the classifier network. This simple classifier network only have input, hidden layer, dropout, and output layers. The input layer corresponds to the the 5 by 5 by 1536 array generated by the feature detector network, which was flattened earlier. These features are used to determine the values of the hidden layer which has 256 neurons. The following layer to this is a dropout layer. this dropout unit randomly ignores half of the values from the hidden layer. This is useful for preventing overfitting. The output layer is just a single neuron with a sigmoid activation. A sigmoid activation is used here because its output can be interpreted as a probability that the image is a posellite.
 
@@ -279,20 +300,6 @@ Other options specified here are in the last two lines of the code. First, the m
 
 In the last line, training settings defined above are passed to the `fit()` method. Namely a batch size of 20 images and a total epoch count of 50.
 """
-
-#Make this thang
-from keras import models
-from keras import layers
-from keras import optimizers
- 
-# Sequential is the typical model structure
-model = models.Sequential()
-# The input layer is dense, or fully connected
-model.add(layers.Dense(256, activation='relu', input_dim=6 * 6 * 1536))
-# Dropout layer prevents overfitting
-model.add(layers.Dropout(0.5))
-# Output layer is a single neuron sigmoid
-model.add(layers.Dense(1, activation='sigmoid'))
 
 
 """# Characterizing the Classifications
@@ -333,8 +340,10 @@ plt.xlabel('Epoch')
 plt.legend(['Train', 'Test'], loc='upper left')
 plt.show()
 
-from keras.utils import plot_model
-plot_model(model, to_file='model.png')
+input('model machine broken have good day')
+
+# from keras.utils import plot_model
+# plot_model(model, to_file='model.png')
 
 """This next section goes over errors in the validation data and displays a bunch of example images."""
 
@@ -375,8 +384,7 @@ import time
 def classify_image(image_data):
   n = image_data.shape[0]
   im_mat = np.asarray(image_data).reshape(n,256,256,3)
-  features = inc_conv.predict(im_mat).reshape(n,6*6*1536)
-  return model.predict(features)
+  return model.predict(im_mat)
 
 N = 100;
 
@@ -391,14 +399,14 @@ dt=0;
 
 for i in range(2*N):
   im = Image.open(ex_list[i]).resize((256,256)).convert("RGB")
-  im = np.array(im).reshape(1,256,256,3)
+  im = np.expand_dims(np.asarray(im)/255,axis=0)
   t0 = time.time();
   prediction = classify_image(im)
   dt += time.time()-t0;
-  print("Original Label:{:}, Prediction:{}".format(i<10,prediction))
-  plt.imshow(im[0])
-  plt.grid('off')
-  plt.show()
+  print("Original Label:{:i}, Prediction:{:.2f}".format(i<N,prediction[0][0]))
+  # plt.imshow(im[0])
+  # plt.grid(False)
+  # plt.show()
   
 
 print("Average classification time: {:8g}".format(dt/(2*N)))
