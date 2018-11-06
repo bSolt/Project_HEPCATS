@@ -37,13 +37,13 @@ char* read_buffer(int fd,char* buffer)
 	// Initilize: 
 	int bytes_received;
 	int bytes_read = 0;
-	int bytes_to_read = 20;
+	int bytes_to_read = 20; // 20 bytes telecommand packet
 
 	// Temporary buffer:
 	char temp_buffer[20];
 
 	// Clear port buffer:
-	tcflush(fd,TCIOFLUSH); // Necessary!!
+	//tcflush(fd,TCIOFLUSH);
 
 	// Loop to get full telecommand packet:
 	while (bytes_to_read > 0 ) {
