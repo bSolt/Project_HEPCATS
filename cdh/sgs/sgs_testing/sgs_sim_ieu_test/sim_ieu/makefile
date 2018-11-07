@@ -1,4 +1,4 @@
-sim_ieu_rcv_sgs_cmd: sim_ieu_rcv_sgs_cmd.c open_port.c port_config.c read_buffer.c telecmd_pkt_proc.c
-	gcc -o sim_ieu_rcv_sgs_cmd sim_ieu_rcv_sgs_cmd.c open_port.c port_config.c read_buffer.c telecmd_pkt_proc.c
+sim_ieu: sim_ieu sim_ieu.c sim_ieu_open_port.c sim_ieu_port_config.c sim_ieu_read_buffer.c sim_ieu_telecmd_pkt_proc.c
+	gcc -o sim_ieu sim_ieu.c sim_ieu_open_port.c sim_ieu_port_config.c sim_ieu_read_buffer.c sim_ieu_telecmd_pkt_proc.c
 clean:
-	rm sim_ieu_rcv_sgs_cmd
+	rm sim_ieu

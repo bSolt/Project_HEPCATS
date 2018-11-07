@@ -2,7 +2,7 @@
 //
 // SGS and Simulated IEU Communication Test
 // 
-// Read Buffer
+// Simulated IEU Read Buffer
 //
 // -------------------------------------------------------------------------- /
 //
@@ -32,7 +32,7 @@
 #include <errno.h>   // Error number definitions 
 #include <termios.h> // POSIX terminal control definitions 
 
-char* read_buffer(int fd,char* buffer)
+char* sim_ieu_read_buffer(int fd,char* buffer)
 {
 	// Initilize: 
 	int bytes_received;

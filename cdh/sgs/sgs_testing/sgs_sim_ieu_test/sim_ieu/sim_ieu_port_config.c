@@ -1,11 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Serial Communication Test
+// SGS and Simulated IEU Communication Test
 //
-// Function: Sets port configuration (options)
-//           - Sets baud rate
-//           - Sets parity
-//           - Sets to raw input
+// Simulated IEU Port Configuration
 //
 // -------------------------------------------------------------------------- /
 //
@@ -35,7 +32,7 @@
 #include <errno.h>   // Error number definitions 
 #include <termios.h> // POSIX terminal control definitions
 
-void port_config(int fd, int speed)
+void sim_ieu_port_config(int fd, int speed)
 {
     // Creat POSIX structure for port options:
     struct termios options;

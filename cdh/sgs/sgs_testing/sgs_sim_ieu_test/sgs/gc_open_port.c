@@ -44,6 +44,9 @@ int gc_open_port(char* port)
   if (fd == -1){
     // Could not open port:
     printf("(GC_OPEN_PORT) <ERROR> Unable to open port: %d\n",errno);
+
+    // Exit:
+    exit(0);
   }
   else{
     // Set file status:

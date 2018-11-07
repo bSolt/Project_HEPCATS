@@ -28,7 +28,7 @@
 #include <unistd.h>  // UNIX standard function definitions 
 #include <stdint.h>  // Integer types
 
-void telecmd_pkt_proc(char* buffer)
+void sim_ieu_telecmd_pkt_proc(char* buffer)
 {	
 	// Initialize:
 	uint16_t pkt_hdr_pkt_id;
