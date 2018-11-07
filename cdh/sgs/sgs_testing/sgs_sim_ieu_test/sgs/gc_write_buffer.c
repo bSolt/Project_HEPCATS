@@ -2,7 +2,7 @@
 //
 // SGS and Simulated IEU Communication Test
 // 
-// Write Buffer
+// Ground Control Write (to) Buffer
 //
 // -------------------------------------------------------------------------- /
 //
@@ -32,7 +32,7 @@
 #include <errno.h>   // Error number definitions 
 #include <termios.h> // POSIX terminal control definitions 
 
-void write_buffer(int fd, char* buffer)
+void gc_write_buffer(int fd, char* buffer)
 {
 	// Write buffer to port:
 	int bytes_sent = write(fd,buffer,20); // 20 byte telecommand packet

@@ -2,7 +2,7 @@
 //
 // SGS and Simulated IEU Communication Test
 // 
-// SGS Create Telecommand Packet
+// Ground Control Create Telecommand Packet
 //
 // -------------------------------------------------------------------------- /
 //
@@ -29,7 +29,7 @@
 #include <unistd.h>  // UNIX standard function definitions 
 #include <stdint.h>  // Integer types
 
-#include "telecmd_inputs_struct.h" // Structure definition
+#include "gc_telecmd_inputs_struct.h" // Structure definition
 
 // Packet header structure
 struct pkt_hdr
@@ -70,7 +70,7 @@ struct pkt_dat_fld
 };
 
 // Function to create telecommand packet 
-char* crt_telecmd_pkt(struct telecmd_pkt_inputs telecmd_pkt_inputs,char* buffer)
+char* gc_crt_telecmd_pkt(struct telecmd_pkt_inputs telecmd_pkt_inputs,char* buffer)
 {
 	// Define packet structure:
 	struct pkt_hdr pkt_hdr;

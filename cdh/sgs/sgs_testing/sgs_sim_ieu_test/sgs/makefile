@@ -1,5 +1,5 @@
-sgs_cmd_sim_ieu: sgs_cmd_sim_ieu.c cmd_str_interp.c crt_telecmd_pkt.c get_doy.c write_buffer.c open_port.c port_config.c
-	gcc -o sgs_cmd_sim_ieu sgs_cmd_sim_ieu.c cmd_str_interp.c crt_telecmd_pkt.c get_doy.c write_buffer.c open_port.c port_config.c
+gc_prompt: gc_prompt_interp.c gc_macro_cmd.c gc_cmd_str_interp.c gc_crt_telecmd_pkt.c gc_open_port.c gc_port_config.c gc_write_buffer.c get_doy.c
+	gcc -o gc_prompt gc_prompt_interp.c gc_macro_cmd.c gc_cmd_str_interp.c gc_crt_telecmd_pkt.c gc_open_port.c gc_port_config.c gc_write_buffer.c get_doy.c
 
 clean:
-	rm sgs_cmd_sim_ieu
+	rm gc_prompt

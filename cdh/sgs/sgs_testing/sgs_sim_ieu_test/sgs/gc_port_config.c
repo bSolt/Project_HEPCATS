@@ -2,10 +2,7 @@
 //
 // Serial Communication Test
 //
-// Function: Sets port configuration (options)
-//           - Sets baud rate
-//           - Sets parity
-//           - Sets to raw input
+// Ground Control Port Configuration
 //
 // -------------------------------------------------------------------------- /
 //
@@ -35,7 +32,7 @@
 #include <errno.h>   // Error number definitions 
 #include <termios.h> // POSIX terminal control definitions
 
-void port_config(int fd, int speed)
+void gc_port_config(int fd, int speed)
 {
     // Creat POSIX structure for port options:
     struct termios options;

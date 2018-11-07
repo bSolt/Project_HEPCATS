@@ -1,1 +1,0 @@
-void write_buffer(int fd, char* buffer);

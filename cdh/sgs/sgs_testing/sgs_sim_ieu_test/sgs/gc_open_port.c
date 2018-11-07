@@ -2,7 +2,7 @@
 //
 // Serial Communication Test
 //
-// Function: Opens input serial port 
+// Ground Control Open Port
 //
 // -------------------------------------------------------------------------- /
 //
@@ -10,7 +10,7 @@
 // - port 
 //
 // Output Arguments:
-// - fd (file descriptor)
+// - fd
 // 
 // -------------------------------------------------------------------------- /
 //
@@ -30,9 +30,9 @@
 #include <errno.h>   // Error number definitions 
 #include <termios.h> // POSIX terminal control definitions 
 
-#include "port_config.h"
+#include "gc_port_config.h"
 
-int open_port(char* port)
+int gc_open_port(char* port)
 {
   // File descriptor for the port:
   int fd;
@@ -51,7 +51,7 @@ int open_port(char* port)
   }
 
   // Set speed to  bps, 8n1 (no parity)
-  port_config(fd,B115200); 
+  gc_port_config(fd,B115200); 
 
   // Return fd:
   return (fd);
