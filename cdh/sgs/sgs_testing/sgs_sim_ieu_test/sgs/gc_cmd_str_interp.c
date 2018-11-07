@@ -57,7 +57,7 @@ struct telecmd_pkt_inputs gc_cmd_str_interp(char* cmd_str)
     // Check for correct external element "hepcat":
     if (strcmp("hepcats",cmd_str_arr[1]) == 1) {		
     	// Print error message
-		printf("(CMD_STR_INTERP) <ERROR> \"%s\" external element"
+		printf("(GC_CMD_STR_INTERP) <ERROR> \"%s\" external element"
 			" not recognized\n",cmd_str_arr[1]);
 
 		// Exit:

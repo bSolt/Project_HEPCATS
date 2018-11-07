@@ -43,7 +43,7 @@ int gc_open_port(char* port)
   // Check for success 
   if (fd == -1){
     // Could not open port:
-    perror("open_port: Unable to open port - ");
+    printf("(GC_OPEN_PORT) <ERROR> Unable to open port: %d\n",errno);
   }
   else{
     // Set file status:

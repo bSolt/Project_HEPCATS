@@ -37,9 +37,6 @@ void gc_port_config(int fd, int speed)
     // Creat POSIX structure for port options:
     struct termios options;
 
-    // Fill memory with 0:
-    //memset(&options, 0, sizeof options);
-
     // Get the current options for the port:
     tcgetattr(fd,&options);
 

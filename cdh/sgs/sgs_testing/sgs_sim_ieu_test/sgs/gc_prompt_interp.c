@@ -11,6 +11,9 @@
 // for which macro the user specifed and then starts the associated function to 
 // execute that macro. 
 //
+// Commands from the Commands Panel are written to the prompt and interpreted
+// here.
+//
 // Macros defined right now:
 //     - "cmd"
 //	       - Send a command to an external element (I.E. hepcats)
@@ -45,10 +48,10 @@
 void main(int argc, char const *argv[])
 {
 	// Get input string:
-	char input_str[50];
+	char input_str[20];
 	strcpy(input_str,argv[1]);
 
-	// Split input string to get macro:
+	// Split input string to array to get macro:
     char* p = strtok(input_str," "); // Split with " "
     char* input_str_arr[10]; int i = 0;
 
