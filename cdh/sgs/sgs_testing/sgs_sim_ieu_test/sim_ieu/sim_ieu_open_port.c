@@ -1,17 +1,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // SGS and Simulated IEU Communication Test
-// 
-// Write Buffer
+//
+// Simulated IEU Open Port
 //
 // -------------------------------------------------------------------------- /
 //
 // Input Arguments:
-// - fd
-// - buffer
+// - port 
 //
 // Output Arguments:
-// - N/A
+// - fd (file descriptor)
 // 
 // -------------------------------------------------------------------------- /
 //
@@ -19,29 +18,44 @@
 // ASEN 4018
 // Project HEPCATS
 // Subsystem: C&DH
-// Created: November 4, 2018
+// Created: October 25, 2018
 // 
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <stdio.h>   // Standard input/output definitions
 #include <stdlib.h>  // Standard library 
-#include <stdint.h>  // Integer types
 #include <string.h>  // String function definitions 
 #include <unistd.h>  // UNIX standard function definitions 
 #include <fcntl.h>   // File control definitions 
 #include <errno.h>   // Error number definitions 
 #include <termios.h> // POSIX terminal control definitions 
 
-void write_buffer(int fd, char* buffer)
+#include "sim_ieu_port_config.h"
+
+int sim_ieu_open_port(char* port)
 {
-	// Write buffer to port:
-	int bytes_sent = write(fd,buffer,20); // 20 byte telecommand packet
+  // File descriptor for the port:
+  int fd;
 
-	// Check for success (20 bytes sent):
-	if (bytes_sent != 20) {
-		// Print error message:
-	    printf("Error from write: %d, %d\n", bytes_sent, errno);
-	}
+  // Open port:
+  fd = open(port, O_RDWR | O_NOCTTY | O_NDELAY);
 
-	return;
+  // Check for success 
+  if (fd == -1){
+    // Could not open port:
+    perror("open_port: Unable to open port - ");
+
+    // Exit:
+    exit(0);
+  }
+  else{
+    // Set file status:
+    fcntl(fd, F_SETFL, 0);
+  }
+
+  // Set speed to  bps, 8n1 (no parity)
+  sim_ieu_port_config(fd,B115200); 
+
+  // Return fd:
+  return (fd);
 }

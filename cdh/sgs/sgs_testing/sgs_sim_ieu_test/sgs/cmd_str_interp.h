@@ -1,1 +1,0 @@
-struct telecmd_pkt_inputs cmd_str_interp(char cmd_str[]);

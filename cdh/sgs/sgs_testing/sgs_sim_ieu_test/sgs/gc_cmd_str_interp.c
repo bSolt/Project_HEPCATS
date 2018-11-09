@@ -2,7 +2,7 @@
 //
 // SGS and Simulated IEU Communication Test
 // 
-// SGS Command String Interpretor
+// Ground Control Command String Interpretor
 //
 // -------------------------------------------------------------------------- /
 //
@@ -29,17 +29,17 @@
 #include <stdint.h>  // Integer types
 #include "time.h"    // Standard time function definitions
 
-#include "telecmd_inputs_struct.h" // Structure definition
+#include "gc_telecmd_inputs_struct.h" // Structure definition
 
 #include "get_doy.h" // Function definition
 
 // Converts Command String into Command Packet Field Inputs
-struct telecmd_pkt_inputs cmd_str_interp(char cmd_str[])
+struct telecmd_pkt_inputs gc_cmd_str_interp(char* cmd_str)
 {
 	// Define structure:
 	struct telecmd_pkt_inputs telecmd_pkt_inputs;
 
-	// Split command string into array
+	// Split command string intho array
     char* p = strtok(cmd_str," "); // Split with " "
     char* cmd_str_arr[7]; int i = 0;
 
@@ -54,20 +54,10 @@ struct telecmd_pkt_inputs cmd_str_interp(char cmd_str[])
     	cmd_str_arr[j] = "empty";
     }
 
-    // Check for correct macro "cmd":
-    if (strcmp("cmd",cmd_str_arr[0]) == 1) {
-    	// Print error message
-    	printf("(CMD_STR_INTERP) <ERROR> \"%s\" macro not recognized\n",\
-    		cmd_str_arr[0]);
-
-    	// Exit:
-    	exit(0);
-    }
-
     // Check for correct external element "hepcat":
     if (strcmp("hepcats",cmd_str_arr[1]) == 1) {		
     	// Print error message
-		printf("(CMD_STR_INTERP) <ERROR> \"%s\" external element"
+		printf("(GC_CMD_STR_INTERP) <ERROR> \"%s\" external element"
 			" not recognized\n",cmd_str_arr[1]);
 
 		// Exit:
@@ -120,8 +110,8 @@ struct telecmd_pkt_inputs cmd_str_interp(char cmd_str[])
 		telecmd_pkt_inputs.pkt_t_sec = atoi(time_str_arr[4]);
     } else {
 		// Define time variables and get current time in UTC:
-	    struct tm *tm; time_t now;
-	    time(&now); tm = gmtime(&now);
+		struct tm *tm; time_t now;
+		time(&now); tm = gmtime(&now);
 
 	    // Save time:
 		telecmd_pkt_inputs.pkt_t_year = tm->tm_year+1900;

@@ -1,16 +1,17 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Serial Communication Test
-//
-// Function: Opens input serial port 
+// SGS and Simulated IEU Communication Test
+// 
+// Ground Control Write (to) Buffer
 //
 // -------------------------------------------------------------------------- /
 //
 // Input Arguments:
-// - port 
+// - fd
+// - buffer
 //
 // Output Arguments:
-// - fd (file descriptor)
+// - N/A
 // 
 // -------------------------------------------------------------------------- /
 //
@@ -18,41 +19,30 @@
 // ASEN 4018
 // Project HEPCATS
 // Subsystem: C&DH
-// Created: October 25, 2018
+// Created: November 4, 2018
 // 
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <stdio.h>   // Standard input/output definitions
 #include <stdlib.h>  // Standard library 
+#include <stdint.h>  // Integer types
 #include <string.h>  // String function definitions 
 #include <unistd.h>  // UNIX standard function definitions 
 #include <fcntl.h>   // File control definitions 
 #include <errno.h>   // Error number definitions 
 #include <termios.h> // POSIX terminal control definitions 
 
-#include "port_config.h"
-
-int open_port(char* port)
+void gc_write_buffer(int fd, char* buffer)
 {
-  // File descriptor for the port:
-  int fd;
+	// Write buffer to port:
+	int bytes_sent = write(fd,buffer,20); // 20 byte telecommand packet
 
-  // Open port:
-  fd = open(port, O_RDWR | O_NOCTTY | O_NDELAY);
+	// Check for success (20 bytes sent):
+	if (bytes_sent != 20) {
+		// Print error message:
+	    printf("(GC_WRITE_BUFFER) <ERROR> Unable to write: %d, %d\n",\
+    		bytes_sent,errno);
+	}
 
-  // Check for success 
-  if (fd == -1){
-    // Could not open port:
-    perror("open_port: Unable to open port - ");
-  }
-  else{
-    // Set file status:
-    fcntl(fd, F_SETFL, 0);
-  }
-
-  // Set speed to  bps, 8n1 (no parity)
-  port_config(fd,B115200); 
-
-  // Return fd:
-  return (fd);
+	return;
 }

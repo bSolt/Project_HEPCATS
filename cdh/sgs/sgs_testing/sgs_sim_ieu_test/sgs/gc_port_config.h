@@ -1,0 +1,1 @@
+void gc_port_config(int fd, int speed);

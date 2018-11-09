@@ -2,16 +2,15 @@
 //
 // SGS and Simulated IEU Communication Test
 // 
-// Read Buffer
+// Ground Control Command Macro Function
 //
 // -------------------------------------------------------------------------- /
 //
 // Input Arguments:
-// - fd
-// - buffer
+// - cmd_str
 //
 // Output Arguments:
-// - buffer
+// - N/A
 // 
 // -------------------------------------------------------------------------- /
 //
@@ -19,7 +18,7 @@
 // ASEN 4018
 // Project HEPCATS
 // Subsystem: C&DH
-// Created: November 4, 2018
+// Created: November 5, 2018
 // 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -32,36 +31,31 @@
 #include <errno.h>   // Error number definitions 
 #include <termios.h> // POSIX terminal control definitions 
 
-char* read_buffer(int fd,char* buffer)
+#include "gc_telecmd_inputs_struct.h" // Structure definition
+
+#include "gc_cmd_str_interp.h"  // Function definition
+#include "gc_crt_telecmd_pkt.h" // Function definition
+#include "gc_open_port.h"       // Function definition
+#include "gc_write_buffer.h"	 // Function definition
+
+// "cmd" macro function 
+void gc_macro_cmd(char* cmd_str)
 {
-	// Initilize: 
-	int bytes_received;
-	int bytes_read = 0;
-	int bytes_to_read = 20; // 20 bytes telecommand packet
+	// Interpret command string:
+	struct telecmd_pkt_inputs telecmd_pkt_inputs = gc_cmd_str_interp(cmd_str);
 
-	// Temporary buffer:
-	char temp_buffer[20];
+    // Create telecommand packet:
+	char* buffer = malloc(20*sizeof(char));
+    buffer = gc_crt_telecmd_pkt(telecmd_pkt_inputs,buffer);
 
-	// Clear port buffer:
-	//tcflush(fd,TCIOFLUSH);
+    // Open port:
+    int fd = gc_open_port("/dev/pts/2");
 
-	// Loop to get full telecommand packet:
-	while (bytes_to_read > 0 ) {
-		// Read from port:
-		bytes_received = read(fd,&temp_buffer[bytes_read],bytes_to_read);
+    // Write buffer to port:
+    gc_write_buffer(fd, buffer); 
 
-		// Check to see if entire packet is recieved:
-		if ( bytes_received > 0 ) {
-			// Increment bytes read:
-			bytes_read += bytes_received;
+    // Close port:
+    close(fd);
 
-			// Increment bytes to read:
-			bytes_to_read -= bytes_received;
-		} 
-	}	
-
-	// Copy temporary buffer to return buffer:
-	memcpy(buffer,&temp_buffer,20);
-
-  	return buffer;
+	return;
 }

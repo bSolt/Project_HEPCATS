@@ -2,7 +2,7 @@
 //
 // SGS and Simulated IEU Communication Test
 // 
-// Simulated IEU Receive SGS Command
+// Simulated IEU Receive Ground Command
 //
 // -------------------------------------------------------------------------- /
 //
@@ -28,21 +28,21 @@
 #include <unistd.h>  // UNIX standard function definitions 
 #include <stdint.h>  // Integer types
 
-#include "open_port.h"        // Function definition
-#include "read_buffer.h"      // Function definition
-#include "telecmd_pkt_proc.h" // Function definition
+#include "sim_ieu_open_port.h"        // Function definition
+#include "sim_ieu_read_buffer.h"      // Function definition
+#include "sim_ieu_telecmd_pkt_proc.h" // Function definition
 
 void main(int argc, char const *argv[])
 {
 	// Open port:
-	int fd = open_port("/dev/pts/3");
+	int fd = sim_ieu_open_port("/dev/pts/3");
 
 	// Read from buffer:
 	char* buffer = malloc(20*sizeof(char));
-	buffer = read_buffer(fd,buffer);
+	buffer = sim_ieu_read_buffer(fd,buffer);
 
 	// Process telecommand packet:
-	telecmd_pkt_proc(buffer);
+	sim_ieu_telecmd_pkt_proc(buffer);
 
 	// Close port:
 	close(fd);
