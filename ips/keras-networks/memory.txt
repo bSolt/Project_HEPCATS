@@ -1,0 +1,25 @@
+Model Time Testing Log
+
+Classifications done on images.office.png with 30 repetitions
+Load Time of Killed means that the model failed to load with amount of RAM allocated
+Times are in units of seconds
+
+My surface Pro has an Intel i5 @ 2712 MHz
+
+Runs with High resources 2712MHz (100%) x2 cores and 4096 MB RAM
+=============================================
+Model			Memory Used (MB)
+=============================================
+
+VGG16			768.5
+VGG19			782.1
+incepResNetV2	913.0
+NAS_large		1220.6
+inception		489.1
+xception		347.0
+resnet50		374.1
+mobileNet		197.2
+mobileV2		242.4
+dense121		435.2
+dense201		699.4
+NAS_mobile		618.7

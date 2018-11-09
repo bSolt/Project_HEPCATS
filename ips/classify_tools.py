@@ -154,7 +154,7 @@ def classify_projector_files():
         # im = resize_withPIL(im,(256,256))
         c=classify_with_prototype(im,model)
         # print(c)
-        show_image_overlay(im0,"Rocket = {:.2f}%".format(c*100))
+        show_image_overlay(im0,"Satellite = {:.2f}%".format(c*100))
 
 def main():
     classify_projector_files()
