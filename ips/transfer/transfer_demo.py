@@ -65,9 +65,14 @@ ap.add_argument("-s", "--saveas", type=str, default=None,
   help="name to save h5 files with")
 ap.add_argument("-e", "--epochs", type=int, default=10,
   help="nuber of epochs to train the classifier network on")
+ap.add_argument("-n", "--samplenumber", type=int, default=600,
+  help="number of images to use for each classification type")
 ap.add_argument("-p", "--plotting", action='store_const',
   const=True,default=False,
   help="flag for generating history plots")
+ap.add_argument("-pe", "--ploterrors", action='store_const',
+  const=True,default=False,
+  help="flag for viewing erroneous classifications")
 ap.add_argument("-t", "--timing", action='store_const',
   const=True,default=False,
   help="flag for computing classification time")
@@ -113,7 +118,7 @@ print("[INFO] Detected {} positive images and {} negative images"
 
 # Training Parameters #
 # Define the number of images to use for each classification
-N_im = 600
+N_im = args['samplenumber']
 # Define ratio of images for training
 rTrain = 0.75
 rTest = 1-rTrain
@@ -170,6 +175,7 @@ MODELS = {
     "resnet50": tf.keras.applications.ResNet50,
     "inceptionresnetv2": tf.keras.applications.InceptionResNetV2,
     "mobilenet": tf.keras.applications.MobileNet,
+    "mobilenetv2": tf.keras.applications.MobileNetV2,
     "densenet121": tf.keras.applications.DenseNet121,
     "densenet169": tf.keras.applications.DenseNet169,
     "densenet201": tf.keras.applications.DenseNet201,
@@ -182,12 +188,16 @@ if args["model"] not in MODELS.keys():
   raise AssertionError("The --model command line argument should "
     "be a key in the `MODELS` dictionary")
 
+if args["model"] in ("mobilenet","mobilenetv2"):
+  inshape = (224,224,3)
+else:
+  inshape = (256,256,3)
 # Note that the input_shape chosen here is to help with future datasets, but can be changed
 # The feature detector is taken from a pre-trained, deep network, built into keras
 ptdnn = MODELS[args['model']](
           weights='imagenet',
           include_top=False,
-          input_shape=(256, 256, 3))
+          input_shape=inshape)
 
 feature_shape = ptdnn.output_shape
 
@@ -238,6 +248,7 @@ model.add(classifier)
 #ptdnn should not be trainable for now
 model.layers[0].trainable=False
 # Display layer information for reference
+print('[INFO] Full Model Architecture:')
 model.summary()
 
 # classifier options including metrics and loss function
@@ -263,7 +274,7 @@ batch_size = 32
 #number of epochs is taken from command line argument, default is 10
 epochs = args['epochs']
 # create arrays for inputs (x) and expected outputs (y)
-x_train = np.array([np.array(Image.open(fname).resize((256,256)).convert("RGB")) 
+x_train = np.array([np.array(Image.open(fname).resize(inshape[0:2]).convert("RGB")) 
                     for fname in train_list])
 y_train = np.concatenate((np.ones(nTrain//2), np.zeros(nTrain//2)))
 # this is an iterator, trust me.
@@ -295,7 +306,7 @@ for inputs_batch, labels_batch in train_generator:
 # this print is just a new line
 print('')
 # x and y arrays for verification
-x_test = np.array([np.array(Image.open(fname).resize((256,256)).convert("RGB")) 
+x_test = np.array([np.array(Image.open(fname).resize(inshape[0:2]).convert("RGB")) 
                    for fname in test_list])
 y_test = np.concatenate((np.ones(nTest//2), np.zeros(nTest//2)))
 #iterator
@@ -304,7 +315,7 @@ test_generator = datagen.flow(x_test, y_test, batch_size=batch_size)
 test_featrs = np.zeros(
   shape=np.concatenate(([nTest], feature_shape[1:]))
   )
-test_inputs = np.zeros(shape=(nTest, 256, 256, 3))
+test_inputs = np.zeros(shape=np.concatenate(([nTest], inshape)) )
 test_labels = np.zeros(shape=(nTest))
 #iterate
 i = 0
@@ -352,29 +363,33 @@ accuracy, recall, F1, as well as loss.
 """
 if(args['plotting']):
   # define this function for plotting a generic metric
-  def plot_history(history,metric='acc'):
+  def plot_history(history,metric='acc',req=None, save=False):
     val_metric = 'val_' + metric
     model_name = history.model.name
     if metric not in history.history.keys() :
       raise AssertionError(f"The metric of {metric} must be included in this history for {model_name}")
     plt.plot(history.epoch,history.history[metric],label='Training Data')
     plt.plot(history.epoch,history.history[val_metric],label='Verification Data')
-    plt.title(f'History of {model_name} {metric}')
-    plt.xlabel('Epoch')
+    if req:
+      plt.axhline(y=req,color='green',label=f'Requirement: {metric}>={req}')
+    plt.title(f'History of {args["model"]} {metric}\nTrained on {nTrain} images')
+    plt.xlabel(f'Epochs (0-{epochs})')
     plt.ylabel(metric)
     plt.grid(True)
     plt.legend()
+    if(save):
+      plt.savefig(f"{metric}_{args['saveas']}_e{epochs}_n{N_im}.png")
     plt.show()
   #use the function to plot several metrics for this history
   plot_history(history,'acc')
-  plot_history(history,'f1')
+  plot_history(history,'f1',req=0.95,save=True)
   plot_history(history,'recall')
   plot_history(history,'loss')
 
   # couldn't get this to work...
   # from keras.utils import plot_model
   # plot_model(model, to_file='model.png')
-
+if(args['ploterrors']):
   """This next section goes over errors in the validation data and displays a bunch of example images."""
 
   ground_truth = test_labels

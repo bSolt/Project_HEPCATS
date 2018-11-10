@@ -39,15 +39,28 @@ MODELS = {
 	"inception": (apps.InceptionV3,apps.inception_v3.preprocess_input),
 	"xception": (apps.Xception,apps.xception.preprocess_input),
 	"resnet": (apps.ResNet50,apps.resnet50.preprocess_input),
-	"inception_resnet_v2" : (apps.InceptionResNetV2,apps.inception_resnet_v2.preprocess_input),
+	"inceptionresnetv2" : (apps.InceptionResNetV2,apps.inception_resnet_v2.preprocess_input),
 	"mobile" : (apps.MobileNet,apps.mobilenet.preprocess_input),
-	"mobile_v2" : (apps.MobileNetV2,apps.mobilenet.preprocess_input),
-	"nas_mobile" : (apps.NASNetMobile,apps.nasnet.preprocess_input),
-	"nas_large" : (apps.NASNetLarge,apps.nasnet.preprocess_input),
+	"mobilev2" : (apps.MobileNetV2,apps.mobilenet.preprocess_input),
+	"nasnetmobile" : (apps.NASNetMobile,apps.nasnet.preprocess_input),
+	"nasnetlarge" : (apps.NASNetLarge,apps.nasnet.preprocess_input),
 	"dense121" : (apps.DenseNet121,apps.densenet.preprocess_input),
 	"dense201" : (apps.DenseNet201,apps.densenet.preprocess_input)
 }
-
+# MODELS = {
+#     "vgg16": tf.keras.applications.VGG16,
+#     "vgg19": tf.keras.applications.VGG19,
+#     "inceptionv3": tf.keras.applications.InceptionV3,
+#     "xception": tf.keras.applications.Xception,
+#     "resnet50": tf.keras.applications.ResNet50,
+#     "inceptionresnetv2": tf.keras.applications.InceptionResNetV2,
+#     "mobilenet": tf.keras.applications.MobileNet,
+#     "densenet121": tf.keras.applications.DenseNet121,
+#     "densenet169": tf.keras.applications.DenseNet169,
+#     "densenet201": tf.keras.applications.DenseNet201,
+#     "nasnetlarge": tf.keras.applications.NASNetLarge,
+#     "nasnetmobile": tf.keras.applications.NASNetMobile,
+# }
 # esnure a valid model name was supplied via command line argument
 if args["model"] not in MODELS.keys():
 	raise AssertionError("The --model command line argument should "
@@ -62,11 +75,11 @@ inputShape = (224, 224)
 # if we are using the InceptionV3 or Xception networks, then we
 # need to set the input shape to (299x299) [rather than (224x224)]
 # and use a different image processing function
-if args["model"] in ("inception", "xception", "inception_resnet_v2"):
+if args["model"] in ("inception", "xception", "inceptionresnetv2"):
 	inputShape = (299, 299)
 	# preprocess = apps.inception_v3.preprocess_input
 
-if args["model"] in ("nas_large"):
+if args["model"] in ("nasnetlarge"):
 	inputShape = (331,331)
 # load our the network weights from disk (NOTE: if this is the
 # first time you are running this script for a given network, the
