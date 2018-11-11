@@ -1,4 +1,6 @@
-sim_ieu: sim_ieu sim_ieu.c sim_ieu_open_port.c sim_ieu_port_config.c sim_ieu_read_buffer.c sim_ieu_telecmd_pkt_proc.c
-	gcc -o sim_ieu sim_ieu.c sim_ieu_open_port.c sim_ieu_port_config.c sim_ieu_read_buffer.c sim_ieu_telecmd_pkt_proc.c
+sim_ieu_rcv_telecmd_pkt: sim_ieu_rcv_telecmd_pkt.c sim_ieu_open_port.c sim_ieu_port_config.c sim_ieu_read_buffer.c sim_ieu_telecmd_pkt_proc.c
+	gcc -o sim_ieu_rcv_telecmd_pkt sim_ieu_rcv_telecmd_pkt.c sim_ieu_open_port.c sim_ieu_port_config.c sim_ieu_read_buffer.c sim_ieu_telecmd_pkt_proc.c
+sim_ieu_send_tlm_pkt: sim_ieu_send_tlm_pkt.c sim_ieu_write_buffer.c sim_ieu_crt_tlm_pkt.c sim_ieu_open_port.c sim_ieu_port_config.c sim_ieu_read_buffer.c
+	gcc -o sim_ieu_send_tlm_pkt sim_ieu_send_tlm_pkt.c sim_ieu_write_buffer.c sim_ieu_crt_tlm_pkt.c sim_ieu_open_port.c sim_ieu_port_config.c sim_ieu_read_buffer.c
 clean:
-	rm sim_ieu
+	rm sim_ieu_rcv_telemcd_pkt

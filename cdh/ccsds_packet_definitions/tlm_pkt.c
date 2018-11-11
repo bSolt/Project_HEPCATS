@@ -58,7 +58,7 @@ struct pkt_dat_fld
 	unsigned int pkt_sec_hdr_p_red:   3; //  3 bits
 
 	// Packet User Data Field:
-	uint8_t pkt_usr_dat[1064]; // Placeholder for 1064 bytes
+	uint8_t pkt_usr_dat[1064]; // 1064 bytes
 
 	// Packet Error Control:
 	uint16_t pkt_err_cnt: 16; // 16 bits
@@ -82,7 +82,7 @@ void main(int argc, char const *argv[])
 	                                 // (first packet in count)
 
 	// Populate packet length field:
-	pkt_hdr.pkt_len = 1079; // "C" (Octets in packet data field - 1)
+	pkt_hdr.pkt_len = 1073; // "C" (Octets in packet data field - 1)
 
 	// Populate packet secondary header T fields:
 	pkt_dat_fld.pkt_sec_hdr_t_year = 2018; // "00000011111100010"

@@ -1,16 +1,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Determines Day of Year given Month, Day, and Year
+// SGS and Simulated IEU Communication Test
+// 
+// Simulated IEU Receive Ground Telecommand
 //
 // -------------------------------------------------------------------------- /
 //
 // Input Arguments:
-// - mon
-// - day
-// - year
+// - N/A
 //
 // Output Arguments:
-// - doy
+// - N/A
 // 
 // -------------------------------------------------------------------------- /
 //
@@ -28,21 +28,24 @@
 #include <unistd.h>  // UNIX standard function definitions 
 #include <stdint.h>  // Integer types
 
-// Determine year function
-uint16_t is_leap_year(int year)
+#include "sim_ieu_open_port.h"        // Function definition
+#include "sim_ieu_read_buffer.h"      // Function definition
+#include "sim_ieu_telecmd_pkt_proc.h" // Function definition
+
+void main(int argc, char const *argv[])
 {
-    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
-}
+	// Open port:
+	int fd = sim_ieu_open_port("/dev/pts/3");
 
-// Determine DOY function
-uint16_t get_doy(int mon, int day, int year)
-{
-    static const int days[2][13] = {
-        {0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334},
-        {0, 0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335}
-    };
+	// Read from buffer:
+	char* buffer = malloc(20*sizeof(char));
+	buffer = sim_ieu_read_buffer(fd,buffer);
 
-    int leap = is_leap_year(year);
+	// Process telecommand packet:
+	sim_ieu_telecmd_pkt_proc(buffer);
 
-    return days[leap][mon] + day;
+	// Close port:
+	close(fd);
+
+	return;
 }

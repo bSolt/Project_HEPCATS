@@ -1,9 +1,0 @@
-Make sure you install socat:
-	$sudo apt get socat
-
-Running the test
-
-1. Create virtual comm ports:
-	$socat -d -d pty,raw,echo=0 pty,raw,echo=0 &
-
-	(Run this a few timess)	

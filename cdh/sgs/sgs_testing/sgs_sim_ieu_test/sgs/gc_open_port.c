@@ -32,6 +32,7 @@
 
 #include "gc_port_config.h"
 
+// Open port function
 int gc_open_port(char* port)
 {
   // File descriptor for the port:

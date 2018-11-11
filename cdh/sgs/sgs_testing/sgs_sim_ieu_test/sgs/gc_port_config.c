@@ -32,6 +32,7 @@
 #include <errno.h>   // Error number definitions 
 #include <termios.h> // POSIX terminal control definitions
 
+// Configure port function
 void gc_port_config(int fd, int speed)
 {
     // Creat POSIX structure for port options:
