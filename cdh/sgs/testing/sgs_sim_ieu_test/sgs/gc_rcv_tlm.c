@@ -2,7 +2,10 @@
 //
 // SGS and Simulated IEU Communication Test
 // 
-// Simulated IEU Receive Ground Command
+// Ground Control Receive Telemetry
+//
+// This script continually reads port for telemetry packets. If a telemetry
+// packet is read from the port, it is then processed.
 //
 // -------------------------------------------------------------------------- /
 //
@@ -18,7 +21,7 @@
 // ASEN 4018
 // Project HEPCATS
 // Subsystem: C&DH
-// Created: November 4, 2018
+// Created: November 10, 2018
 // 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -28,24 +31,26 @@
 #include <unistd.h>  // UNIX standard function definitions 
 #include <stdint.h>  // Integer types
 
-#include "sim_ieu_open_port.h"        // Function definition
-#include "sim_ieu_read_buffer.h"      // Function definition
-#include "sim_ieu_telecmd_pkt_proc.h" // Function definition
+#include "gc_open_port.h"    // Function definition
+#include "gc_tlm_pkt_proc.h" // Function definition
+#include "gc_read_buffer.h"
 
 void main(int argc, char const *argv[])
 {
 	// Open port:
-	int fd = sim_ieu_open_port("/dev/pts/3");
+    int fd = gc_open_port("/dev/pts/2");
 
-	// Read from buffer:
-	char* buffer = malloc(20*sizeof(char));
-	buffer = sim_ieu_read_buffer(fd,buffer);
+    // Allocate buffer:
+    char* buffer = malloc(1080*sizeof(char));
+        
+    // Read from port forever:
+    do {
+    	// Read from port:
+	    buffer = gc_read_buffer(fd,buffer);
 
-	// Process telecommand packet:
-	sim_ieu_telecmd_pkt_proc(buffer);
-
-	// Close port:
-	close(fd);
+	    // Process telemetry packet:
+	    gc_tlm_pkt_proc(buffer);
+    } while (-1);
 
 	return;
 }

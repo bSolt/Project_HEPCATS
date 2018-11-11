@@ -1,0 +1,1 @@
+void gc_tlm_pkt_proc(char* buffer);

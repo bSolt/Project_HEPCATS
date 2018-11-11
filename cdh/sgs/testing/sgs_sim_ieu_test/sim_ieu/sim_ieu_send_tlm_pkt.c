@@ -1,16 +1,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Serial Communication Test
-//
-// Ground Control Open Port
+// SGS and Simulated IEU Communication Test
+// 
+// Simulated IEU Receive Ground TeleCommand
 //
 // -------------------------------------------------------------------------- /
 //
 // Input Arguments:
-// - port 
+// - N/A
 //
 // Output Arguments:
-// - fd
+// - N/A
 // 
 // -------------------------------------------------------------------------- /
 //
@@ -18,44 +18,37 @@
 // ASEN 4018
 // Project HEPCATS
 // Subsystem: C&DH
-// Created: October 25, 2018
+// Created: November 10, 2018
 // 
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <stdio.h>   // Standard input/output definitions
 #include <stdlib.h>  // Standard library 
+#include <stdint.h>  // Integer types
 #include <string.h>  // String function definitions 
 #include <unistd.h>  // UNIX standard function definitions 
 #include <fcntl.h>   // File control definitions 
 #include <errno.h>   // Error number definitions 
-#include <termios.h> // POSIX terminal control definitions 
+#include <termios.h> // POSIX terminal control definitions
 
-#include "gc_port_config.h"
+#include "sim_ieu_open_port.h"
+#include "sim_ieu_crt_tlm_pkt.h"  // Function definition
+#include "sim_ieu_write_buffer.h" // Function definition
 
-int gc_open_port(char* port)
+void main(int argc, char const *argv[])
 {
-  // File descriptor for the port:
-  int fd;
+	// Create telemetry packet:
+	char* buffer = malloc(1080*sizeof(char));
+    buffer = sim_ieu_crt_tlm_pkt(buffer);
 
-  // Open port:
-  fd = open(port, O_RDWR | O_NOCTTY | O_NDELAY);
+    // Open port:
+	int fd = sim_ieu_open_port("/dev/pts/3");
 
-  // Check for success 
-  if (fd == -1){
-    // Could not open port:
-    printf("(GC_OPEN_PORT) <ERROR> Unable to open port: %d\n",errno);
+    // Write buffer to port:
+    sim_ieu_write_buffer(fd,buffer);
 
-    // Exit:
-    exit(0);
-  }
-  else{
-    // Set file status:
-    fcntl(fd, F_SETFL, 0);
-  }
-
-  // Set speed to  bps, 8n1 (no parity)
-  gc_port_config(fd,B115200); 
-
-  // Return fd:
-  return (fd);
+    // Close port:
+    close(fd);
+    
+	return;
 }

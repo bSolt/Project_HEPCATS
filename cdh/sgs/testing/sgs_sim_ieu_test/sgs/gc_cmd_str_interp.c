@@ -33,7 +33,7 @@
 
 #include "get_doy.h" // Function definition
 
-// Converts Command String into Command Packet Field Inputs
+// Convert command string into command packet field inputs function
 struct telecmd_pkt_inputs gc_cmd_str_interp(char* cmd_str)
 {
 	// Define structure:

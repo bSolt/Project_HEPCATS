@@ -2,7 +2,7 @@
 //
 // SGS and Simulated IEU Communication Test
 // 
-// Ground Control Write (to) Buffer
+// Simulated IEU Read Buffer
 //
 // -------------------------------------------------------------------------- /
 //
@@ -11,7 +11,7 @@
 // - buffer
 //
 // Output Arguments:
-// - N/A
+// - buffer
 // 
 // -------------------------------------------------------------------------- /
 //
@@ -32,17 +32,34 @@
 #include <errno.h>   // Error number definitions 
 #include <termios.h> // POSIX terminal control definitions 
 
-void gc_write_buffer(int fd, char* buffer)
+// Read buffer from port function
+char* gc_read_buffer(int fd,char* buffer)
 {
-	// Write buffer to port:
-	int bytes_sent = write(fd,buffer,20); // 20 byte telecommand packet
+	// Initilize: 
+	int bytes_received;
+	int bytes_read = 0;
+	int bytes_to_read = 1080; // 20 bytes telecommand packet
 
-	// Check for success (20 bytes sent):
-	if (bytes_sent != 20) {
-		// Print error message:
-	    printf("(GC_WRITE_BUFFER) <ERROR> Unable to write: %d, %d\n",\
-    		bytes_sent,errno);
-	}
+	// Temporary buffer:
+	char temp_buffer[1080];
 
-	return;
+	// Loop to get full telecommand packet:
+	while (bytes_to_read > 0 ) {
+		// Read from port:
+		bytes_received = read(fd,&temp_buffer[bytes_read],bytes_to_read);
+
+		// Check to see if entire packet is recieved:
+		if ( bytes_received > 0 ) {
+			// Increment bytes read:
+			bytes_read += bytes_received;
+
+			// Increment bytes to read:
+			bytes_to_read -= bytes_received;
+		} 
+	}	
+
+	// Copy temporary buffer to return buffer:
+	memcpy(buffer,&temp_buffer,1080);
+
+  	return buffer;
 }

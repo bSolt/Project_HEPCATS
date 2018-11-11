@@ -32,7 +32,7 @@
 #include <errno.h>   // Error number definitions 
 #include <termios.h> // POSIX terminal control definitions
 
-void gc_port_config(int fd, int speed)
+void sim_ieu_port_config(int fd, int speed)
 {
     // Creat POSIX structure for port options:
     struct termios options;
