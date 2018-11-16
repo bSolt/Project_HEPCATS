@@ -6,6 +6,7 @@ from PIL import Image
 from tensorflow.keras import backend as K
 import cv2
 import keras #for the old model
+import sys
 
 MODELS = {
     "vgg16": tf.keras.applications.VGG16,
@@ -157,9 +158,16 @@ def classify_projector_files():
         show_image_overlay(im0,"Satellite = {:.2f}%".format(c*100))
 
 def main():
-    classify_projector_files()
-    input('Press Enter to continue...')
-    classify_downloaded_files()
+    prototype = 'POLAR_detection.h5'
+    model = tf.keras.models.load_model(prototype,
+        custom_objects={'recall': recall, 
+                        'f1'    : f1    } )
+    imname = sys.argv[0]
+    image = np.asarray( Image.open(imname).reshape((256,256)) )/255
+    pred = model.predict(image)
+
+    print('Probability of aurora detected: {pred[0]:.5f}%')
+
 
 if __name__ == '__main__':
     main()
