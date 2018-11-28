@@ -21,6 +21,7 @@ from scipy import stats as stats
 
 # The default ptdnn to be used if a different one is not specified
 default_net = "xception"
+default_train = "polar"
 
 """The first block of code defines several metrics which will be used to gauge 
 the network's performance. Included in this is the F1 score, which is a 
@@ -61,10 +62,20 @@ def f1(y_true, y_pred):
     r = recall(y_true, y_pred)
     return 2*((p*r)/(p+r+K.epsilon()))
 
+def fix_colors(image):
+  array = np.array(image)  
+  if array.ndim<3:
+    return np.tile(np.expand_dims(array,axis=2),3)
+  else:
+    return array
+
+
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-model", "--model", type=str, default=default_net,
   help="name of pre-trained network to use")
+ap.add_argument("-t", "--training", type=str, default=default_train,
+  help="keys for training sets")
 ap.add_argument("-e", "--epochs", type=int, default=10,
   help="nuber of epochs to train the classifier network on")
 ap.add_argument("-n", "--samplenumber", type=int, default=250,
@@ -83,10 +94,19 @@ ap.add_argument("-pe", "--ploterrors", action='store_const',
 
 args = vars(ap.parse_args())
 
+DIRS = {
+  "polar": "./training_v1/",
+  "iss": "./color/ISS/",
+  "image": "./IMAGE/"
+}
 
-# store the images here
-pos_dir = "./training_v1/Aurora/"
-neg_dir = "./training_v1/NoAurora/"
+if args["training"] not in DIRS.keys():
+  raise AssertionError("The --training command line argument should "
+    "be a key in the `DIRS` dictionary")
+im_dir = DIRS[args["training"]]
+pos_dir = im_dir + "Aurora/"
+neg_dir = im_dir + "NoAurora/"
+
 # Store plots here
 plotdir = "./plots/"
 
@@ -257,7 +277,7 @@ batch_size = 32
 #number of epochs is taken from command line argument, default is 10
 epochs = args['epochs']
 # create arrays for inputs (x) and expected outputs (y)
-x_train = np.array([np.array(Image.open(fname).convert('L').resize(inshape[0:2]).convert('L').convert("RGB")) 
+x_train = np.array([ fix_colors(np.array(Image.open(fname).resize(inshape[0:2])) )  
                     for fname in train_list])
 y_train = np.concatenate((np.ones(nTrain//2), np.zeros(nTrain//2)))
 # this is an iterator, trust me.
@@ -289,7 +309,7 @@ for inputs_batch, labels_batch in train_generator:
 # this print is just a new line
 print('')
 # x and y arrays for verification
-x_test = np.array([np.array(Image.open(fname).resize(inshape[0:2]).convert('L').convert("RGB")) 
+x_test = np.array([np.array( fix_colors(Image.open(fname).resize(inshape[0:2])) ) 
                    for fname in test_list])
 y_test = np.concatenate((np.ones(nTest//2), np.zeros(nTest//2)))
 #iterator
@@ -370,9 +390,13 @@ for i in range(M):
       test_labels[resamples[i]]),
     verbose=False)
   # store each result
+  # First iterate on the keys present
   for key in history.history.keys():
+    # We will have to initialize each key as an empty list in order to get
+    # A list of lists as the object which is stored by the dict.
     if key not in results.keys():
       results[key] = []
+    # add the current history into results as an item of a list with .append()
     results[key].append(history.history[key])
 print() #newline
 """
@@ -500,5 +524,6 @@ if(args['ploterrors']):
           f' Probability: {predictions[i]}')
     # Show the image for reference
     plt.imshow(test_inputs[i])
-    plt.grid('off')
+    plt.title(f'Predicted Aurora Probability = {100*predictions[i]:.2f}%')
+    plt.grid(False)
     plt.show()
