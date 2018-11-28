@@ -4,7 +4,21 @@ import matplotlib.pyplot as plt
 import scipy.stats as stats
 
 
-def f1_plot(results,title=None,save=None,req=0.95,level=0.95,metric='val_f1'):
+def f1_plot(results,title=None,save=None,
+	req=0.95,level=0.95,metric='val_f1'):
+	"""
+	f1_plot() generates a plot for average f1 score over the course of training 
+	a neural network several times. The plot includes raw data as well as average 
+	curve and error bars
+
+	Inputs:
+	results: dictionary of metrics resulting from repeated trainings of a network
+	title: a string to be included as a plot title
+	save: a name for the plot to be saved to a png file with
+	req: Average F1 score requirement to be displayed on the plot
+	level: Statistical confidence level to calculate confidence intervals with
+	metric: change this to plot other keys of the results input
+	"""
 	M, epochs = np.array(results[metric]).shape
 	mean_f1 = np.mean(results[metric],axis=0)
 

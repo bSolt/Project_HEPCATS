@@ -91,6 +91,9 @@ ap.add_argument("-r", "--resampling", action='store_const',
 ap.add_argument("-pe", "--ploterrors", action='store_const',
   const=True,default=False,
   help="flag for showing errors made by the final model")
+ap.add_argument("-p", "--plotting", action='store_const',
+  const=True,default=False,
+  help="flag for generating the stats plots, altrernative to pres_plot.f1_plot()")
 
 args = vars(ap.parse_args())
 
@@ -409,101 +412,102 @@ of simulations. For the proportion, the standard deviation of the estimator is p
 The estimator of mean F1 score at each epoch is also used. the standard deviation for this estimator
 is calculated from np.std on each epoch.
 """
-req = 0.95
-prop = (
-  np.sum(np.array(results['val_f1'])>=req,axis=0)
-  /M)
-mean_f1 = np.mean(results['val_f1'],axis=0)
-# Confidence level
-level = 0.95
-# Amount of uncertainty based on confidence level
-std_f1 = np.std(results['val_f1'],axis=0)
-unc_f1 = stats.t.ppf(1/2+level/2,df=M-1) * std_f1/np.sqrt(M)
-unc_prop = stats.t.ppf(1/2+level/2,df=M-1) * prop*(1-prop)/np.sqrt(M)
+if args["plotting"]:
+  req = 0.95
+  prop = (
+    np.sum(np.array(results['val_f1'])>=req,axis=0)
+    /M)
+  mean_f1 = np.mean(results['val_f1'],axis=0)
+  # Confidence level
+  level = 0.95
+  # Amount of uncertainty based on confidence level
+  std_f1 = np.std(results['val_f1'],axis=0)
+  unc_f1 = stats.t.ppf(1/2+level/2,df=M-1) * std_f1/np.sqrt(M)
+  unc_prop = stats.t.ppf(1/2+level/2,df=M-1) * prop*(1-prop)/np.sqrt(M)
 
-# Plot for proportion of models meeting requirement
-fig = plt.figure(figsize=(12,8))
-plt.plot(np.arange(epochs),prop,'.-',
-  linewidth=2,
-  label='Measured Proportion')
-plt.plot(np.arange(epochs),prop+unc_prop,'-',
-  color='xkcd:green',
-  linewidth=2,
-  label=f'{100*level:.0f}% Confidence Interval Upper Limit')
-plt.plot(np.arange(epochs),prop-unc_prop,'-',
-  color='xkcd:red',
-  linewidth=2,
-  label=f'{100*level:.0f}% Confidence Inteval Lower Limit')
-plt.xlim([0,epochs-1])
-plt.ylim([0,1])
-plt.grid(True)
-plt.xlabel('Training Epochs',
-  fontsize=16)
-plt.ylabel(f'Proportion Meeting Requirement f1>={req}',
-  fontsize=16)
-plt.title(
-  f'Propotion of models which meet f1>={req} at Each Epoch\n' \
-  f'Feature Detector:{args["model"]}, ' \
-  f'Trained on {N_im} Images{(", Resampled" if args["resampling"] else "")}',
-  fontsize=20)
-plt.legend(loc='best',fontsize=12)
-# Save this figure to a png even if it isn't a unique name
-savefile = f'{plotdir}proportion_{args["model"]}_e{epochs}_n{N_im}_m{M}.png'
-i=1
-while os.path.isfile(savefile):
-  savefile = f'{plotdir}proportion_{args["model"]}_e{epochs}_n{N_im}_m{M}_{i}.png'
-  i+=1
-print(f'[INFO] Proportion chart saved to {savefile}')
-plt.savefig(savefile)
+  # Plot for proportion of models meeting requirement
+  fig = plt.figure(figsize=(12,8))
+  plt.plot(np.arange(epochs),prop,'.-',
+    linewidth=2,
+    label='Measured Proportion')
+  plt.plot(np.arange(epochs),prop+unc_prop,'-',
+    color='xkcd:green',
+    linewidth=2,
+    label=f'{100*level:.0f}% Confidence Interval Upper Limit')
+  plt.plot(np.arange(epochs),prop-unc_prop,'-',
+    color='xkcd:red',
+    linewidth=2,
+    label=f'{100*level:.0f}% Confidence Inteval Lower Limit')
+  plt.xlim([0,epochs-1])
+  plt.ylim([0,1])
+  plt.grid(True)
+  plt.xlabel('Training Epochs',
+    fontsize=16)
+  plt.ylabel(f'Proportion Meeting Requirement f1>={req}',
+    fontsize=16)
+  plt.title(
+    f'Propotion of models which meet f1>={req} at Each Epoch\n' \
+    f'Feature Detector:{args["model"]}, ' \
+    f'Trained on {N_im} Images{(", Resampled" if args["resampling"] else "")}',
+    fontsize=20)
+  plt.legend(loc='best',fontsize=12)
+  # Save this figure to a png even if it isn't a unique name
+  savefile = f'{plotdir}proportion_{args["model"]}_e{epochs}_n{N_im}_m{M}.png'
+  i=1
+  while os.path.isfile(savefile):
+    savefile = f'{plotdir}proportion_{args["model"]}_e{epochs}_n{N_im}_m{M}_{i}.png'
+    i+=1
+  print(f'[INFO] Proportion chart saved to {savefile}')
+  plt.savefig(savefile)
 
-# Plot for mean F1 Score of simulated models
-fig = plt.figure(figsize=(12,8))
-meas = plt.plot(np.transpose(results['val_f1']),'o',
-  markersize=8,
-  alpha=0.15,
-  color='gray')
-plt.plot(np.arange(epochs),mean_f1,'.-',
-  linewidth=2,
-  label='Mean F1 Score')
-plt.plot(np.arange(epochs),mean_f1+unc_f1,'-',
-  color='xkcd:green',
-  linewidth=2,
-  label=f'{100*level:.0f}% Confidence Interval Upper Limit')
-plt.plot(np.arange(epochs),mean_f1-unc_f1,'-',
-  color='xkcd:red',
-  linewidth=2,
-  label=f'{100*level:.0f}% Confidence Interval Lower Limit')
-plt.axhline(y=req,
-  linestyle='--',
-  color='xkcd:purple',
-  linewidth=3,
-  label='F1 Score Requirement')
-plt.xlim([0,epochs-1])
-# plt.ylim([0,1])
-plt.grid(True)
-plt.xlabel('Training Epochs',
-  fontsize=16)
-plt.ylabel('Mean F1 Score',
-  fontsize=16)
-plt.title(
-  f'Mean F1 Scores at Each Epoch\n' \
-  f'Feature Detector:{args["model"]}, ' \
-  f'Trained on {N_im} Images{(", Resampled" if args["resampling"] else "")}',
-  fontsize=20)
-h,l = plt.gca().get_legend_handles_labels()
-h1 = [meas[0]]+h
-l1 = ['F1 Score Measuremets']+l
-plt.legend(h1,l1,fontsize=12,loc='best')
-# Save this figure to a png also
-savefile = f'{plotdir}mean_f1_{args["model"]}_e{epochs}_n{N_im}_m{M}.png'
-i=1
-while os.path.isfile(savefile):
-  savefile = f'{plotdir}mean_f1_{args["model"]}_e{epochs}_n{N_im}_m{M}_{i}.png'
-  i+=1
+  # Plot for mean F1 Score of simulated models
+  fig = plt.figure(figsize=(12,8))
+  meas = plt.plot(np.transpose(results['val_f1']),'o',
+    markersize=8,
+    alpha=0.15,
+    color='gray')
+  plt.plot(np.arange(epochs),mean_f1,'.-',
+    linewidth=2,
+    label='Mean F1 Score')
+  plt.plot(np.arange(epochs),mean_f1+unc_f1,'-',
+    color='xkcd:green',
+    linewidth=2,
+    label=f'{100*level:.0f}% Confidence Interval Upper Limit')
+  plt.plot(np.arange(epochs),mean_f1-unc_f1,'-',
+    color='xkcd:red',
+    linewidth=2,
+    label=f'{100*level:.0f}% Confidence Interval Lower Limit')
+  plt.axhline(y=req,
+    linestyle='--',
+    color='xkcd:purple',
+    linewidth=3,
+    label='F1 Score Requirement')
+  plt.xlim([0,epochs-1])
+  # plt.ylim([0,1])
+  plt.grid(True)
+  plt.xlabel('Training Epochs',
+    fontsize=16)
+  plt.ylabel('Mean F1 Score',
+    fontsize=16)
+  plt.title(
+    f'Mean F1 Scores at Each Epoch\n' \
+    f'Feature Detector:{args["model"]}, ' \
+    f'Trained on {N_im} Images{(", Resampled" if args["resampling"] else "")}',
+    fontsize=20)
+  h,l = plt.gca().get_legend_handles_labels()
+  h1 = [meas[0]]+h
+  l1 = ['F1 Score Measuremets']+l
+  plt.legend(h1,l1,fontsize=12,loc='best')
+  # Save this figure to a png also
+  savefile = f'{plotdir}mean_f1_{args["model"]}_e{epochs}_n{N_im}_m{M}.png'
+  i=1
+  while os.path.isfile(savefile):
+    savefile = f'{plotdir}mean_f1_{args["model"]}_e{epochs}_n{N_im}_m{M}_{i}.png'
+    i+=1
 
-plt.savefig(savefile)
-print(f'[INFO] Mean F1 chart saved to {savefile}')
-plt.show()
+  plt.savefig(savefile)
+  print(f'[INFO] Mean F1 chart saved to {savefile}')
+  plt.show()
 
 
 if(args['ploterrors']):
