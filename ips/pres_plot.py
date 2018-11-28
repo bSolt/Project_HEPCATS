@@ -118,21 +118,25 @@ def f1_plot(results,title=None,save=None,
 # print(f'[INFO] Mean F1 chart saved to {savefile}')
 # plt.show()
 
-def plot_errors(ground_truth,predictions,test_inputs):
+def plot_errors(model,ground_truth,test_inputs,modelname=None,mono=False):
   # ground_truth = test_labels
-  # predictions = model.predict(test_inputs).reshape((nTest,))
-  #find where the errors in the testing data are
-  errors = np.where((predictions>0.5) != ground_truth)[0]
-  print("Number of Errors = {}/{}".format(len(errors),len(ground_truth)))
-  # Create this list thing for plotting examples
+	predictions = model.predict(test_inputs).reshape(ground_truth.shape)
+	#find where the errors in the testing data are
+	errors = np.where((predictions>0.5) != ground_truth)[0]
+	print("Number of Errors = {}/{}".format(len(errors),len(ground_truth)))
+	# Create this list thing for plotting examples
 
-  for i in errors:
-    # Print the classification and prediction for this case
-    print(f'Image does {"" if ground_truth[i] else "not"} contain aurora,'
-          f' Probability: {predictions[i]}')
-    # Show the image for reference
-    plt.imshow(test_inputs[i])
-    plt.title(f'Predicted Aurora Probability = {100*predictions[i]:.2f}%')
-    plt.grid(False)
-    plt.savefig(f'plots/ex/error_{i}.png')
-    plt.show()
+	for i in errors:
+		# Print the classification and prediction for this case
+		print(f'Image does {"" if ground_truth[i] else "not"} contain aurora,'
+		      f' Probability: {predictions[i]}')
+		# Show the image for reference
+		if mono:
+			plt.imshow(test_inputs[i][:,:,1])
+		else:
+			plt.imshow(test_inputs[i])
+		plt.title(f'Predicted Aurora Probability = {100*predictions[i]:.2f}%')
+		plt.grid(False)
+		if modelname:
+			plt.savefig(f'plots/ex/error_{modelname}_{i}.png')
+		plt.show()
