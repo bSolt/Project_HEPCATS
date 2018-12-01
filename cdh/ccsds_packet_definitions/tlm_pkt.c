@@ -71,10 +71,10 @@ void main(int argc, char const *argv[])
 	struct pkt_dat_fld pkt_dat_fld;
 
 	// Populate packet I.D. fields:
-	pkt_hdr.pkt_id_vrs =         0; // "000"           (version 1)
-	pkt_hdr.pkt_id_typ =         0; // "0"             (telemetry packet)
-	pkt_hdr.pkt_id_sec_hdr_flg = 0; // "0"             (idle packet)
-	pkt_hdr.pkt_id_apid =     2047; // "11111111111"   (idle packet APID)
+	pkt_hdr.pkt_id_vrs =         0;  // "000"          (version 1)
+	pkt_hdr.pkt_id_typ =         0;  // "0"            (telemetry packet)
+	pkt_hdr.pkt_id_sec_hdr_flg = 0;  // "0"            (idle packet)
+	pkt_hdr.pkt_id_apid =     0x7FF; // "11111111111"  (idle packet APID)
 
 	// Populate packet sequence control fields: 
 	pkt_hdr.pkt_seq_cnt_grp_flg = 3; // "11" (unsegmented data)  
@@ -99,7 +99,7 @@ void main(int argc, char const *argv[])
 
 	// Populate user data field:
 	for (int i = 0; i < 1063; ++i)
-		pkt_dat_fld.pkt_usr_dat[i] = 255; // "1s" (idle packet user data)
+		pkt_dat_fld.pkt_usr_dat[i] = 0xFF; // "1s" (idle packet user data)
 
 	// Populate packer error control field:
 	pkt_dat_fld.pkt_err_cnt = 0; // "0000000000000000" (not researched yet)
