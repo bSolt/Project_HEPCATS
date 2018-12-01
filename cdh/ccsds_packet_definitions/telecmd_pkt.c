@@ -58,7 +58,8 @@ struct pkt_dat_fld
 	unsigned int pkt_sec_hdr_p_red:   3; //  3 bits
 
 	// Packet User (Application) Data Field:
-	uint32_t pkt_app_dat; // 4 bytes
+	unsigned int pkt_app_dat_atc_flg:  1; // 1 bit
+	unsigned int pkt_app_dat_cmd_args: 7; // 7 bits
 
 	// Packet Error Control:
 	unsigned int pkt_err_cnt: 16; // 16 bits
@@ -98,8 +99,8 @@ void main(int argc, char const *argv[])
 	pkt_dat_fld.pkt_sec_hdr_p_red = 1; // "001" (subsecond resolution)
 
 	// Populate user data field:
-	pkt_dat_fld.pkt_app_dat = 2147483647; // "1s" 
-	                                      // (idle packet application data)
+	pkt_dat_fld.pkt_app_dat_atc_flg  = 0;    // "0" (execute now)
+	pkt_dat_fld.pkt_app_dat_cmd_args = 0x7F; // "1s" (idle)
 
 	// Populate packer error control field:
 	pkt_dat_fld.pkt_err_cnt = 0; // "0000000000000000" (no error detection)
