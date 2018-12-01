@@ -75,12 +75,12 @@ void main(int argc, char const *argv[])
 	pkt_hdr.pkt_id_vrs =         0; // "000"           (always)
 	pkt_hdr.pkt_id_typ =         1; // "0"             (telecommand packet)
 	pkt_hdr.pkt_id_sec_hdr_flg = 0; // "0"             (idle packet)
-	pkt_hdr.pkt_id_apid =     2047; // "11111111111"   (idle packet APID)
+	pkt_hdr.pkt_id_apid =     0xFF; // "11111111111"   (idle packet APID)
 
 	// Populate packet sequence control fields: 
-	pkt_hdr.pkt_seq_cnt_grp_flg =      3; // "11" (unsegmented data)  
-	pkt_hdr.pkt_seq_cnt_pkt_name = 16383; // "11111111111111" 
-	                                      // (idle packet name)
+	pkt_hdr.pkt_seq_cnt_grp_flg =      3;  // "11" (unsegmented data)  
+	pkt_hdr.pkt_seq_cnt_pkt_name = 0x3FFF; // "11111111111111" 
+	                                       // (idle packet name)
 
 	// Populate packet length field:
 	pkt_hdr.pkt_len = 13; // "C" (Octets in packet data field - 1)
@@ -100,7 +100,7 @@ void main(int argc, char const *argv[])
 
 	// Populate user data field:
 	pkt_dat_fld.pkt_app_dat_atc_flg  = 0;    // "0" (execute now)
-	pkt_dat_fld.pkt_app_dat_cmd_args = 0x7F; // "1s" (idle)
+	pkt_dat_fld.pkt_app_dat_cmd_args = 0x7F; // "1s" (idle command argument)
 
 	// Populate packer error control field:
 	pkt_dat_fld.pkt_err_cnt = 0; // "0000000000000000" (no error detection)
