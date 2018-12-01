@@ -1,1 +1,0 @@
-void sim_ieu_telecmd_pkt_proc(char* buffer);

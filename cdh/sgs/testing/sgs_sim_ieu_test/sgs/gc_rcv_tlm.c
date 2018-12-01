@@ -32,7 +32,7 @@
 #include <stdint.h>  // Integer types
 
 #include "gc_open_port.h"    // Function definition
-#include "gc_tlm_pkt_proc.h" // Function definition
+#include "gc_proc_tlm_pkt.h" // Function definition
 #include "gc_read_buffer.h"
 
 void main(int argc, char const *argv[])
@@ -49,7 +49,7 @@ void main(int argc, char const *argv[])
 	    buffer = gc_read_buffer(fd,buffer);
 
 	    // Process telemetry packet:
-	    gc_tlm_pkt_proc(buffer);
+	    gc_proc_tlm_pkt(buffer);
     } while (-1);
 
 	return;

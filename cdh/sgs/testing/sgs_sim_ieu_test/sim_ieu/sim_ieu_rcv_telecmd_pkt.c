@@ -30,7 +30,7 @@
 
 #include "sim_ieu_open_port.h"        // Function definition
 #include "sim_ieu_read_buffer.h"      // Function definition
-#include "sim_ieu_telecmd_pkt_proc.h" // Function definition
+#include "sim_ieu_proc_telecmd_pkt.h" // Function definition
 
 void main(int argc, char const *argv[])
 {
@@ -42,7 +42,7 @@ void main(int argc, char const *argv[])
 	buffer = sim_ieu_read_buffer(fd,buffer);
 
 	// Process telecommand packet:
-	sim_ieu_telecmd_pkt_proc(buffer);
+	sim_ieu_proc_telecmd_pkt(buffer);
 
 	// Close port:
 	close(fd);

@@ -15,5 +15,6 @@ struct telecmd_pkt_inputs
 	uint8_t pkt_t_sec;
 
 	// Packet Data Field:
-	uint32_t pkt_app_data;
+	uint8_t pkt_app_dat_atc_flg;
+	uint8_t pkt_app_dat_cmd_arg;
 };

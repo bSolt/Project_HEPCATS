@@ -63,7 +63,8 @@ struct pkt_dat_fld
 	unsigned int pkt_sec_hdr_p_red:   3; //  3 bits
 
 	// Packet User (Application) Data Field:
-	uint32_t pkt_app_dat; // 4 bytes
+	unsigned int pkt_app_dat_atc_flg: 1; // 1 bit
+	unsigned int pkt_app_dat_cmd_arg:  7; // 7 bits
 
 	// Packet Error Control:
 	unsigned int pkt_err_cnt: 16; // 16 bits
@@ -89,7 +90,7 @@ char* gc_crt_telecmd_pkt(struct telecmd_pkt_inputs telecmd_pkt_inputs,char* buff
 		telecmd_pkt_inputs.pkt_name;
 
 	// Populate packet length field:
-	pkt_hdr.pkt_len = 13; // "C" (Octets in packet data field - 1)
+	pkt_hdr.pkt_len = 10; // "C" (Octets in packet data field - 1)
 
 	// Populate packet secondary header T fields:
 	pkt_dat_fld.pkt_sec_hdr_t_year = telecmd_pkt_inputs.pkt_t_year;
@@ -105,14 +106,15 @@ char* gc_crt_telecmd_pkt(struct telecmd_pkt_inputs telecmd_pkt_inputs,char* buff
 	pkt_dat_fld.pkt_sec_hdr_p_red = 0; // "000" (second resolution)
 
 	// Populate user data field:
-	pkt_dat_fld.pkt_app_dat = telecmd_pkt_inputs.pkt_app_data;
+	pkt_dat_fld.pkt_app_dat_atc_flg = telecmd_pkt_inputs.pkt_app_dat_atc_flg;
+	pkt_dat_fld.pkt_app_dat_cmd_arg = telecmd_pkt_inputs.pkt_app_dat_cmd_arg;
 
 	// Populate packer error control field:
 	pkt_dat_fld.pkt_err_cnt = 0; // "0000000000000000" (no error detection)
 
 	// Copy Packet Header and Data Field to buffer:
 	memcpy(buffer+0,&pkt_hdr,6);
-	memcpy(buffer+6,&pkt_dat_fld,14);
+	memcpy(buffer+6,&pkt_dat_fld,11);
 
 	return buffer;
 }

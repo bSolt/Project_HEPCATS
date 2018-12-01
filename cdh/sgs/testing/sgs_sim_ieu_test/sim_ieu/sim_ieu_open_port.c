@@ -30,7 +30,7 @@
 #include <errno.h>   // Error number definitions 
 #include <termios.h> // POSIX terminal control definitions 
 
-#include "sim_ieu_port_config.h"
+#include "sim_ieu_config_port.h"
 
 int sim_ieu_open_port(char* port)
 {
@@ -54,7 +54,7 @@ int sim_ieu_open_port(char* port)
   }
 
   // Set speed to  bps, 8n1 (no parity)
-  sim_ieu_port_config(fd,B115200); 
+  sim_ieu_config_port(fd,B115200); 
 
   // Return fd:
   return (fd);

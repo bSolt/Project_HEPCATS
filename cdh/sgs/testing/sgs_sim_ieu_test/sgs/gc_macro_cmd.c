@@ -33,16 +33,17 @@
 
 #include "gc_telecmd_inputs_struct.h" // Structure definition
 
-#include "gc_cmd_str_interp.h"  // Function definition
+#include "gc_interp_cmd_str.h"  // Function definition
 #include "gc_crt_telecmd_pkt.h" // Function definition
 #include "gc_open_port.h"       // Function definition
 #include "gc_write_buffer.h"	 // Function definition
 
 // "cmd" macro function 
-void gc_macro_cmd(char* cmd_str)
+void gc_macro_cmd(char* cmd_str_arr[])
 {
-	// Interpret command string:
-	struct telecmd_pkt_inputs telecmd_pkt_inputs = gc_cmd_str_interp(cmd_str);
+    // Interpret command string:
+	struct telecmd_pkt_inputs telecmd_pkt_inputs = \
+     gc_interp_cmd_str(cmd_str_arr);
 
     // Create telecommand packet:
 	char* buffer = malloc(20*sizeof(char));

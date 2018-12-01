@@ -47,24 +47,20 @@
 
 void main(int argc, char const *argv[])
 {
-	// Get input string:
-	char input_str[20];
-	strcpy(input_str,argv[1]);
+	// Initialize:
+    char* input_str_arr[10] = \
+        {" "," "," "," "," "," "," "," "," "," "};
 
-	// Split input string to array to get macro:
-    char* p = strtok(input_str," "); // Split with " "
-    char* input_str_arr[10]; int i = 0;
-
-    // Loop to split input string:
-    while (p != NULL) {
-        input_str_arr[i++] = p; 
-        p = strtok(NULL," ");
+    // Loop to read in prompt string input:
+    for (int i = 0; i < 10; ++i){
+        if (argv[i+1])
+            input_str_arr[i] = strdup(argv[i+1]);
     }
-
+    
     // Check to see if macro is "cmd":
     if (strcmp("cmd",input_str_arr[0]) == 0){
 		// Start command macro function:
-    	gc_macro_cmd(input_str);
+    	gc_macro_cmd(input_str_arr);
 		
 		// Exit:
 		return;

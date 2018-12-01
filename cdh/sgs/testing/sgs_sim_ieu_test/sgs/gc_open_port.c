@@ -30,7 +30,7 @@
 #include <errno.h>   // Error number definitions 
 #include <termios.h> // POSIX terminal control definitions 
 
-#include "gc_port_config.h"
+#include "gc_config_port.h"
 
 // Open port function
 int gc_open_port(char* port)
@@ -55,7 +55,7 @@ int gc_open_port(char* port)
   }
 
   // Set speed to  bps, 8n1 (no parity)
-  gc_port_config(fd,B115200); 
+  gc_config_port(fd,B115200); 
 
   // Return fd:
   return (fd);

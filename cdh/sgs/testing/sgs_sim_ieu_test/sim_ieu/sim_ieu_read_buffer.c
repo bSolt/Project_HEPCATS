@@ -35,12 +35,13 @@
 char* sim_ieu_read_buffer(int fd,char* buffer)
 {
 	// Initilize: 
+	int buffer_size = 17; // 17 byte telecommand packet
 	int bytes_received;
 	int bytes_read = 0;
-	int bytes_to_read = 20; // 20 bytes telecommand packet
+	int bytes_to_read = buffer_size;
 
 	// Temporary buffer:
-	char temp_buffer[20];
+	char temp_buffer[buffer_size];
 
 	// Clear port buffer:
 	//tcflush(fd,TCIOFLUSH);
@@ -61,7 +62,7 @@ char* sim_ieu_read_buffer(int fd,char* buffer)
 	}	
 
 	// Copy temporary buffer to return buffer:
-	memcpy(buffer,&temp_buffer,20);
+	memcpy(buffer,&temp_buffer,buffer_size);
 
   	return buffer;
 }

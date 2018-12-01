@@ -27,6 +27,9 @@
 #include <string.h>  // String function definitions 
 #include <unistd.h>  // UNIX standard function definitions 
 #include <stdint.h>  // Integer types
+#include "time.h"    // Standard time function definitions
+
+#include "get_doy.h" // Function definition
 
 // Packet header structure:
 struct pkt_hdr
@@ -86,12 +89,17 @@ char* sim_ieu_crt_tlm_pkt(char* buffer)
 	// Populate packet length field:
 	pkt_hdr.pkt_len = 1073; // "C" (Octets in packet data field - 1)
 
+	// Define time variables and get current time in UTC:
+	struct tm *tm; time_t now;
+	time(&now); tm = gmtime(&now);
+
 	// Populate packet secondary header T fields:
-	pkt_dat_fld.pkt_sec_hdr_t_year = 2018; // "00000011111100010"
-	pkt_dat_fld.pkt_sec_hdr_t_doy =   305; // "00000000100110001"
-	pkt_dat_fld.pkt_sec_hdr_t_hour =    0; // "00000000"
-	pkt_dat_fld.pkt_sec_hdr_t_min =    33; // "00100001"
-	pkt_dat_fld.pkt_sec_hdr_t_sec =    27; // "00011011"
+	pkt_dat_fld.pkt_sec_hdr_t_year = tm->tm_year+1900;
+	pkt_dat_fld.pkt_sec_hdr_t_doy  = \
+		get_doy(tm->tm_mon+1,tm->tm_mday,tm->tm_year+1900);
+	pkt_dat_fld.pkt_sec_hdr_t_hour = tm->tm_hour;
+	pkt_dat_fld.pkt_sec_hdr_t_min  = tm->tm_min;
+	pkt_dat_fld.pkt_sec_hdr_t_sec  = tm->tm_sec;
 
 	// Populate packet secondary header P fields:
 	pkt_dat_fld.pkt_sec_hdr_p_ext = 0; // "0"   (no extension)

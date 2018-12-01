@@ -2,12 +2,12 @@
 //
 // SGS and Simulated IEU Communication Test
 // 
-// Ground Control Telemetry Packet Processor
+// Simulated IEU Telecommand Packet Processor
 //
 // -------------------------------------------------------------------------- /
 //
 // Input Arguments:
-// - buffer (contains CCSDS telemetry packet)
+// - buffer (contains CCSDS telecommand packet)
 //
 // Output Arguments:
 // - N/A
@@ -18,7 +18,7 @@
 // ASEN 4018
 // Project HEPCATS
 // Subsystem: C&DH
-// Created: November 10, 2018
+// Created: November 1, 2018
 // 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -28,8 +28,7 @@
 #include <unistd.h>  // UNIX standard function definitions 
 #include <stdint.h>  // Integer types
 
-// Telemetry processor function
-void gc_tlm_pkt_proc(char* buffer)
+void sim_ieu_proc_telecmd_pkt(char* buffer)
 {	
 	// Initialize:
 	uint16_t pkt_hdr_pkt_id;
@@ -42,7 +41,7 @@ void gc_tlm_pkt_proc(char* buffer)
 	uint8_t pkt_dat_fld_sec_hdr_t_fld_min;
 	uint8_t pkt_dat_fld_sec_hdr_t_fld_sec;
 	uint8_t pkt_dat_fld_sec_hdr_p_fld;
-	uint32_t pkt_dat_fld_usr_data;
+	uint32_t pkt_dat_fld_app_dat;
 	uint16_t pkt_dat_fld_pkt_err_cnt;
 
 	// Save input buffer to seperate fields:
@@ -56,8 +55,8 @@ void gc_tlm_pkt_proc(char* buffer)
 	memcpy(&pkt_dat_fld_sec_hdr_t_fld_min,buffer+11,1);  // 1 byte of buffer (offset 11)
 	memcpy(&pkt_dat_fld_sec_hdr_t_fld_sec,buffer+12,1);  // 1 byte of buffer (offset 12)
 	memcpy(&pkt_dat_fld_sec_hdr_p_fld,buffer+13,1);      // 1 byte of buffer (offset 13)
-	memcpy(&pkt_dat_fld_usr_data,buffer+14,1064);        // 1067 bytes of buffer (offset 14)
-	memcpy(&pkt_dat_fld_pkt_err_cnt,buffer+1078,2);      // 2 bytes of buffer (offset 1078)
+	memcpy(&pkt_dat_fld_app_dat,buffer+14,1);            // 1 bytes of buffer (offset 14)
+	memcpy(&pkt_dat_fld_pkt_err_cnt,buffer+15,2);        // 2 bytes of buffer (offset 15)
 
 	// Packet Header Identification:
 	uint8_t pkt_id_vrs;
@@ -130,8 +129,14 @@ void gc_tlm_pkt_proc(char* buffer)
 	pkt_p_fld_res = pkt_p_fld_res >> 5;               // Shift right by 5 bits
 
 	// Packet Data Field Application Data
-	int pkt_usr_data[1064]; 
-	memcpy(pkt_usr_data,&pkt_dat_fld_usr_data,1064);
+	uint8_t pkt_app_dat = pkt_dat_fld_app_dat;
+	uint8_t pkt_app_dat_atc_flg;
+	uint8_t pkt_app_dat_cmd_arg;
+	
+	pkt_app_dat_atc_flg = pkt_app_dat & 0x01; // Mask to keep bit 0
+
+	pkt_app_dat_cmd_arg = pkt_app_dat & 0xFE; // Mast to keep bits 1-7
+	pkt_app_dat_cmd_arg = pkt_app_dat_cmd_arg >> 1; // Shift right by 1 bit
 
 	// Packet Data Field Packet Error Control:
 	uint16_t pkt_err_cnt = pkt_dat_fld_pkt_err_cnt;
@@ -145,7 +150,7 @@ void gc_tlm_pkt_proc(char* buffer)
     printf("      APID                  : %u\n",pkt_id_apid);
     printf("  Packet Sequence Control\n");
     printf("      Grouping Flags        : %u\n",pkt_seq_cnt_grp_flg);
-    printf("      Sequence Count        : %u\n",pkt_seq_cnt_pkt_name);
+    printf("      Packet Name           : %u\n",pkt_seq_cnt_pkt_name);
 	printf("  Packet Length\n");
 	printf("      Packet Length         : %u\n",pkt_len);
 	printf("Packet Data Field\n");
@@ -159,6 +164,9 @@ void gc_tlm_pkt_proc(char* buffer)
     printf("      P-Field I.D.          : %u\n",pkt_p_fld_id);
     printf("      P-Field Variation     : %u\n",pkt_p_fld_var);
     printf("      P-Field Resolution    : %u\n",pkt_p_fld_res);
+    printf("  Application Data\n");
+    printf("      ATC Flag              : %u\n",pkt_app_dat_atc_flg);
+    printf("      Command Argument      : %u\n",pkt_app_dat_cmd_arg);
     printf("  Packet Error Control\n");
     printf("      Packet Error Control  : %u\n",pkt_err_cnt);
     printf("\n");

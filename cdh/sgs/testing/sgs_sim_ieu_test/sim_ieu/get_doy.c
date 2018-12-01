@@ -1,17 +1,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// SGS and Simulated IEU Communication Test
-// 
-// Ground Control Write (to) Buffer
+// Determines Day of Year given Month, Day, and Year
 //
 // -------------------------------------------------------------------------- /
 //
 // Input Arguments:
-// - fd
-// - buffer
+// - mon
+// - day
+// - year
 //
 // Output Arguments:
-// - N/A
+// - doy
 // 
 // -------------------------------------------------------------------------- /
 //
@@ -25,25 +24,25 @@
 
 #include <stdio.h>   // Standard input/output definitions
 #include <stdlib.h>  // Standard library 
-#include <stdint.h>  // Integer types
 #include <string.h>  // String function definitions 
 #include <unistd.h>  // UNIX standard function definitions 
-#include <fcntl.h>   // File control definitions 
-#include <errno.h>   // Error number definitions 
-#include <termios.h> // POSIX terminal control definitions 
+#include <stdint.h>  // Integer types
 
-// Write buffer to port function
-void gc_write_buffer(int fd, char* buffer)
+// Determine year function
+uint16_t is_leap_year(int year)
 {
-	// Write buffer to port:
-	int bytes_sent = write(fd,buffer,17); // 17 byte telecommand packet
+    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+}
 
-	// Check for success (20 bytes sent):
-	if (bytes_sent != 17) {
-		// Print error message:
-	    printf("(GC_WRITE_BUFFER) <ERROR> Unable to write: %d, %d\n",\
-    		bytes_sent,errno);
-	}
+// Determine DOY function
+uint16_t get_doy(int mon, int day, int year)
+{
+    static const int days[2][13] = {
+        {0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334},
+        {0, 0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335}
+    };
 
-	return;
+    int leap = is_leap_year(year);
+
+    return days[leap][mon] + day;
 }
