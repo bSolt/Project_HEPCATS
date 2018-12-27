@@ -1,0 +1,11 @@
+This file contains information about the cdf files in this directory
+
+Prefix Meanings
+im_k0s_wic: WIC Instrument on IMAGE Mission
+
+
+
+Files table
+filename										notes
+======================================================================================
+im_k0s_wic_20000714000808_20000715190729.cdf	Bastille Day Event
