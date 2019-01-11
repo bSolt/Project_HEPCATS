@@ -42,15 +42,15 @@
 void gc_macro_cmd(char* cmd_str_arr[])
 {
     // Interpret command string:
-    struct telecmd_pkt_inputs telecmd_pkt_inputs = \
-        gc_interp_cmd_str(cmd_str_arr);
+	struct telecmd_pkt_inputs telecmd_pkt_inputs = \
+     gc_interp_cmd_str(cmd_str_arr);
 
     // Create telecommand packet:
-    char* buffer = malloc(20*sizeof(char));
+	char* buffer = malloc(20*sizeof(char));
     buffer = gc_crt_telecmd_pkt(telecmd_pkt_inputs,buffer);
 
     // Open port:
-    int fd = gc_open_port("/dev/pts/8");
+    int fd = gc_open_port("/dev/pts/4");
 
     // Write buffer to port:
     gc_write_buffer(fd, buffer);

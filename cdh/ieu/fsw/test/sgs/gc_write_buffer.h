@@ -1,0 +1,1 @@
+void gc_write_buffer(int fd, char* buffer);
