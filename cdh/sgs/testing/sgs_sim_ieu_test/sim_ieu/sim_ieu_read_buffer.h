@@ -1,1 +1,0 @@
-char* sim_ieu_read_buffer(int fd,char* buffer);

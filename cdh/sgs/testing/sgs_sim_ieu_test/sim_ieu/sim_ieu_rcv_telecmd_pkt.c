@@ -22,30 +22,31 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+// Standard libraries:
 #include <stdio.h>   // Standard input/output definitions
 #include <stdlib.h>  // Standard library
 #include <string.h>  // String function definitions
 #include <unistd.h>  // UNIX standard function definitions
 #include <stdint.h>  // Standard integer types
 
-#include "sim_ieu_open_port.h"        // Function definition
-#include "sim_ieu_read_buffer.h"      // Function definition
-#include "sim_ieu_proc_telecmd_pkt.h" // Function definition
+// Header files:
+#include "sim_ieu_open_port.h"        // Open port function declarations
+#include "sim_ieu_read_port.h"      // Read buffer function declarations
+#include "sim_ieu_proc_telecmd_pkt.h" // Process packet function declarations
 
-void main(int argc, char const *argv[])
-{
-	// Open port:
-	int fd = sim_ieu_open_port("/dev/pts/9");
+void main(int argc, char const *argv[]) {
+    // Open port:
+    int fd = sim_ieu_open_port("/dev/pts/3");
 
-	// Read from buffer:
-	char* buffer = malloc(20*sizeof(char));
-	buffer = sim_ieu_read_buffer(fd,buffer);
+    // Read from buffer:
+    char* buffer = malloc(17*sizeof(char));
+    buffer = sim_ieu_read_port(fd,buffer);
 
-	// Process telecommand packet:
-	sim_ieu_proc_telecmd_pkt(buffer);
+    // Process telecommand packet:
+    sim_ieu_proc_telecmd_pkt(buffer);
 
-	// Close port:
-	close(fd);
+    // Close port:
+    close(fd);
 
-	return;
+    return;
 }

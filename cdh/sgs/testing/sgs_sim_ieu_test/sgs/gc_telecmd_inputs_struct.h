@@ -1,20 +1,33 @@
-// Command Packet Field Inputs Structure
-struct telecmd_pkt_inputs
-{
-	// Packet Identification:
-	uint16_t pkt_apid;
+///////////////////////////////////////////////////////////////////////////////
+//
+// SGS and Simulated IEU Communication Test
+//
+// Telecommand inputs structure declaration
+//
+// -------------------------------------------------------------------------- /
+//
+// Benjamin Spencer
+// ASEN 4018
+// Project HEPCATS
+// Subsystem: C&DH
+// Created: November 1, 2018
+//
+///////////////////////////////////////////////////////////////////////////////
 
-	// Packet Sequence Control:
-	uint16_t pkt_name;
-	
-	// Packet Secondary Header:
-	uint16_t pkt_t_year;
-	uint16_t pkt_t_doy;
-	uint8_t pkt_t_hour;
-	uint8_t pkt_t_min;
-	uint8_t pkt_t_sec;
+// Structure declaration:
+struct telecmd_pkt_inputs {
+    // Packet Identification:
+    uint16_t pkt_apid;
 
-	// Packet Data Field:
-	uint8_t pkt_app_dat_atc_flg;
-	uint8_t pkt_app_dat_cmd_arg;
+    // Packet Sequence Control:
+    uint16_t pkt_name;
+
+    // Packet Secondary Header:
+    uint32_t pkt_sec_hdr_t_sec;  //  32 bits
+    uint16_t pkt_sec_hdr_t_msec; //  16 bits
+    uint8_t  pkt_sec_hdr_t_void; //  8 bits
+
+    // Packet Data Field:
+    uint8_t pkt_app_dat_atc_flg;
+    uint8_t pkt_app_dat_cmd_arg;
 };

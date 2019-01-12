@@ -22,39 +22,33 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+// Standard libraries:
 #include <stdio.h>   // Standard input/output definitions
 #include <stdlib.h>  // Standard library
 #include <string.h>  // String function definitions
 #include <unistd.h>  // UNIX standard function definitions
 #include <stdint.h>  // Integer types
 
-void sim_ieu_proc_telecmd_pkt(char* buffer)
-{
-    // Initialize:
+void sim_ieu_proc_telecmd_pkt(char* buffer) {
+    // Definitions:
     uint16_t pkt_hdr_pkt_id;
     uint16_t pkt_hdr_pkt_seq_cnt;
     uint16_t pkt_hdr_pkt_len;
 
-    uint16_t pkt_dat_fld_sec_hdr_t_fld_year;
-    uint16_t pkt_dat_fld_sec_hdr_t_fld_doy;
-    uint8_t pkt_dat_fld_sec_hdr_t_fld_hour;
-    uint8_t pkt_dat_fld_sec_hdr_t_fld_min;
-    uint8_t pkt_dat_fld_sec_hdr_t_fld_sec;
+    uint32_t pkt_dat_fld_sec_hdr_t_fld_sec;
+    uint16_t pkt_dat_fld_sec_hdr_t_fld_msec;
     uint8_t pkt_dat_fld_sec_hdr_p_fld;
     uint32_t pkt_dat_fld_app_dat;
     uint16_t pkt_dat_fld_pkt_err_cnt;
 
-    // Save input buffer to seperate fields:
+    // Parse buffer into fields:
     memcpy(&pkt_hdr_pkt_id,buffer,2);         // 2 bytes of buffer (offset 0)
     memcpy(&pkt_hdr_pkt_seq_cnt,buffer+2,2);  // 2 bytes of buffer (offset 2)
     memcpy(&pkt_hdr_pkt_len,buffer+4,2);      // 2 bytes of buffer (offset 4)
 
-    memcpy(&pkt_dat_fld_sec_hdr_t_fld_year,buffer+6,2);  // 2 bytes of buffer (offset 6)
-    memcpy(&pkt_dat_fld_sec_hdr_t_fld_doy,buffer+8,2);   // 2 bytes of buffer (offset 8)
-    memcpy(&pkt_dat_fld_sec_hdr_t_fld_hour,buffer+10,1); // 1 byte of buffer (offset 10)
-    memcpy(&pkt_dat_fld_sec_hdr_t_fld_min,buffer+11,1);  // 1 byte of buffer (offset 11)
-    memcpy(&pkt_dat_fld_sec_hdr_t_fld_sec,buffer+12,1);  // 1 byte of buffer (offset 12)
-    memcpy(&pkt_dat_fld_sec_hdr_p_fld,buffer+13,1);      // 1 byte of buffer (offset 13)
+    memcpy(&pkt_dat_fld_sec_hdr_t_fld_sec,buffer+6,4);   // 4 byte of buffer  (offset 6)
+    memcpy(&pkt_dat_fld_sec_hdr_t_fld_msec,buffer+10,2); // 2 byte of buffer  (offset 10)
+    memcpy(&pkt_dat_fld_sec_hdr_p_fld,buffer+13,1);      // 1 byte of buffer  (offset 13)
     memcpy(&pkt_dat_fld_app_dat,buffer+14,1);            // 1 bytes of buffer (offset 14)
     memcpy(&pkt_dat_fld_pkt_err_cnt,buffer+15,2);        // 2 bytes of buffer (offset 15)
 
@@ -95,23 +89,17 @@ void sim_ieu_proc_telecmd_pkt(char* buffer)
     uint16_t pkt_len = pkt_hdr_pkt_len;
 
     // Packet Data Field Packet Secondary Header
-    uint16_t pkt_t_fld_year;
-    uint16_t pkt_t_fld_doy;
-    uint8_t pkt_t_fld_hour;
-    uint8_t pkt_t_fld_min;
-    uint8_t pkt_t_fld_sec;
+    uint32_t pkt_t_fld_sec;
+    uint16_t pkt_t_fld_msec;
 
     uint8_t pkt_p_fld_ext;
     uint8_t pkt_p_fld_id;
-    uint8_t pkt_p_fld_var;
-    uint8_t pkt_p_fld_res;
+    uint8_t pkt_p_fld_bas;
+    uint8_t pkt_p_fld_frc;
 
     // Packet Data Field Packet Secondary Header T-Fields:
-    pkt_t_fld_year = pkt_dat_fld_sec_hdr_t_fld_year;
-    pkt_t_fld_doy = pkt_dat_fld_sec_hdr_t_fld_doy;
-    pkt_t_fld_hour = pkt_dat_fld_sec_hdr_t_fld_hour;
-    pkt_t_fld_min = pkt_dat_fld_sec_hdr_t_fld_min;
     pkt_t_fld_sec = pkt_dat_fld_sec_hdr_t_fld_sec;
+    pkt_t_fld_msec = pkt_dat_fld_sec_hdr_t_fld_msec;
 
     // Packet Secondary Header P-Field Extension:
     pkt_p_fld_ext = pkt_dat_fld_sec_hdr_p_fld & 0x0; // Mask to keep bit 0
@@ -121,12 +109,12 @@ void sim_ieu_proc_telecmd_pkt(char* buffer)
     pkt_p_fld_id = pkt_p_fld_id >> 1;               // Shift right by 1 bit
 
     // Packet Secondary Header P-Field Variation:
-    pkt_p_fld_var = pkt_dat_fld_sec_hdr_p_fld & 0x10; // Mask to keep bit 4
-    pkt_p_fld_var = pkt_p_fld_var >> 4;               // Shift right by 4 bits
+    pkt_p_fld_bas = pkt_dat_fld_sec_hdr_p_fld & 0x30; // Mask to keep bit 4-5
+    pkt_p_fld_bas = pkt_p_fld_bas >> 4;               // Shift right by 4 bits
 
     // Packet Secondary Header P-Field Variation:
-    pkt_p_fld_res = pkt_dat_fld_sec_hdr_p_fld & 0xE0; // Mask to keep bit 5-7
-    pkt_p_fld_res = pkt_p_fld_res >> 5;               // Shift right by 5 bits
+    pkt_p_fld_frc = pkt_dat_fld_sec_hdr_p_fld & 0xC0; // Mask to keep bit 6-7
+    pkt_p_fld_frc = pkt_p_fld_frc >> 6;               // Shift right by 5 bits
 
     // Packet Data Field Application Data
     uint8_t pkt_app_dat = pkt_dat_fld_app_dat;
@@ -144,31 +132,28 @@ void sim_ieu_proc_telecmd_pkt(char* buffer)
     // Print results:
     printf("Packet Header\n");
     printf("  Packet I.D.\n");
-    printf("      Version               : %u\n",pkt_id_vrs);
-    printf("      Type                  : %u\n",pkt_id_typ);
-    printf("      Secondary Header Flag : %u\n",pkt_id_sec_hdr_flg);
-    printf("      APID                  : %u\n",pkt_id_apid);
+    printf("      Version                 : %u\n",pkt_id_vrs);
+    printf("      Type                    : %u\n",pkt_id_typ);
+    printf("      Secondary Header Flag   : %u\n",pkt_id_sec_hdr_flg);
+    printf("      APID                    : %u\n",pkt_id_apid);
     printf("  Packet Sequence Control\n");
-    printf("      Grouping Flags        : %u\n",pkt_seq_cnt_grp_flg);
-    printf("      Packet Name           : %u\n",pkt_seq_cnt_pkt_name);
+    printf("      Grouping Flags          : %u\n",pkt_seq_cnt_grp_flg);
+    printf("      Packet Name             : %u\n",pkt_seq_cnt_pkt_name);
     printf("  Packet Length\n");
-    printf("      Packet Length         : %u\n",pkt_len);
+    printf("      Packet Length           : %u\n",pkt_len);
     printf("Packet Data Field\n");
     printf("  Packet Secondary Header\n");
-    printf("      T-Field Year          : %u\n",pkt_t_fld_year);
-    printf("      T-Field DOY           : %u\n",pkt_t_fld_doy);
-    printf("      T-Field Hour          : %u\n",pkt_t_fld_hour);
-    printf("      T-Field Min           : %u\n",pkt_t_fld_min);
-    printf("      T-Field Sec           : %u\n",pkt_t_fld_sec);
-    printf("      P-Field Ext           : %u\n",pkt_p_fld_ext);
-    printf("      P-Field I.D.          : %u\n",pkt_p_fld_id);
-    printf("      P-Field Variation     : %u\n",pkt_p_fld_var);
-    printf("      P-Field Resolution    : %u\n",pkt_p_fld_res);
+    printf("      T-Field Sec             : %u\n",pkt_t_fld_sec);
+    printf("      T-Field mSec            : %u\n",pkt_t_fld_msec);
+    printf("      P-Field Ext             : %u\n",pkt_p_fld_ext);
+    printf("      P-Field I.D.            : %u\n",pkt_p_fld_id);
+    printf("      P-Field Basic Octets    : %u\n",pkt_p_fld_bas);
+    printf("      P-Field Fraction Octets : %u\n",pkt_p_fld_frc);
     printf("  Application Data\n");
-    printf("      ATC Flag              : %u\n",pkt_app_dat_atc_flg);
-    printf("      Command Argument      : %u\n",pkt_app_dat_cmd_arg);
+    printf("      ATC Flag                : %u\n",pkt_app_dat_atc_flg);
+    printf("      Command Argument        : %u\n",pkt_app_dat_cmd_arg);
     printf("  Packet Error Control\n");
-    printf("      Packet Error Control  : %u\n",pkt_err_cnt);
+    printf("      Packet Error Control    : %u\n",pkt_err_cnt);
     printf("\n");
 
     return;

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // SGS and Simulated IEU Communication Test
-// 
+//
 // Ground Control Write (to) Buffer
 //
 // -------------------------------------------------------------------------- /
@@ -12,7 +12,7 @@
 //
 // Output Arguments:
 // - N/A
-// 
+//
 // -------------------------------------------------------------------------- /
 //
 // Benjamin Spencer
@@ -20,9 +20,10 @@
 // Project HEPCATS
 // Subsystem: C&DH
 // Created: November 4, 2018
-// 
+//
 ///////////////////////////////////////////////////////////////////////////////
 
+// Standard libraries:
 #include <stdio.h>   // Standard input/output definitions
 #include <stdlib.h>  // Standard library 
 #include <stdint.h>  // Integer types
@@ -32,10 +33,17 @@
 #include <errno.h>   // Error number definitions 
 #include <termios.h> // POSIX terminal control definitions 
 
-void sim_ieu_write_buffer(int fd, char* buffer)
-{
-	// Write buffer to port:
-	int bytes_sent = write(fd,buffer,1080); // 1080 byte telemetry packet
+// Write buffer to port function
+void gc_write_port(int fd, char* buffer) {
+    // Write buffer to port:
+    int bytes_sent = write(fd,buffer,17); // 17 byte telecommand packet
 
-	return;
+    // Check for success (20 bytes sent):
+    if (bytes_sent != 17) {
+        // Print error message:
+        printf("(GC_WRITE_BUFFER) <ERROR> Unable to write: %d, %d\n",\
+            bytes_sent,errno);
+    }
+
+    return;
 }

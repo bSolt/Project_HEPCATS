@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // SGS and Simulated IEU Communication Test
-//
-// Create telecommand packet header file
+// 
+// Read port header file
 //
 // -------------------------------------------------------------------------- /
 //
@@ -10,9 +10,9 @@
 // ASEN 4018
 // Project HEPCATS
 // Subsystem: C&DH
-// Created: November 1, 2018
+// Created: November 4, 2018
 //
 ///////////////////////////////////////////////////////////////////////////////
 
 // Function declaration:
-char* gc_crt_telecmd_pkt(struct telecmd_pkt_inputs telecmd_pkt_inputs, char* buffer);
+char* sim_ieu_read_port(int fd,char* buffer);

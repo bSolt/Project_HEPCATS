@@ -2,7 +2,7 @@
 //
 // SGS and Simulated IEU Communication Test
 // 
-// Simulated IEU Read Buffer
+// Read port for telemetry packet
 //
 // -------------------------------------------------------------------------- /
 //
@@ -23,35 +23,31 @@
 // 
 ///////////////////////////////////////////////////////////////////////////////
 
+// Standard libraries:
 #include <stdio.h>   // Standard input/output definitions
-#include <stdlib.h>  // Standard library 
-#include <stdint.h>  // Integer types
-#include <string.h>  // String function definitions 
-#include <unistd.h>  // UNIX standard function definitions 
-#include <fcntl.h>   // File control definitions 
-#include <errno.h>   // Error number definitions 
-#include <termios.h> // POSIX terminal control definitions 
+#include <stdlib.h>  // Standard library
+#include <stdint.h>  // Standard integer types
+#include <string.h>  // String function definitions
+#include <unistd.h>  // UNIX standard function definitions
+#include <fcntl.h>   // File control definitions
+#include <errno.h>   // Error number definitions
+#include <termios.h> // POSIX terminal control definitions
 
-char* sim_ieu_read_buffer(int fd,char* buffer)
-{
-	// Initilize: 
-	int buffer_size = 17; // 17 byte telecommand packet
+char* gc_read_port(int fd,char* buffer) {
+	// Definitions and initializations: 
 	int bytes_received;
 	int bytes_read = 0;
-	int bytes_to_read = buffer_size;
+	int bytes_to_read = 1080; // 20 bytes telecommand packet
 
 	// Temporary buffer:
-	char temp_buffer[buffer_size];
-
-	// Clear port buffer:
-	//tcflush(fd,TCIOFLUSH);
+	char temp_buffer[1080];
 
 	// Loop to get full telecommand packet:
 	while (bytes_to_read > 0 ) {
 		// Read from port:
 		bytes_received = read(fd,&temp_buffer[bytes_read],bytes_to_read);
 
-		// Check to see if entire packet is recieved:
+		// Check to see if entire packet is received:
 		if ( bytes_received > 0 ) {
 			// Increment bytes read:
 			bytes_read += bytes_received;
@@ -62,7 +58,8 @@ char* sim_ieu_read_buffer(int fd,char* buffer)
 	}	
 
 	// Copy temporary buffer to return buffer:
-	memcpy(buffer,&temp_buffer,buffer_size);
+	memcpy(buffer,&temp_buffer,1080);
 
+	// Return:
   	return buffer;
 }

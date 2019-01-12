@@ -2,7 +2,7 @@
 //
 // SGS and Simulated IEU Communication Test
 //
-// Create telecommand packet header file
+// Read port header file
 //
 // -------------------------------------------------------------------------- /
 //
@@ -15,4 +15,4 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 // Function declaration:
-char* gc_crt_telecmd_pkt(struct telecmd_pkt_inputs telecmd_pkt_inputs, char* buffer);
+char* gc_read_port(int fd,char* buffer);

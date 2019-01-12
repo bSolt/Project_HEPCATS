@@ -24,17 +24,17 @@
 // 
 ///////////////////////////////////////////////////////////////////////////////
 
+// Standard libraries:
 #include <stdio.h>   // Standard input/output definitions
-#include <stdlib.h>  // Standard library 
+#include <stdlib.h>  // Standard library
 #include <string.h>  // String function definitions 
 #include <unistd.h>  // UNIX standard function definitions 
-#include <fcntl.h>   // File control definitions 
+#include <fcntl.h>   // File control definitions
 #include <errno.h>   // Error number definitions 
 #include <termios.h> // POSIX terminal control definitions
 
 // Configure port function
-void gc_config_port(int fd, int speed)
-{
+void gc_config_port(int fd, int speed) {
     // Creat POSIX structure for port options:
     struct termios options;
 
