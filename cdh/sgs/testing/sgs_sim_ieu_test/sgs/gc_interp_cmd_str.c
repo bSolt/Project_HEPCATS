@@ -42,8 +42,7 @@ struct telecmd_pkt_inputs gc_interp_cmd_str(char* cmd_str_arr[]) {
     struct telecmd_pkt_inputs \
         telecmd_pkt_inputs; // Telecommand inputs structure
     struct tm tm;           // Time structure
-    struct timespec spec;   // Time structure
-    time_t sec;             // Unix timestamp
+    int i;
 
     // Definitions:
     int cmd_time_str_ind;
@@ -63,7 +62,7 @@ struct telecmd_pkt_inputs gc_interp_cmd_str(char* cmd_str_arr[]) {
     telecmd_pkt_inputs.pkt_name = 0; // PLACEHOLDER
 
     // Check for command parameter:
-    for (int i = 0; i < 10; ++i) {
+    for (i = 0; i < 10; ++i) {
         // Check if command parameter flag is set:
         if (strcmp("with",cmd_str_arr[i]) == 0) {
             // Get Application Data for command parameter:
@@ -77,22 +76,23 @@ struct telecmd_pkt_inputs gc_interp_cmd_str(char* cmd_str_arr[]) {
     }
 
     // Check for command execution time:
-    for (int i = 0; i < 10; ++i) {
+    for (i = 0; i < 10; ++i) {
         // Check if execution time flag is set:
         if (strcmp("hold",cmd_str_arr[i]) == 0) {
+            // Set environment to UTC:
+            // (required for mktime)
+            setenv("TZ", "UTC", 1);
+
             // Set index where command execution time is located
             // in command string array:
             cmd_time_str_ind = i + 1;
 
-            // Convert command execution string into the (numerical) 
-            // time structure:
+            // Convert command execution string into a time structure:
+            // (string format: YYYY/DOY-HH:MM:SS)
             strptime(cmd_str_arr[cmd_time_str_ind],"%Y/%j-%H:%M:%S",&tm);
 
-            // Convert time structure into UNIX time stamp:
-            sec = mktime(&tm);
-
-            // Set command execution time:
-            telecmd_pkt_inputs.pkt_sec_hdr_t_sec  = sec;
+            // Set command execution time to Unix timestamp of command string:
+            telecmd_pkt_inputs.pkt_sec_hdr_t_sec  = mktime(&tm);
             telecmd_pkt_inputs.pkt_sec_hdr_t_msec = 0;
             telecmd_pkt_inputs.pkt_sec_hdr_t_void = 0xFF;
 
@@ -104,12 +104,9 @@ struct telecmd_pkt_inputs gc_interp_cmd_str(char* cmd_str_arr[]) {
         }
         // Execution time flag is not set:
         if (i == 9) {
-            // Get current UNIX time stamp: 
-            clock_gettime(CLOCK_REALTIME, &spec);
-
-            // Set command execution time:
-            telecmd_pkt_inputs.pkt_sec_hdr_t_sec  = spec.tv_sec;
-            telecmd_pkt_inputs.pkt_sec_hdr_t_msec =  0;
+            // Set command execution time to current Unix timestamp:
+            telecmd_pkt_inputs.pkt_sec_hdr_t_sec  = time(NULL);
+            telecmd_pkt_inputs.pkt_sec_hdr_t_msec = 0;
             telecmd_pkt_inputs.pkt_sec_hdr_t_void = 0xFF;
 
             // Set ATC flag:
