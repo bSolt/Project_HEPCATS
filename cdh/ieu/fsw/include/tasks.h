@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Task Header
+// Xenomai Task Header
 //
-// Task variable and function declarations
+// Xenomai task variable and function declarations
 //
 // -------------------------------------------------------------------------- /
 //
@@ -14,10 +14,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-// Task declarations:
-extern RT_TASK rx_telecmd_pkt_task;
-extern RT_TASK proc_telecmd_pkt_task;
+// Task variable declarations:
+extern RT_TASK rx_telecmd_pkt_task;   // Receive telecommand packet from uplink
+                                      // serial port
+extern RT_TASK proc_telecmd_pkt_task; // Process telecommand packet
 
 // Task function declarations:
-void rx_telecmd_pkt(void* arg);   // Receive telecommand packet
+void rx_telecmd_pkt(void* arg);   // Receive telecommand packet from uplink
+                                  // serial port
 void proc_telecmd_pkt(void* arg); // Process telecommand packet

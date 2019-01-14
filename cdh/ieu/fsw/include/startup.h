@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// SGS and Simulated IEU Communication Test
+// Startup (Flight Software Initialization) Header
 //
-// Create telecommand packet header file
+// Startup function declaration
 //
 // -------------------------------------------------------------------------- /
 //
@@ -10,9 +10,9 @@
 // ASEN 4018
 // Project HEPCATS
 // Subsystem: C&DH
-// Created: November 1, 2018
+// Created: January 7, 2019
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-// Function declaration:
-char* gc_crt_telecmd_pkt(struct telecmd_pkt_inputs telecmd_pkt_inputs, char* buffer);
+// Function declarations:
+void startup(void); // Startup (flight software initialization)

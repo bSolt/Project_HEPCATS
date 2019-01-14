@@ -1,7 +1,6 @@
-/home/xenomai/fsw/obj/tasks/rx_telecmd_pkt/rx_telecmd_pkt_task.o: \
- /home/xenomai/fsw/src/tasks/rx_telecmd_pkt/rx_telecmd_pkt_task.c \
- /usr/xenomai/include/cobalt/stdio.h /usr/xenomai/include/cobalt/stdlib.h \
- /usr/xenomai/include/cobalt/unistd.h /usr/xenomai/include/alchemy/task.h \
+/home/xenomai/fsw/obj/main/startup/startup.o: /home/xenomai/fsw/src/main/startup/startup.c \
+ /usr/xenomai/include/cobalt/time.h /usr/xenomai/include/alchemy/task.h \
+ /usr/xenomai/include/xeno_config.h \
  /usr/xenomai/include/boilerplate/list.h \
  /usr/xenomai/include/boilerplate/scope.h \
  /usr/xenomai/include/boilerplate/shared-list.h \
@@ -25,14 +24,12 @@
  /usr/xenomai/include/boilerplate/setup.h \
  /usr/xenomai/include/alchemy/timer.h \
  /usr/xenomai/include/alchemy/compat.h /usr/xenomai/include/trank/trank.h \
- /usr/xenomai/include/alchemy/queue.h \
- /home/xenomai/fsw/include/open_port.h
-:
-/home/xenomai/fsw/src/tasks/rx_telecmd_pkt/rx_telecmd_pkt_task.c:
-/usr/xenomai/include/cobalt/stdio.h:
-/usr/xenomai/include/cobalt/stdlib.h:
-/usr/xenomai/include/cobalt/unistd.h:
+ /home/xenomai/fsw/include/dat_struct_startup.h \
+ /home/xenomai/fsw/include/task_startup.h
+/home/xenomai/fsw/src/main/startup/startup.c:
+/usr/xenomai/include/cobalt/time.h:
 /usr/xenomai/include/alchemy/task.h:
+/usr/xenomai/include/xeno_config.h:
 /usr/xenomai/include/boilerplate/list.h:
 /usr/xenomai/include/boilerplate/scope.h:
 /usr/xenomai/include/boilerplate/shared-list.h:
@@ -57,5 +54,5 @@
 /usr/xenomai/include/alchemy/timer.h:
 /usr/xenomai/include/alchemy/compat.h:
 /usr/xenomai/include/trank/trank.h:
-/usr/xenomai/include/alchemy/queue.h:
-/home/xenomai/fsw/include/open_port.h:
+/home/xenomai/fsw/include/dat_struct_startup.h:
+/home/xenomai/fsw/include/task_startup.h:

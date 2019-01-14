@@ -1,8 +1,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Config Port Header
+// Tasks Startup Header
 //
-// Config Port function declaration
+// Create and start Xenomai tasks function declarations
+//
+// -------------------------------------------------------------------------- /
+//
+// Input Arguments:
+// - N/A
+//
+// Output Arguments:
+// - N/A
 //
 // -------------------------------------------------------------------------- /
 //
@@ -10,9 +18,10 @@
 // ASEN 4018
 // Project HEPCATS
 // Subsystem: C&DH
-// Created: January 7, 2019
+// Created: January 12, 2019
 //
 ///////////////////////////////////////////////////////////////////////////////
 
 // Function declarations:
-void config_port(int fd, int speed); // Configure opened serial port
+void crt_tasks(void); // Create Xenomai tasks
+void str_tasks(void); // Start Xenomai tasks

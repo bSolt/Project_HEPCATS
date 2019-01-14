@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // SGS and Simulated IEU Communication Test
-// 
+//
 // Ground Control Receive Telemetry
 //
 // This script continually reads port for telemetry packets. If a telemetry
@@ -14,7 +14,7 @@
 //
 // Output Arguments:
 // - N/A
-// 
+//
 // -------------------------------------------------------------------------- /
 //
 // Benjamin Spencer
@@ -22,35 +22,36 @@
 // Project HEPCATS
 // Subsystem: C&DH
 // Created: November 10, 2018
-// 
+//
 ///////////////////////////////////////////////////////////////////////////////
 
+// Standard libraries:
 #include <stdio.h>   // Standard input/output definitions
 #include <stdlib.h>  // Standard library 
 #include <string.h>  // String function definitions 
 #include <unistd.h>  // UNIX standard function definitions 
-#include <stdint.h>  // Integer types
+#include <stdint.h>  // Standard integer types
 
-#include "gc_open_port.h"    // Function definition
-#include "gc_proc_tlm_pkt.h" // Function definition
-#include "gc_read_buffer.h"
+#include "gc_open_port.h"    // Open port function declaration
+#include "gc_proc_tlm_pkt.h" // Process packet function declaration
+#include "gc_read_port.h"    // Read port function declaration
 
-void main(int argc, char const *argv[])
-{
-	// Open port:
+void main(int argc, char const *argv[]) {
+    // Open port:
     int fd = gc_open_port("/dev/pts/2");
 
     // Allocate buffer:
     char* buffer = malloc(1080*sizeof(char));
         
     // Read from port forever:
-    do {
-    	// Read from port:
-	    buffer = gc_read_buffer(fd,buffer);
+    while(1) {
+        // Read from port:
+        buffer = gc_read_port(fd,buffer);
 
-	    // Process telemetry packet:
-	    gc_proc_tlm_pkt(buffer);
-    } while (-1);
+        // Process telemetry packet:
+        gc_proc_tlm_pkt(buffer);
+    }
 
-	return;
+    // Will never reach this:
+    return;
 }

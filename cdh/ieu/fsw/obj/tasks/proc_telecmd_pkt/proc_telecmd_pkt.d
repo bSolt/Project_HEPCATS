@@ -1,7 +1,8 @@
 /home/xenomai/fsw/obj/tasks/proc_telecmd_pkt/proc_telecmd_pkt.o: \
  /home/xenomai/fsw/src/tasks/proc_telecmd_pkt/proc_telecmd_pkt.c \
- /usr/xenomai/include/cobalt/stdio.h /usr/xenomai/include/cobalt/stdlib.h \
+ /usr/xenomai/include/cobalt/stdlib.h \
  /usr/xenomai/include/cobalt/unistd.h /usr/xenomai/include/alchemy/task.h \
+ /usr/xenomai/include/xeno_config.h \
  /usr/xenomai/include/boilerplate/list.h \
  /usr/xenomai/include/boilerplate/scope.h \
  /usr/xenomai/include/boilerplate/shared-list.h \
@@ -29,10 +30,10 @@
  /home/xenomai/fsw/include/msg_queues.h /home/xenomai/fsw/include/sems.h
 :
 /home/xenomai/fsw/src/tasks/proc_telecmd_pkt/proc_telecmd_pkt.c:
-/usr/xenomai/include/cobalt/stdio.h:
 /usr/xenomai/include/cobalt/stdlib.h:
 /usr/xenomai/include/cobalt/unistd.h:
 /usr/xenomai/include/alchemy/task.h:
+/usr/xenomai/include/xeno_config.h:
 /usr/xenomai/include/boilerplate/list.h:
 /usr/xenomai/include/boilerplate/scope.h:
 /usr/xenomai/include/boilerplate/shared-list.h:

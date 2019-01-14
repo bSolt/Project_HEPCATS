@@ -29,9 +29,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 // Standard libraries:
-#include <stdio.h>   // Standard input/output definitions
 #include <stdlib.h>  // Standard library
-#include <string.h>  // String function definitions
 #include <unistd.h>  // UNIX standard function definitions
 #include <errno.h>   // Error number definitions
 #include <stdint.h>  // Standard integer types
@@ -43,37 +41,37 @@
 #include <alchemy/sem.h>   // Semaphore services
 
 // Header files:
-#include <open_port.h> // Open serial port function declaration
+#include <open_port.h>  // Open serial port function declaration
 #include <msg_queues.h> // Message queue variable declarations
 #include <sems.h>       // Semaphore variable declarations
 
+// Macro definitions:
+#define TELECMD_PKT_SIZE 20 // Telecommand packet size in bytes
+#define B2400 0000013       // Baud rate (as defined in terminos.h)
+
 // Message queue definitions:
-RT_QUEUE telecmd_msg_queue; // For command transfer packets
-                            // (rx_telecmd_pkt_task --> proc_telecmd_pkt_task)
+RT_QUEUE telecmd_pkt_msg_queue; // For telecommand packets
+                                // (rx_telecmd_pkt_task 
+                                // --> proc_telecmd_pkt_task)
 
 // Semaphore definitions:
 RT_SEM telecmd_pkt_sem; // For rx_telecmd_pkt_task and proc_telecmd_pkt_task
                         // task synchronization
 
-// Macro definitions:
-#define B2400 0000013 // Baud rate (as defined in terminos.h)
-
-void rx_telecmd_pkt(void* arg){
+void rx_telecmd_pkt(void* arg) {
     // Print:
     rt_printf("%d (RX_TELECMD_PKT_TASK) Task started\n",time(NULL));
 
-    // Initialize:
-    uint8_t debug_flg = 1;         // Debug flag
-    int8_t fd;                     // File descriptor
-    int8_t ret_val;                // Function return value
-    uint8_t telecmd_pkt_size = 17; // Packet size in bytes
-    uint8_t bytes_left = \
-        telecmd_pkt_size;          // Bytes left to read
-    uint8_t bytes_read = 0;        // Bytes read
-    char buf[telecmd_pkt_size];    // Buffer
+    // Definitions and initializations:
+    int8_t fd;      // File descriptor for port
+    int8_t ret_val; // Function return value
 
-    // Define uplink serial port:
-    char* port = "/dev/pts/5";
+    char* port = "/dev/pts/5"; // Uplink serial port
+
+    char telecmd_pkt_buf[TELECMD_PKT_SIZE]; // Buffer for telecommand packet
+
+    uint8_t bytes_left = TELECMD_PKT_SIZE; // Bytes left to read from port
+    uint8_t bytes_read = 0;                // Bytes read from port
 
     // Open port:
     fd = open_port(port,B2400);
@@ -100,16 +98,15 @@ void rx_telecmd_pkt(void* arg){
 
     // Print:
     rt_printf("%d (RX_TELECMD_PKT_TASK)"
-        " Telecommand packet processor task ready."
-        " Continuing...\n",time(NULL));
+        " Telecommand packet processor task ready;"
+        " continuing...\n",time(NULL));
 
     // Infinite loop to read uplink serial port for telecommand packets:
     while(1) {
         // Loop to read full telecommand packet:
         while (bytes_left > 0 ) {
             // Read from port:
-            // returns number of bytes read)
-            ret_val = read(fd,&buf,bytes_left); 
+            ret_val = read(fd,&telecmd_pkt_buf[bytes_read],bytes_left);
 
             // Check to see if entire packet is received:
             if (ret_val > 0) {
@@ -119,19 +116,20 @@ void rx_telecmd_pkt(void* arg){
             } else {
                 // Print:
                 rt_printf("%d (RX_TELECMD_PKT_TASK)"
-                    "Error reading uplink port\n",time(NULL));
+                    " Error reading uplink serial port\n",time(NULL));
                 // NEED ERROR HANDLING
             }
         }
 
         // Print:
         rt_printf("%d (RX_TELECMD_PKT_TASK)"
-                    " Telecommand packet received\n",time(NULL));
+                    " Telecommand packet received from uplink serial"
+                    " port\n",time(NULL));
 
         // Send telecommand packet to telecommand packet processor task 
         // via message que:
-        ret_val = rt_queue_write(&telecmd_msg_queue,&buf,\
-            telecmd_pkt_size,Q_NORMAL); // Append message to queue
+        ret_val = rt_queue_write(&telecmd_pkt_msg_queue,&telecmd_pkt_buf,\
+            TELECMD_PKT_SIZE,Q_NORMAL); // Append message to queue
 
         // Check success:
         if (ret_val > 0) {
@@ -144,7 +142,7 @@ void rx_telecmd_pkt(void* arg){
         }
 
         // Reset counters:
-        bytes_left = telecmd_pkt_size; // Bytes left to read
+        bytes_left = TELECMD_PKT_SIZE; // Bytes left to read
         bytes_read = 0;                // Bytes read
     }
 

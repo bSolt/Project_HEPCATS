@@ -1,6 +1,5 @@
 /home/xenomai/fsw/obj/main/main.o: /home/xenomai/fsw/src/main/main.c \
- /usr/xenomai/include/cobalt/stdio.h /usr/xenomai/include/cobalt/stdlib.h \
- /usr/xenomai/include/cobalt/unistd.h /usr/xenomai/include/alchemy/task.h \
+ /usr/xenomai/include/alchemy/task.h /usr/xenomai/include/xeno_config.h \
  /usr/xenomai/include/boilerplate/list.h \
  /usr/xenomai/include/boilerplate/scope.h \
  /usr/xenomai/include/boilerplate/shared-list.h \
@@ -24,14 +23,10 @@
  /usr/xenomai/include/boilerplate/setup.h \
  /usr/xenomai/include/alchemy/timer.h \
  /usr/xenomai/include/alchemy/compat.h /usr/xenomai/include/trank/trank.h \
- /usr/xenomai/include/alchemy/queue.h /usr/xenomai/include/alchemy/sem.h \
- /home/xenomai/fsw/include/tasks.h /home/xenomai/fsw/include/msg_queues.h \
- /home/xenomai/fsw/include/sems.h
+ /home/xenomai/fsw/include/startup.h /home/xenomai/fsw/include/tasks.h
 /home/xenomai/fsw/src/main/main.c:
-/usr/xenomai/include/cobalt/stdio.h:
-/usr/xenomai/include/cobalt/stdlib.h:
-/usr/xenomai/include/cobalt/unistd.h:
 /usr/xenomai/include/alchemy/task.h:
+/usr/xenomai/include/xeno_config.h:
 /usr/xenomai/include/boilerplate/list.h:
 /usr/xenomai/include/boilerplate/scope.h:
 /usr/xenomai/include/boilerplate/shared-list.h:
@@ -56,8 +51,5 @@
 /usr/xenomai/include/alchemy/timer.h:
 /usr/xenomai/include/alchemy/compat.h:
 /usr/xenomai/include/trank/trank.h:
-/usr/xenomai/include/alchemy/queue.h:
-/usr/xenomai/include/alchemy/sem.h:
+/home/xenomai/fsw/include/startup.h:
 /home/xenomai/fsw/include/tasks.h:
-/home/xenomai/fsw/include/msg_queues.h:
-/home/xenomai/fsw/include/sems.h:

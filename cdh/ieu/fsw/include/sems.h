@@ -2,7 +2,7 @@
 //
 // Semaphores Header
 //
-// Semaphore variable declarations
+// Xenomai semaphore variable declarations
 //
 // -------------------------------------------------------------------------- /
 //
