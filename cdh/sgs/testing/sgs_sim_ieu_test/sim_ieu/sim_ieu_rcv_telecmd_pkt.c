@@ -31,15 +31,15 @@
 
 // Header files:
 #include "sim_ieu_open_port.h"        // Open port function declarations
-#include "sim_ieu_read_port.h"      // Read buffer function declarations
+#include "sim_ieu_read_port.h"        // Read buffer function declarations
 #include "sim_ieu_proc_telecmd_pkt.h" // Process packet function declarations
 
 void main(int argc, char const *argv[]) {
     // Open port:
-    int fd = sim_ieu_open_port("/dev/pts/3");
+    int fd = sim_ieu_open_port("/dev/pts/12");
 
     // Read from buffer:
-    char* buffer = malloc(17*sizeof(char));
+    char* buffer = malloc(20*sizeof(char));
     buffer = sim_ieu_read_port(fd,buffer);
 
     // Process telecommand packet:

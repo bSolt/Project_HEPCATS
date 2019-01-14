@@ -46,7 +46,7 @@ struct pkt_hdr {
     unsigned int pkt_seq_cnt_pkt_name: 14;  // 14 bits
 
     // Packet Length:
-    unsigned int pkt_len: 16; // 16 bits    
+    uint16_t pkt_len; // 16 bits   
 };
 
 // Packet data field structure
@@ -61,11 +61,11 @@ struct pkt_dat_fld {
     unsigned int pkt_sec_hdr_p_frc:   2; //  2 bits
 
     // Packet User (Application) Data Field:
-    unsigned int pkt_app_dat_atc_flg: 1; // 1 bit
-    unsigned int pkt_app_dat_cmd_arg:  7; // 7 bits
+    unsigned int pkt_app_dat_atc_flg:  1; // 1 bit
+    unsigned int pkt_app_dat_cmd_arg: 31; // 31 bits
 
     // Packet Error Control:
-    unsigned int pkt_err_cnt: 16; // 16 bits
+    uint16_t pkt_err_cnt; // 16 bits
 };
 
 char* gc_crt_telecmd_pkt(struct telecmd_pkt_inputs telecmd_pkt_inputs,\
@@ -111,7 +111,7 @@ char* gc_crt_telecmd_pkt(struct telecmd_pkt_inputs telecmd_pkt_inputs,\
 
     // Copy Packet Header and Data Field to buffer:
     memcpy(buffer+0,&pkt_hdr,6);
-    memcpy(buffer+6,&pkt_dat_fld,11);
+    memcpy(buffer+6,&pkt_dat_fld,14);
 
     // Return:
     return buffer;

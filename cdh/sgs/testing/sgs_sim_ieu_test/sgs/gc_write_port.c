@@ -36,10 +36,10 @@
 // Write buffer to port function
 void gc_write_port(int fd, char* buffer) {
     // Write buffer to port:
-    int bytes_sent = write(fd,buffer,17); // 17 byte telecommand packet
+    int bytes_sent = write(fd,buffer,20); // 17 byte telecommand packet
 
     // Check for success (20 bytes sent):
-    if (bytes_sent != 17) {
+    if (bytes_sent != 20) {
         // Print error message:
         printf("(GC_WRITE_BUFFER) <ERROR> Unable to write: %d, %d\n",\
             bytes_sent,errno);

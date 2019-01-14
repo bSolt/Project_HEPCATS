@@ -71,7 +71,7 @@ struct telecmd_pkt_inputs gc_interp_cmd_str(char* cmd_str_arr[]) {
         // Command parameter flag is not set:
         if (i == 9) {
             // Set Application Data to idle:
-            telecmd_pkt_inputs.pkt_app_dat_cmd_arg = 0xFF; // All '1's 
+            telecmd_pkt_inputs.pkt_app_dat_cmd_arg = 0x7FFFFFFF; // "1"s 
         }
     }
 

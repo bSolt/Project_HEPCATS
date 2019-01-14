@@ -61,7 +61,7 @@ struct pkt_dat_fld {
     uint8_t pkt_usr_dat[1064]; // 1064 bytes
 
     // Packet Error Control:
-    uint16_t pkt_err_cnt: 16; // 16 bits
+    uint16_t pkt_err_cnt; // 16 bits
 };
 
 char* sim_ieu_crt_tlm_pkt(char* buffer) {

@@ -35,7 +35,7 @@
 
 char* sim_ieu_read_port(int fd,char* buffer) {
     // Definitions and initilizations: 
-    int buffer_size = 17; // 17 byte telecommand packet
+    int buffer_size = 20; // 20 byte telecommand packet
     int bytes_received;
     int bytes_read = 0;
     int bytes_to_read = buffer_size;

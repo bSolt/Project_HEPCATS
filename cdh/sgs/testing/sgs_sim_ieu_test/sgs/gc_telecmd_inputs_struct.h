@@ -23,11 +23,11 @@ struct telecmd_pkt_inputs {
     uint16_t pkt_name;
 
     // Packet Secondary Header:
-    uint32_t pkt_sec_hdr_t_sec;  //  32 bits
-    uint16_t pkt_sec_hdr_t_msec; //  16 bits
-    uint8_t  pkt_sec_hdr_t_void; //  8 bits
+    uint32_t pkt_sec_hdr_t_sec;
+    uint16_t pkt_sec_hdr_t_msec;
+    uint8_t pkt_sec_hdr_t_void;
 
     // Packet Data Field:
     uint8_t pkt_app_dat_atc_flg;
-    uint8_t pkt_app_dat_cmd_arg;
+    uint32_t pkt_app_dat_cmd_arg;
 };

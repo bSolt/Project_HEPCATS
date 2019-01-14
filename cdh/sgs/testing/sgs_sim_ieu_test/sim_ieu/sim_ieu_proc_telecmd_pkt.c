@@ -49,8 +49,8 @@ void sim_ieu_proc_telecmd_pkt(char* buffer) {
     memcpy(&pkt_dat_fld_sec_hdr_t_fld_sec,buffer+6,4);   // 4 byte of buffer  (offset 6)
     memcpy(&pkt_dat_fld_sec_hdr_t_fld_msec,buffer+10,2); // 2 byte of buffer  (offset 10)
     memcpy(&pkt_dat_fld_sec_hdr_p_fld,buffer+13,1);      // 1 byte of buffer  (offset 13)
-    memcpy(&pkt_dat_fld_app_dat,buffer+14,1);            // 1 bytes of buffer (offset 14)
-    memcpy(&pkt_dat_fld_pkt_err_cnt,buffer+15,2);        // 2 bytes of buffer (offset 15)
+    memcpy(&pkt_dat_fld_app_dat,buffer+14,4);            // 4 bytes of buffer (offset 14)
+    memcpy(&pkt_dat_fld_pkt_err_cnt,buffer+18,2);        // 2 bytes of buffer (offset 18)
 
     // Packet Header Identification:
     uint8_t pkt_id_vrs;
@@ -117,13 +117,13 @@ void sim_ieu_proc_telecmd_pkt(char* buffer) {
     pkt_p_fld_frc = pkt_p_fld_frc >> 6;               // Shift right by 5 bits
 
     // Packet Data Field Application Data
-    uint8_t pkt_app_dat = pkt_dat_fld_app_dat;
+    uint32_t pkt_app_dat = pkt_dat_fld_app_dat;
     uint8_t pkt_app_dat_atc_flg;
-    uint8_t pkt_app_dat_cmd_arg;
+    uint32_t pkt_app_dat_cmd_arg;
 
     pkt_app_dat_atc_flg = pkt_app_dat & 0x01; // Mask to keep bit 0
 
-    pkt_app_dat_cmd_arg = pkt_app_dat & 0xFE; // Mast to keep bits 1-7
+    pkt_app_dat_cmd_arg = pkt_app_dat & 0xFFFFFFFE; // Mask to keep bits 1-31
     pkt_app_dat_cmd_arg = pkt_app_dat_cmd_arg >> 1; // Shift right by 1 bit
 
     // Packet Data Field Packet Error Control:

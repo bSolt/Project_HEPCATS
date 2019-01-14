@@ -45,11 +45,11 @@ void gc_macro_cmd(char* cmd_str_arr[]) {
         gc_interp_cmd_str(cmd_str_arr);
 
     // Create telecommand packet:
-    char* buffer = malloc(17*sizeof(char));
+    char* buffer = malloc(20*sizeof(char));
     buffer = gc_crt_telecmd_pkt(telecmd_pkt_inputs,buffer);
 
     // Open port:
-    int fd = gc_open_port("/dev/pts/2");
+    int fd = gc_open_port("/dev/pts/11");
 
     // Write buffer to port:
     gc_write_port(fd, buffer);

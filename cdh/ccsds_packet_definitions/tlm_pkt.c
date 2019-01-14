@@ -21,10 +21,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 // Standard libraries:
-#include <stdio.h>   // Standard input/output definitions
-#include <stdlib.h>  // Standard library
-#include <string.h>  // String function definitions
-#include <unistd.h>  // UNIX standard function definitions
 #include <stdint.h>  // Standard time function definitions
 
 // Packet header structure:
