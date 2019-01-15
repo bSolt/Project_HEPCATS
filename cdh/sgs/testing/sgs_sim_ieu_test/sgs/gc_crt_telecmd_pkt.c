@@ -87,7 +87,7 @@ char* gc_crt_telecmd_pkt(struct telecmd_pkt_inputs telecmd_pkt_inputs,\
         telecmd_pkt_inputs.pkt_name;
 
     // Populate packet length field:
-    pkt_hdr.pkt_len = 10; // "C" (Octets in packet data field - 1)
+    pkt_hdr.pkt_len = 13; // "C" (Octets in packet data field - 1)
 
     // Populate packet secondary header T fields:
     pkt_dat_fld.pkt_sec_hdr_t_sec  = telecmd_pkt_inputs.pkt_sec_hdr_t_sec;
