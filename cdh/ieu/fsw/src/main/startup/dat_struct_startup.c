@@ -45,12 +45,14 @@ RT_QUEUE telecmd_pkt_msg_queue; // For command transfer frames
                                 // (rx_telecmd_pkt_task 
                                 //  --> proc_telecmd_pkt_task)
 RT_QUEUE cmd_xfr_frm_msg_queue; // For command transfer frames
-                                // (proc_telecmd_pkt_task --> cmd_exec_task)
+                                // (proc_telecmd_pkt_task/cmd_sched_task
+                                //  --> exec_cmd_task)
 
 // Semaphore definitions:
 RT_SEM telecmd_pkt_sem; // For rx_telecmd_pkt_task and proc_telecmd_pkt_task
                         // task synchronization
-
+RT_SEM cmd_xfr_frm_sem; // For proc_telecmd_pkt_task and exec_cmd task
+                        // synchronization
 
 // Create message queues and message pipes
 void crt_msg_queues_pipes() {
@@ -82,6 +84,7 @@ void crt_sems() {
 
     // Create semaphores:
     rt_sem_create(&telecmd_pkt_sem,"telecmd_pkt_sem",0,S_FIFO);
+    rt_sem_create(&cmd_xfr_frm_sem,"cmd_xfr_frm_sem",0,S_FIFO);
 
     // Print:
     rt_printf("%d (STARTUP/CRT_SEMS)"

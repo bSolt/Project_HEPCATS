@@ -42,15 +42,17 @@
 RT_TASK rx_telecmd_pkt_task;   // Receive telecommand packet from uplink
                                // serial port
 RT_TASK proc_telecmd_pkt_task; // Process telecommand packet
+RT_TASK exec_cmd_task;         // Execute command
 
 // Create tasks
-void crt_tasks(void){
+void crt_tasks(void) {
     // Print:
     rt_printf("%d (STARTUP/CRT_TASKS) Creating all tasks\n",time(NULL));
 
     // Create tasks:
     rt_task_create(&rx_telecmd_pkt_task,"rx_telecmd_pkt_task",0,50,T_JOINABLE);
     rt_task_create(&proc_telecmd_pkt_task,"proc_telecmd_pkt_task",0,50,0);
+    rt_task_create(&exec_cmd_task,"exec_cmd_task",0,50,0);
 
     // Print:
     rt_printf("%d (STARTUP/CRT_TASKS) All tasks created\n",time(NULL));
@@ -66,6 +68,7 @@ void str_tasks(void){
     // Start tasks:
     rt_task_start(&rx_telecmd_pkt_task,&rx_telecmd_pkt,0);
     rt_task_start(&proc_telecmd_pkt_task,&proc_telecmd_pkt,0);
+    rt_task_start(&exec_cmd_task,&exec_cmd,0);
 
     // Print:
     rt_printf("%d (STARTUP/STR_TASKS) All tasks started\n",time(NULL));

@@ -16,9 +16,8 @@
 
 // Message queue declarations:
 extern RT_QUEUE telecmd_pkt_msg_queue; // For telecommand packets
-                                       // (rx_telecmd_pkt_task 
+                                       // (rx_telecmd_pkt_task
                                        //  --> proc_telecmd_pkt_task)
-
 extern RT_QUEUE cmd_xfr_frm_msg_queue; // For command transfer frames
-									   // (proc_telecmd_pkt_task 
-									   //  --> cmd_exec_task)
+                                       // (proc_telecmd_pkt_task/cmd_sched_task
+                                       //  --> exec_cmd_task)

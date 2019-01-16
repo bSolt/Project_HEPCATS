@@ -1,18 +1,18 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // SGS and Simulated IEU Communication Test
-// 
+//
 // Create telecommand packet
 //
 // -------------------------------------------------------------------------- /
 //
 // Input Arguments:
-// - telecmd_pkt_inputs (APID, Packet Name, Packet Secondary Header, 
+// - telecmd_pkt_inputs (APID, Packet Name, Packet Secondary Header,
 //                       and Application Data)
 //
 // Output Arguments:
 // - buffer
-// 
+//
 // -------------------------------------------------------------------------- /
 //
 // Benjamin Spencer
@@ -20,7 +20,7 @@
 // Project HEPCATS
 // Subsystem: C&DH
 // Created: November 4, 2018
-// 
+//
 ///////////////////////////////////////////////////////////////////////////////
 
 // Standard libraries:
@@ -46,7 +46,7 @@ struct pkt_hdr {
     unsigned int pkt_seq_cnt_pkt_name: 14;  // 14 bits
 
     // Packet Length:
-    uint16_t pkt_len; // 16 bits   
+    uint16_t pkt_len; // 16 bits
 };
 
 // Packet data field structure
@@ -81,13 +81,13 @@ char* gc_crt_telecmd_pkt(struct telecmd_pkt_inputs telecmd_pkt_inputs,\
     pkt_hdr.pkt_id_apid = \
         telecmd_pkt_inputs.pkt_apid;
 
-    // Populate packet sequence control fields: 
-    pkt_hdr.pkt_seq_cnt_grp_flg  =  3; // "11" (unsegmented data) 
+    // Populate packet sequence control fields:
+    pkt_hdr.pkt_seq_cnt_grp_flg  =  3; // "11" (unsegmented data)
     pkt_hdr.pkt_seq_cnt_pkt_name = \
         telecmd_pkt_inputs.pkt_name;
 
     // Populate packet length field:
-    pkt_hdr.pkt_len = 10; // "C" (Octets in packet data field - 1)
+    pkt_hdr.pkt_len = 13; // "C" (Octets in packet data field - 1)
 
     // Populate packet secondary header T fields:
     pkt_dat_fld.pkt_sec_hdr_t_sec  = telecmd_pkt_inputs.pkt_sec_hdr_t_sec;
@@ -99,7 +99,7 @@ char* gc_crt_telecmd_pkt(struct telecmd_pkt_inputs telecmd_pkt_inputs,\
     pkt_dat_fld.pkt_sec_hdr_p_id  = 2; // "010" (time code I.D.)
     pkt_dat_fld.pkt_sec_hdr_p_bas = 3; // "11"  (Number of octets of the basic
                                        //        time unit minus one)
-    pkt_dat_fld.pkt_sec_hdr_p_frc = 2; // "10"  (Number of octets of the 
+    pkt_dat_fld.pkt_sec_hdr_p_frc = 2; // "10"  (Number of octets of the
                                        //        fractional time unit)
 
     // Populate user data field:

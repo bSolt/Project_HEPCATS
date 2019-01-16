@@ -47,12 +47,12 @@
 
 // Macro definitions:
 #define TELECMD_PKT_SIZE 20 // Telecommand packet size in bytes
-#define B2400 0000013       // Baud rate (as defined in terminos.h)
+#define B2400       0000013 // Baud rate (as defined in terminos.h)
 
 // Message queue definitions:
 RT_QUEUE telecmd_pkt_msg_queue; // For telecommand packets
                                 // (rx_telecmd_pkt_task 
-                                // --> proc_telecmd_pkt_task)
+                                //  --> proc_telecmd_pkt_task)
 
 // Semaphore definitions:
 RT_SEM telecmd_pkt_sem; // For rx_telecmd_pkt_task and proc_telecmd_pkt_task
@@ -61,6 +61,19 @@ RT_SEM telecmd_pkt_sem; // For rx_telecmd_pkt_task and proc_telecmd_pkt_task
 void rx_telecmd_pkt(void* arg) {
     // Print:
     rt_printf("%d (RX_TELECMD_PKT_TASK) Task started\n",time(NULL));
+
+    // Task synchronize with proc_telecmd_pkt_task
+    // (Wait for task to be ready to receive and process packets)
+    rt_printf("%d (RX_TELECMD_PKT_TASK) Waiting for process telecommand"
+        " packet task to be ready\n",time(NULL));
+    
+    // Wait for signal:
+    rt_sem_p(&telecmd_pkt_sem,TM_INFINITE);
+
+    // Print:
+    rt_printf("%d (RX_TELECMD_PKT_TASK)"
+        " Process telecommand packet task is ready"
+        " ; continuing...\n",time(NULL));
 
     // Definitions and initializations:
     int8_t fd;      // File descriptor for port
@@ -88,18 +101,9 @@ void rx_telecmd_pkt(void* arg) {
         // NEED ERROR HANDLING
     }
 
-    // Task synchronize with proc_telecmd_pkt_task
-    // (Wait for task to be ready to receive and process packets)
-    rt_printf("%d (RX_TELECMD_PKT_TASK)"
-        " Waiting for telecommand packet processor\n",time(NULL));
-    
-    // Wait for signal:
-    rt_sem_p(&telecmd_pkt_sem,TM_INFINITE);
-
-    // Print:
-    rt_printf("%d (RX_TELECMD_PKT_TASK)"
-        " Telecommand packet processor task ready;"
-        " continuing...\n",time(NULL));
+    // Print 
+    rt_printf("%d (RX_TELECMD_PKT_TASK) Ready to receive telecommand packets"
+        " on uplink serial port\n",time(NULL));
 
     // Infinite loop to read uplink serial port for telecommand packets:
     while(1) {
@@ -134,8 +138,7 @@ void rx_telecmd_pkt(void* arg) {
         // Check success:
         if (ret_val > 0) {
             // Print:
-            rt_printf("%d (RX_TELECMD_PKT_TASK)"
-                    " Telecommand packet sent to"
+            rt_printf("%d (RX_TELECMD_PKT_TASK) Telecommand packet sent to"
                     " processor task\n",time(NULL));
         } else {
             // NEED ERROR HANDLING
