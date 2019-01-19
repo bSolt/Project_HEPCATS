@@ -58,6 +58,11 @@
 
 // Macro definitions:
 #define CMD_XFR_FRM_SIZE 15 // Command transfer frame size in bytes
+#define ATC_FLG_T         1 // ATC flag value indicating that the command is
+                            // absolutely timed (true)
+#define ATC_FLG_F         0 // ATC flag value indicating that the command is
+                            // to execute now (false)
+#define DEST_SW_APID   0x01 // Software APID
 
 // Message queue definitions:
 RT_QUEUE cmd_xfr_frm_msg_queue; // For command transfer frames
@@ -83,7 +88,7 @@ void exec_cmd(void* arg) {
     uint32_t cmd_arg;		     // Command arguments
 
     char cmd_xfr_frm_buf[CMD_XFR_FRM_SIZE]; // Buffer for command transfer
-                                             // frame
+                                            // frame
 
     // Task synchronize with proc_telecmd_pkt task
     // (tell task that it is now ready to receive frames)
@@ -94,12 +99,11 @@ void exec_cmd(void* arg) {
     rt_sem_v(&cmd_xfr_frm_sem);
 
     // Infinte loop receive command transfer frames from telecommand processor
-    // task or the command scheduler. // When a command transfer frame is
+    // task or the command scheduler. When a command transfer frame is
     // received from the message queue, the ATC flag is checked to determine
-    // if command is to be executed now or is absolutely timed. If ATC
-    // flag = 1, then the command is executed now (following a sanity check on
-    // the command execution time). If ATC flag = 0, them the command transfer
-    // frame is sent to the command scheduler.
+    // if command is to be executed now or is absolutely timed (execute later).
+    // If ATC flag = 0, then the command transfer frame is sent to the command
+    // scheduler.
     while(1) {
     	// Read command transfer frames from message queue:
         ret_val = rt_queue_read(&cmd_xfr_frm_msg_queue,&cmd_xfr_frm_buf,\
@@ -125,6 +129,38 @@ void exec_cmd(void* arg) {
         memcpy(&cmd_exec_time_sec,cmd_xfr_frm_buf+5,4);
         memcpy(&cmd_exec_time_msec,cmd_xfr_frm_buf+9,2);
         memcpy(&cmd_arg,cmd_xfr_frm_buf+11,4);
+    
+        // Print:
+        rt_printf("%d (EXEC_CMD_TASK) Checking command execution"
+            " time\n",time(NULL));
+
+        // Check for ATC flag. If ATC flag = 0, then execute the command now.
+        // If ATC flag = 1, then send command transfer frame to the command
+        // scheduler task. 
+        if (cmd_atc_flg == ATC_FLG_F) {
+            // Print:
+            rt_printf("%d (EXEC_CMD_TASK) Command will execute"
+                " NOW\n",time(NULL));
+
+            // Switch to direct command to final destination by matching
+            // the command's APID to a destination's APID:
+            switch(cmd_apid) {
+                // Software
+                case DEST_SW_APID :
+                    // Print:
+                    rt_printf("%d (EXEC_CMD_TASK) Command transfer frame"
+                        " directed to APID=0x%X\n",time(NULL),DEST_SW_APID);
+            } 
+        } else if (cmd_atc_flg == ATC_FLG_T) {
+            // Print:
+            rt_printf("%d (EXEC_CMD_TASK) Command is absolutely"
+                " timed; sending command to command scheduler\n",time(NULL));
+        } else {
+            // Print:
+            rt_printf("%d (EXEC_CMD_TASK) Invalid absolutely timed command" 
+                " flag; ignoring command\n",time(NULL));
+        }
+
     }
     // Will never reach this:
     return;

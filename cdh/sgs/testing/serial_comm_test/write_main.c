@@ -49,7 +49,7 @@ void main(int argc, char const *argv[])
 	unsigned char buffer[3]; // Buffer 3 bytes in size
 
 	// Define port name:
-	char* port = "/dev/pts/2"; // Will have to update!!
+	char* port = "/dev/ttyUSB0"; // Will have to update!!
 
 	// Open and configure port:
 	int fd = open_port(port);

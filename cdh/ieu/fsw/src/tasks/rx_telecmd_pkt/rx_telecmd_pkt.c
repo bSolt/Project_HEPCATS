@@ -71,9 +71,8 @@ void rx_telecmd_pkt(void* arg) {
     rt_sem_p(&telecmd_pkt_sem,TM_INFINITE);
 
     // Print:
-    rt_printf("%d (RX_TELECMD_PKT_TASK)"
-        " Process telecommand packet task is ready"
-        " ; continuing...\n",time(NULL));
+    rt_printf("%d (RX_TELECMD_PKT_TASK) Process telecommand packet task is" 
+        " ready; continuing\n",time(NULL));
 
     // Definitions and initializations:
     int8_t fd;      // File descriptor for port
@@ -141,6 +140,9 @@ void rx_telecmd_pkt(void* arg) {
             rt_printf("%d (RX_TELECMD_PKT_TASK) Telecommand packet sent to"
                     " processor task\n",time(NULL));
         } else {
+            // Print:
+            rt_printf("%d (RX_TELECMD_PKT_TASK) Error sending telecommand"
+                " packet sent to processor task\n",time(NULL));
             // NEED ERROR HANDLING
         }
 

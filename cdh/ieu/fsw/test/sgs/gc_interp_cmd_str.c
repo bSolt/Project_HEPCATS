@@ -48,7 +48,7 @@ struct telecmd_pkt_inputs gc_interp_cmd_str(char* cmd_str_arr[]) {
     int cmd_time_str_ind;
 
     // Check for correct external element "hepcat":
-    if (strcmp("hepcats",cmd_str_arr[1]) == 1) {        
+    if (strcmp("hepcats",cmd_str_arr[1]) == 1) {
         // Print error message
         printf("(GC_CMD_STR_INTERP) <ERROR> \"%s\" external element"
             " not recognized\n",cmd_str_arr[1]);
@@ -58,7 +58,7 @@ struct telecmd_pkt_inputs gc_interp_cmd_str(char* cmd_str_arr[]) {
     }
 
     // Get APID and Packet Name for command mnemonic:
-    telecmd_pkt_inputs.pkt_apid = 0; // PLACEHOLDER
+    telecmd_pkt_inputs.pkt_apid = 0x01; // PLACEHOLDER
     telecmd_pkt_inputs.pkt_name = 0; // PLACEHOLDER
 
     // Check for command parameter:

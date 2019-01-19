@@ -68,6 +68,9 @@
 #define EXP_PKT_ERR_CNT  65535 // Expected telecommand packet error control
 #define EXP_PKT_CMD_ARG_RNG \
     2147483647                 // Expected telecommand packet argument range
+#define CMD_EXEC_TM_TOL    -20 // Telecommand packet execution time tolerance
+                               // (will not except packet if execution time is
+                               //  in this past by more than this many seconds)
 #define EXP_PKT_P_EXT        0 // Expected telecommand packet p-field 
                                // extension flag
 #define EXP_PKT_P_ID         2 // Expected telecommand packet p-field
@@ -103,7 +106,7 @@ void proc_telecmd_pkt(void) {
 
     // Print:
     rt_printf("%d (PROC_TELECMD_PKT_TASK)"
-        " Execute command task is ready; continuing...\n",time(NULL));
+        " Execute command task is ready; continuing\n",time(NULL));
 
     // Definitions and initializations:
     int8_t ret_val; // Function return value
@@ -167,9 +170,8 @@ void proc_telecmd_pkt(void) {
     // task via message queue. If it is not valid, it is not processed and a
     // command transfer frame is not created. This is done using goto and
     // labels: read_telecmd_pkt and inv_pkt. The read_telecmd_pkt is the "top
-    // of the loop" label. inv_pkt label is the "bottom of the loop" label and
-    // only reached if a data field is not what is expected (either exact value
-    // or range).
+    // of the loop" label. inv_pkt label is only reached if one data field is
+    // not what is expected (either exact value or range).
     while(1) {
         // "Top of the loop" Label:
         read_telecmd_pkt:
@@ -208,6 +210,10 @@ void proc_telecmd_pkt(void) {
         // packet. If a value does not match what is expected (either range
         // or exact value, go to inv_pkt label to ignore telecommand packet
         // and skip further processing.
+
+        // Print:
+        rt_printf("%d (PROC_TELECMD_PKT_TASK) Processing telecommand"
+            " packet\n",time(NULL));
 
         // Packet I.D. version:
         pkt_id_vrs = pkt_hdr_pkt_id & 0x07; // Mask to keep bits 0-2
@@ -288,10 +294,23 @@ void proc_telecmd_pkt(void) {
         pkt_t_fld_sec = pkt_dat_fld_sec_hdr_t_fld_sec;
         pkt_t_fld_msec = pkt_dat_fld_sec_hdr_t_fld_msec;
 
+        // Check packet T-field for a command execution time in the past by
+        // a specificed tolerance. Will not accept packet if execution time is
+        // in this past by more than this many seconds. If true, go to 
+        // invalid packet label:
+        if ((pkt_t_fld_sec - time(NULL)) < CMD_EXEC_TM_TOL) {
+            // Print:
+            rt_printf("%d (PROC_TELECMD_PKT_TASK) Command execution time is" 
+                " in the past by %d seconds \n",time(NULL),(pkt_t_fld_sec - time(NULL)));
+
+            // Goto invalid packet:
+            goto inv_pkt;
+        }
+
         // Packet secondary header P-field extension:
         pkt_p_fld_ext = pkt_dat_fld_sec_hdr_p_fld & 0x0; // Mask to keep bit 0
 
-        // Check packet p-field extension flag for expected value. If true, 
+        // Check packet P-field extension flag for expected value. If true, 
         // go to invalid packet label:
         if (pkt_p_fld_ext != EXP_PKT_P_EXT) {
             // Goto invalid packet:
@@ -303,7 +322,7 @@ void proc_telecmd_pkt(void) {
                                                         // bits 1-3
         pkt_p_fld_id = pkt_p_fld_id >> 1;               // Shift right by 1 bit
 
-        // Check packet p-field extension identification for expected value. 
+        // Check packet P-field extension identification for expected value. 
         // If true, go to invalid packet label:
         if (pkt_p_fld_id != EXP_PKT_P_ID) {
             // Goto invalid packet:
@@ -397,6 +416,9 @@ void proc_telecmd_pkt(void) {
             rt_printf("%d (PROC_TELECMD_PKT_TASK) Command transfer frame" 
             " sent to execute command task\n",time(NULL));
         } else {
+            // Print:
+            rt_printf("%d (PROC_TELECMD_PKT_TASK) Error sending command"
+                " transfer frame to execute command task\n",time(NULL));
             // NEED ERROR HANDLING
         }
 
