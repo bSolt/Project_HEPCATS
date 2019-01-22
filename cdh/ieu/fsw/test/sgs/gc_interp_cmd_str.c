@@ -58,8 +58,8 @@ struct telecmd_pkt_inputs gc_interp_cmd_str(char* cmd_str_arr[]) {
     }
 
     // Get APID and Packet Name for command mnemonic:
-    telecmd_pkt_inputs.pkt_apid = 0x01; // PLACEHOLDER
-    telecmd_pkt_inputs.pkt_name = 0; // PLACEHOLDER
+    telecmd_pkt_inputs.pkt_apid = 0xC8; // PLACEHOLDER
+    telecmd_pkt_inputs.pkt_name = 0x00; // PLACEHOLDER
 
     // Check for command parameter:
     for (i = 0; i < 10; ++i) {

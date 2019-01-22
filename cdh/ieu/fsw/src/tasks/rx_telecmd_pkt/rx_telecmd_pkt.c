@@ -55,8 +55,8 @@ RT_QUEUE telecmd_pkt_msg_queue; // For telecommand packets
                                 //  --> proc_telecmd_pkt_task)
 
 // Semaphore definitions:
-RT_SEM telecmd_pkt_sem; // For rx_telecmd_pkt_task and proc_telecmd_pkt_task
-                        // task synchronization
+RT_SEM rx_telecmd_pkt_sem; // For rx_telecmd_pkt_task and proc_telecmd_pkt_task
+                           // task synchronization
 
 void rx_telecmd_pkt(void* arg) {
     // Print:
@@ -68,7 +68,7 @@ void rx_telecmd_pkt(void* arg) {
         " packet task to be ready\n",time(NULL));
     
     // Wait for signal:
-    rt_sem_p(&telecmd_pkt_sem,TM_INFINITE);
+    rt_sem_p(&rx_telecmd_pkt_sem,TM_INFINITE);
 
     // Print:
     rt_printf("%d (RX_TELECMD_PKT_TASK) Process telecommand packet task is" 

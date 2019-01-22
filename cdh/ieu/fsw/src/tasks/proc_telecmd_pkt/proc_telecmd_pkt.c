@@ -89,8 +89,11 @@ RT_QUEUE cmd_xfr_frm_msg_queue; // For command transfer frames
                                 //  --> exec_cmd_task)
 
 // Semaphore definitions:
-RT_SEM telecmd_pkt_sem; // For rx_telecmd_pkt_task and proc_telecmd_pkt_task
-                        // task synchronization
+RT_SEM rx_telecmd_pkt_sem;   // For rx_telecmd_pkt_task and 
+                             // proc_telecmd_pkt_task task 
+                             // synchronization
+RT_SEM proc_telecmd_pkt_sem; // For proc_telecmd_pkt_task and exec_cmd 
+                             // task synchronization
 
 void proc_telecmd_pkt(void) {
     // Print:
@@ -102,7 +105,7 @@ void proc_telecmd_pkt(void) {
         " task to be ready\n",time(NULL));
 
     // Wait for signal:
-    rt_sem_p(&cmd_xfr_frm_sem,TM_INFINITE);
+    rt_sem_p(&proc_telecmd_pkt_sem,TM_INFINITE);
 
     // Print:
     rt_printf("%d (PROC_TELECMD_PKT_TASK)"
@@ -158,11 +161,11 @@ void proc_telecmd_pkt(void) {
 
     // Task synchronize with rx_telecmd_pkt task
     // (tell task that it is now ready to receive packets)
-    rt_printf("%d (PROC_TELECMD_PKT_TASK)"
-        " Ready to receive and process telecommand packets\n",time(NULL));
+    rt_printf("%d (PROC_TELECMD_PKT_TASK) Ready to process telecommand"
+        " packets\n",time(NULL));
 
     // Signal task to continue executing:
-    rt_sem_v(&telecmd_pkt_sem);
+    rt_sem_v(&rx_telecmd_pkt_sem);
 
     // Infinite loop to receive telecommand packets from receive packets task
     // and process the packets into telecommand transfer frames. If packet

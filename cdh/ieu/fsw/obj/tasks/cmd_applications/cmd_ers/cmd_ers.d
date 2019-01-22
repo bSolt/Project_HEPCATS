@@ -1,4 +1,4 @@
-/home/xenomai/fsw/obj/tasks/exec_cmd/exec_cmd.o: /home/xenomai/fsw/src/tasks/exec_cmd/exec_cmd.c \
+/home/xenomai/fsw/obj/tasks/cmd_applications/cmd_ers/cmd_ers.o: /home/xenomai/fsw/src/tasks/cmd_applications/cmd_ers/cmd_ers.c \
  /usr/xenomai/include/cobalt/stdlib.h \
  /usr/xenomai/include/cobalt/unistd.h /usr/xenomai/include/alchemy/task.h \
  /usr/xenomai/include/xeno_config.h \
@@ -25,10 +25,8 @@
  /usr/xenomai/include/boilerplate/setup.h \
  /usr/xenomai/include/alchemy/timer.h \
  /usr/xenomai/include/alchemy/compat.h /usr/xenomai/include/trank/trank.h \
- /usr/xenomai/include/alchemy/queue.h /usr/xenomai/include/alchemy/sem.h \
- /home/xenomai/fsw/include/tasks.h /home/xenomai/fsw/include/msg_queues.h \
- /home/xenomai/fsw/include/sems.h
-/home/xenomai/fsw/src/tasks/exec_cmd/exec_cmd.c:
+ /usr/xenomai/include/alchemy/sem.h /home/xenomai/fsw/include/sems.h
+/home/xenomai/fsw/src/tasks/cmd_applications/cmd_ers/cmd_ers.c:
 /usr/xenomai/include/cobalt/stdlib.h:
 /usr/xenomai/include/cobalt/unistd.h:
 /usr/xenomai/include/alchemy/task.h:
@@ -57,8 +55,5 @@
 /usr/xenomai/include/alchemy/timer.h:
 /usr/xenomai/include/alchemy/compat.h:
 /usr/xenomai/include/trank/trank.h:
-/usr/xenomai/include/alchemy/queue.h:
 /usr/xenomai/include/alchemy/sem.h:
-/home/xenomai/fsw/include/tasks.h:
-/home/xenomai/fsw/include/msg_queues.h:
 /home/xenomai/fsw/include/sems.h:
