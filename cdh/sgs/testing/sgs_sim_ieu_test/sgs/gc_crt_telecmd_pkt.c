@@ -2,7 +2,7 @@
 //
 // SGS and Simulated IEU Communication Test
 // 
-// Ground Control Create Telecommand Packet
+// Create telecommand packet
 //
 // -------------------------------------------------------------------------- /
 //
@@ -23,98 +23,96 @@
 // 
 ///////////////////////////////////////////////////////////////////////////////
 
+// Standard libraries:
 #include <stdio.h>   // Standard input/output definitions
-#include <stdlib.h>  // Standard library 
-#include <string.h>  // String function definitions 
-#include <unistd.h>  // UNIX standard function definitions 
+#include <stdlib.h>  // Standard library
+#include <string.h>  // String function definitions
+#include <unistd.h>  // UNIX standard function definitions
 #include <stdint.h>  // Integer types
 
-#include "gc_telecmd_inputs_struct.h" // Structure definition
+// Header files:
+#include "gc_telecmd_inputs_struct.h" // Structure declarations
 
 // Packet header structure
-struct pkt_hdr
-{
-	// Packet I.D.:
-	unsigned int pkt_id_vrs:          3;  //  3 bits
-	unsigned int pkt_id_typ:          1;  //  1 bit
-	unsigned int pkt_id_sec_hdr_flg:  1;  //  1 bit
-	unsigned int pkt_id_apid:        11;  // 11 bits
+struct pkt_hdr {
+    // Packet I.D.:
+    unsigned int pkt_id_vrs:          3;  //  3 bits
+    unsigned int pkt_id_typ:          1;  //  1 bit
+    unsigned int pkt_id_sec_hdr_flg:  1;  //  1 bit
+    unsigned int pkt_id_apid:        11;  // 11 bits
 
-	// Packet Sequence Control:
-	unsigned int pkt_seq_cnt_grp_flg:   2;  //  2 bits
-	unsigned int pkt_seq_cnt_pkt_name: 14;  // 14 bits
+    // Packet Sequence Control:
+    unsigned int pkt_seq_cnt_grp_flg:   2;  //  2 bits
+    unsigned int pkt_seq_cnt_pkt_name: 14;  // 14 bits
 
-	// Packet Length:
-	unsigned int pkt_len: 16; // 16 bits	
+    // Packet Length:
+    uint16_t pkt_len; // 16 bits   
 };
 
 // Packet data field structure
-struct pkt_dat_fld
-{
-	// Packet Secondary Header:
-	uint16_t pkt_sec_hdr_t_year;         // 16 bits
-	uint16_t pkt_sec_hdr_t_doy;          // 16 bits 
-	uint8_t pkt_sec_hdr_t_hour;          //  8 bits  
-	uint8_t pkt_sec_hdr_t_min;           //  8 bits
-	uint8_t pkt_sec_hdr_t_sec;           //  8 bits
-	unsigned int pkt_sec_hdr_p_ext:   1; //  1 bit
-	unsigned int pkt_sec_hdr_p_id:    3; //  3 bits
-	unsigned int pkt_sec_hdr_p_cal:   1; //  1 bit
-	unsigned int pkt_sec_hdr_p_red:   3; //  3 bits
+struct pkt_dat_fld {
+    // Packet Secondary Header:
+    uint32_t pkt_sec_hdr_t_sec;          //  32 bits
+    uint16_t pkt_sec_hdr_t_msec;         //  16 bits
+    uint8_t  pkt_sec_hdr_t_void;         //  8 bits
+    unsigned int pkt_sec_hdr_p_ext:   1; //  1 bit
+    unsigned int pkt_sec_hdr_p_id:    3; //  3 bits
+    unsigned int pkt_sec_hdr_p_bas:   2; //  2 bit
+    unsigned int pkt_sec_hdr_p_frc:   2; //  2 bits
 
-	// Packet User (Application) Data Field:
-	unsigned int pkt_app_dat_atc_flg: 1; // 1 bit
-	unsigned int pkt_app_dat_cmd_arg:  7; // 7 bits
+    // Packet User (Application) Data Field:
+    unsigned int pkt_app_dat_atc_flg:  1; // 1 bit
+    unsigned int pkt_app_dat_cmd_arg: 31; // 31 bits
 
-	// Packet Error Control:
-	unsigned int pkt_err_cnt: 16; // 16 bits
+    // Packet Error Control:
+    uint16_t pkt_err_cnt; // 16 bits
 };
 
-// Create telecommand packet function
-char* gc_crt_telecmd_pkt(struct telecmd_pkt_inputs telecmd_pkt_inputs,char* buffer)
-{
-	// Define packet structure:
-	struct pkt_hdr pkt_hdr;
-	struct pkt_dat_fld pkt_dat_fld;
+char* gc_crt_telecmd_pkt(struct telecmd_pkt_inputs telecmd_pkt_inputs,\
+    char* buffer) {
+    // Define packet structure:
+    struct pkt_hdr pkt_hdr;
+    struct pkt_dat_fld pkt_dat_fld;
 
-	// Populate packet I.D. fields:
-	pkt_hdr.pkt_id_vrs =         0; // "000" (always)
-	pkt_hdr.pkt_id_typ =         1; // "0"   (telecommand packet)
-	pkt_hdr.pkt_id_sec_hdr_flg = 1; // "1"   (not idle packet)
-	pkt_hdr.pkt_id_apid = \
-		telecmd_pkt_inputs.pkt_apid;
+    // Populate packet I.D. fields:
+    pkt_hdr.pkt_id_vrs =         0; // "000" (always)
+    pkt_hdr.pkt_id_typ =         1; // "0"   (telecommand packet)
+    pkt_hdr.pkt_id_sec_hdr_flg = 1; // "1"   (not idle packet)
+    pkt_hdr.pkt_id_apid = \
+        telecmd_pkt_inputs.pkt_apid;
 
-	// Populate packet sequence control fields: 
-	pkt_hdr.pkt_seq_cnt_grp_flg =  3; // "11" (unsegmented data) 
-	pkt_hdr.pkt_seq_cnt_pkt_name = \
-		telecmd_pkt_inputs.pkt_name;
+    // Populate packet sequence control fields: 
+    pkt_hdr.pkt_seq_cnt_grp_flg  =  3; // "11" (unsegmented data) 
+    pkt_hdr.pkt_seq_cnt_pkt_name = \
+        telecmd_pkt_inputs.pkt_name;
 
-	// Populate packet length field:
-	pkt_hdr.pkt_len = 10; // "C" (Octets in packet data field - 1)
+    // Populate packet length field:
+    pkt_hdr.pkt_len = 13; // "C" (Octets in packet data field - 1)
 
-	// Populate packet secondary header T fields:
-	pkt_dat_fld.pkt_sec_hdr_t_year = telecmd_pkt_inputs.pkt_t_year;
-	pkt_dat_fld.pkt_sec_hdr_t_doy =  telecmd_pkt_inputs.pkt_t_doy;
-	pkt_dat_fld.pkt_sec_hdr_t_hour = telecmd_pkt_inputs.pkt_t_hour;
-	pkt_dat_fld.pkt_sec_hdr_t_min =  telecmd_pkt_inputs.pkt_t_min;
-	pkt_dat_fld.pkt_sec_hdr_t_sec =  telecmd_pkt_inputs.pkt_t_sec; 
+    // Populate packet secondary header T fields:
+    pkt_dat_fld.pkt_sec_hdr_t_sec  = telecmd_pkt_inputs.pkt_sec_hdr_t_sec;
+    pkt_dat_fld.pkt_sec_hdr_t_msec = telecmd_pkt_inputs.pkt_sec_hdr_t_msec;
+    pkt_dat_fld.pkt_sec_hdr_t_void = telecmd_pkt_inputs.pkt_sec_hdr_t_void;
 
-	// Populate packet secondary header P fields:
-	pkt_dat_fld.pkt_sec_hdr_p_ext = 0; // "0"   (no extension)
-	pkt_dat_fld.pkt_sec_hdr_p_id =  5; // "101" (time code I.D.)
-	pkt_dat_fld.pkt_sec_hdr_p_cal = 1; // "1"   (DOY variation)
-	pkt_dat_fld.pkt_sec_hdr_p_red = 0; // "000" (second resolution)
+    // Populate packet secondary header P fields:
+    pkt_dat_fld.pkt_sec_hdr_p_ext = 0; // "0"   (no extension)
+    pkt_dat_fld.pkt_sec_hdr_p_id  = 2; // "010" (time code I.D.)
+    pkt_dat_fld.pkt_sec_hdr_p_bas = 3; // "11"  (Number of octets of the basic
+                                       //        time unit minus one)
+    pkt_dat_fld.pkt_sec_hdr_p_frc = 2; // "10"  (Number of octets of the 
+                                       //        fractional time unit)
 
-	// Populate user data field:
-	pkt_dat_fld.pkt_app_dat_atc_flg = telecmd_pkt_inputs.pkt_app_dat_atc_flg;
-	pkt_dat_fld.pkt_app_dat_cmd_arg = telecmd_pkt_inputs.pkt_app_dat_cmd_arg;
+    // Populate user data field:
+    pkt_dat_fld.pkt_app_dat_atc_flg = telecmd_pkt_inputs.pkt_app_dat_atc_flg;
+    pkt_dat_fld.pkt_app_dat_cmd_arg = telecmd_pkt_inputs.pkt_app_dat_cmd_arg;
 
-	// Populate packer error control field:
-	pkt_dat_fld.pkt_err_cnt = 0; // "0000000000000000" (no error detection)
+    // Populate packer error control field:
+    pkt_dat_fld.pkt_err_cnt = 0xFFFF; // "1"s (no error detection)
 
-	// Copy Packet Header and Data Field to buffer:
-	memcpy(buffer+0,&pkt_hdr,6);
-	memcpy(buffer+6,&pkt_dat_fld,11);
+    // Copy Packet Header and Data Field to buffer:
+    memcpy(buffer+0,&pkt_hdr,6);
+    memcpy(buffer+6,&pkt_dat_fld,14);
 
-	return buffer;
+    // Return:
+    return buffer;
 }

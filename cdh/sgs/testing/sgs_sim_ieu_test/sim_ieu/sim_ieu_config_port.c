@@ -13,7 +13,7 @@
 //
 // Output Arguments:
 // - N/A
-// 
+//
 // -------------------------------------------------------------------------- /
 //
 // Benjamin Spencer
@@ -21,19 +21,19 @@
 // Project HEPCATS
 // Subsystem: C&DH
 // Created: October 25, 2018
-// 
+//
 ///////////////////////////////////////////////////////////////////////////////
 
+// Standard libaries:
 #include <stdio.h>   // Standard input/output definitions
-#include <stdlib.h>  // Standard library 
-#include <string.h>  // String function definitions 
-#include <unistd.h>  // UNIX standard function definitions 
-#include <fcntl.h>   // File control definitions 
-#include <errno.h>   // Error number definitions 
+#include <stdlib.h>  // Standard library
+#include <string.h>  // String function definitions
+#include <unistd.h>  // UNIX standard function definitions
+#include <fcntl.h>   // File control definitions
+#include <errno.h>   // Error number definitions
 #include <termios.h> // POSIX terminal control definitions
 
-void sim_ieu_config_port(int fd, int speed)
-{
+void sim_ieu_config_port(int fd, int speed) {
     // Creat POSIX structure for port options:
     struct termios options;
 
@@ -68,5 +68,6 @@ void sim_ieu_config_port(int fd, int speed)
     // Set the options now:
     tcsetattr(fd,TCSANOW,&options);
 
+    // Return:
     return;
 }

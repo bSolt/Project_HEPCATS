@@ -1,1 +1,0 @@
-void sim_ieu_write_buffer(int fd, char* buffer);

@@ -16,8 +16,8 @@
 //
 // Macros defined right now:
 //     - "cmd"
-//	       - Send a command to an external element (I.E. hepcats)
-// 
+//         - Send a command to an external element (I.E. hepcats)
+//
 // -------------------------------------------------------------------------- /
 //
 // Input Arguments:
@@ -25,7 +25,7 @@
 //
 // Output Arguments:
 // - N/A
-// 
+//
 // -------------------------------------------------------------------------- /
 //
 // Benjamin Spencer
@@ -33,21 +33,22 @@
 // Project HEPCATS
 // Subsystem: C&DH
 // Created: November 6, 2018
-// 
+//
 ///////////////////////////////////////////////////////////////////////////////
 
+// Standard libraries: 
 #include <stdio.h>   // Standard input/output definitions
-#include <stdlib.h>  // Standard library 
+#include <stdlib.h>  // Standard library
 #include <stdint.h>  // Integer types
-#include <string.h>  // String function definitions 
-#include <unistd.h>  // UNIX standard function definitions 
-#include <fcntl.h>   // File control definitions 
+#include <string.h>  // String function definitions
+#include <unistd.h>  // UNIX standard function definitions
+#include <fcntl.h>   // File control definitions
 
-#include "gc_macro_cmd.h" // Function definition
+// Header files:
+#include "gc_macro_cmd.h" // Command macro function declaration
 
-void main(int argc, char const *argv[])
-{
-	// Initialize:
+void main(int argc, char const *argv[]) {
+    // Definitions and initializations:
     char* input_str_arr[10] = \
         {" "," "," "," "," "," "," "," "," "," "};
 
@@ -59,17 +60,17 @@ void main(int argc, char const *argv[])
     
     // Check to see if macro is "cmd":
     if (strcmp("cmd",input_str_arr[0]) == 0){
-		// Start command macro function:
-    	gc_macro_cmd(input_str_arr);
-		
-		// Exit:
-		return;
+        // Start command macro function:
+        gc_macro_cmd(input_str_arr);
+        
+        // Exit:
+        return;
     } 
 
     // If you get here, the macro is not recognized:
     printf("(GC_PROMPT_INTERP) <ERROR> \"%s\" macro not recognized\n",\
-    	input_str_arr[0]);
+        input_str_arr[0]);
 
     // Exit:
-	return;
+    return;
 }

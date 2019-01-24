@@ -1,1 +1,0 @@
-char* gc_read_buffer(int fd,char* buffer);
