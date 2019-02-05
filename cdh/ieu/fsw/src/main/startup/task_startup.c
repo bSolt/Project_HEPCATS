@@ -48,6 +48,14 @@ RT_TASK cmd_sw_task;           // Execute software command
 RT_TASK cmd_img_task;          // Execute imaging command
 RT_TASK cmd_mdq_task;          // Execute magnetometer DAQ command
 RT_TASK cmd_ers_task;          // Execute electrical relay switch command
+RT_TASK crt_tlm_pkt_task;      // Create telemetry packet
+RT_TASK read_usb_daq_task;     // Read magnetometer DAQ
+RT_TASK read_usb_img_task;     // Read camera
+RT_TASK flt_tbl_task;          // (Telemetry) Filter table
+RT_TASK tx_tlm_pkt_task;       // Transmit telemetry packet to downlink
+                               // serial port
+RT_TASK crt_file_task;         // Create file
+RT_TASK rtrv_file_task;        // Retrieve file for downlink
 
 // Create tasks
 void crt_tasks(void) {
@@ -59,10 +67,17 @@ void crt_tasks(void) {
     rt_task_create(&proc_telecmd_pkt_task,"proc_telecmd_pkt_task",0,50,0);
     rt_task_create(&exec_cmd_task,"exec_cmd_task",0,50,0);
     rt_task_create(&sched_cmd_task,"sched_cmd_task",0,50,0);
-    rt_task_create(&cmd_sw_task,"cmd_sw",0,50,0);
-    rt_task_create(&cmd_img_task,"cmd_img",0,50,0);
-    rt_task_create(&cmd_mdq_task,"cmd_mdq",0,50,0);
-    rt_task_create(&cmd_ers_task,"cmd_ers",0,50,0);
+    rt_task_create(&cmd_sw_task,"cmd_sw_task",0,50,0);
+    rt_task_create(&cmd_img_task,"cmd_img_task",0,50,0);
+    rt_task_create(&cmd_mdq_task,"cmd_mdq_task",0,50,0);
+    rt_task_create(&cmd_ers_task,"cmd_ers_task",0,50,0);
+    rt_task_create(&crt_tlm_pkt_task,"crt_tlm_pkt_task",0,50,0);
+    rt_task_create(&read_usb_daq_task,"read_usb_daq_task",0,50,0);
+    rt_task_create(&read_usb_img_task,"read_usb_img_task",0,50,0);
+    rt_task_create(&flt_tbl_task,"flt_tbl_task",0,50,0);
+    rt_task_create(&tx_tlm_pkt_task,"tx_tlm_pkt_task",0,50,0);
+    rt_task_create(&crt_file_task,"crt_file_task",0,50,0);
+    rt_task_create(&rtrv_file_task,"rtrv_file_task",0,50,0);
 
     // Print:
     rt_printf("%d (STARTUP/CRT_TASKS) All tasks created\n",time(NULL));
@@ -84,6 +99,13 @@ void str_tasks(void){
     rt_task_start(&cmd_img_task,&cmd_img,0);
     rt_task_start(&cmd_mdq_task,&cmd_mdq,0);
     rt_task_start(&cmd_ers_task,&cmd_ers,0);
+    rt_task_start(&crt_tlm_pkt_task,&crt_tlm_pkt,0);
+    rt_task_start(&read_usb_daq_task,&read_usb_daq,0);
+    rt_task_start(&read_usb_img_task,&read_usb_img,0);
+    rt_task_start(&flt_tbl_task,&flt_tbl,0);
+    rt_task_start(&tx_tlm_pkt_task,&tx_tlm_pkt,0);
+    rt_task_start(&crt_file_task,&crt_file,0);
+    rt_task_start(&rtrv_file_task,&rtrv_file,0);
 
     // Print:
     rt_printf("%d (STARTUP/STR_TASKS) All tasks started\n",time(NULL));

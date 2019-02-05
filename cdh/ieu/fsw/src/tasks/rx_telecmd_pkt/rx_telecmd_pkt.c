@@ -91,12 +91,12 @@ void rx_telecmd_pkt(void* arg) {
     // Check for success:
     if (fd > 0) {
         // Success:
-        rt_printf("%d (RX_TELECMD_PKT_TASK)"
-            " Uplink serial port opened and configured\n",time(NULL));
+        rt_printf("%d (RX_TELECMD_PKT_TASK) Uplink serial port opened and"
+            " configured\n",time(NULL));
     } else {
         // Print:
-        rt_printf("%d (RX_TELECMD_PKT_TASK)"
-            " Uplink serial port not opened and configured\n",time(NULL));
+        rt_printf("%d (RX_TELECMD_PKT_TASK) Error opening and configuring"
+            " uplink serial port\n",time(NULL));
         // NEED ERROR HANDLING
     }
 
@@ -118,16 +118,15 @@ void rx_telecmd_pkt(void* arg) {
                 bytes_left -= ret_val;
             } else {
                 // Print:
-                rt_printf("%d (RX_TELECMD_PKT_TASK)"
-                    " Error reading uplink serial port\n",time(NULL));
+                rt_printf("%d (RX_TELECMD_PKT_TASK) Error reading uplink"
+                    " serial port\n",time(NULL));
                 // NEED ERROR HANDLING
             }
         }
 
         // Print:
-        rt_printf("%d (RX_TELECMD_PKT_TASK)"
-                    " Telecommand packet received from uplink serial"
-                    " port\n",time(NULL));
+        rt_printf("%d (RX_TELECMD_PKT_TASK) Telecommand packet received from"
+            " uplink serial port\n",time(NULL));
 
         // Send telecommand packet to telecommand packet processor task 
         // via message que:

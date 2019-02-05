@@ -38,7 +38,7 @@
 
 void main(int argc, char const *argv[]) {
     // Open port:
-    int fd = gc_open_port("/dev/pts/2");
+    int fd = gc_open_port("/dev/pts/3");
 
     // Allocate buffer:
     char* buffer = malloc(1080*sizeof(char));

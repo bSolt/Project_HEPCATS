@@ -49,10 +49,10 @@ void gc_macro_cmd(char* cmd_str_arr[]) {
     buffer = gc_crt_telecmd_pkt(telecmd_pkt_inputs,buffer);
 
     // Open port:
-    int fd = gc_open_port("/dev/pts/11");
+    int fd = gc_open_port("/dev/ttyUSB0");
 
     // Write buffer to port:
-    gc_write_port(fd, buffer);
+    gc_write_port(fd,buffer);
 
     // Close port:
     close(fd);

@@ -54,7 +54,7 @@ int gc_open_port(char* port) {
   }
 
   // Set speed to  bps, 8n1 (no parity)
-  gc_config_port(fd,B115200); 
+  gc_config_port(fd,B1000000);
 
   // Return fd:
   return (fd);

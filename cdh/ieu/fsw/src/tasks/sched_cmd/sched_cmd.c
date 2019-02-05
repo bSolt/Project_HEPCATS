@@ -132,6 +132,7 @@ void sched_cmd(void* arg) {
 
         sched_stat = 1;
 
+
         // Reply to command executor task with command execution status:
         ret_val = rt_task_reply(flw_id,&rply_sched_mcb);
 

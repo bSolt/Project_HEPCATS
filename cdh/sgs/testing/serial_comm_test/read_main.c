@@ -44,7 +44,7 @@ void main(int argc, char const *argv[])
 	uint8_t d1; // 1 byte
 
 	// Define port name:
-	char* port = "/dev/pts/3"; // Will have to update!!
+	char* port = "/dev/ttyUSB0"; // Will have to update!!
 
 	// Open port:
 	int fd = open_port(port);

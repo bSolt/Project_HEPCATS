@@ -34,9 +34,9 @@ make clean
 make gc_prompt
 
 # Define Ground Control prompt input:
-prompt_input_str="cmd hepcats noop"
+#prompt_input_str="cmd hepcats noop"
 #prompt_input_str="cmd hepcats noop with rsp"
-#prompt_input_str="cmd hepcats noop hold 2018/310-14:15:21"
+prompt_input_str="cmd hepcats noop hold 2018/310-14:15:21"
 #prompt_input_str="cmd hepcats noop with rsp hold 2018/310-14:15:21"
 
 # "Type" it into the Ground Control prompt:
