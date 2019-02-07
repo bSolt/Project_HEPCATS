@@ -50,6 +50,7 @@
 // Header files:
 #include <msg_queues.h> // Message queue variable declarations
 #include <sems.h>       // Semaphore variable declarations
+#include <hk_tlm_var.h> // Housekeeping variable declarations
 
 // Macro definitions:
 #define TELECMD_PKT_SIZE    20 // Telecommand packet size in bytes
@@ -95,6 +96,10 @@ RT_SEM rx_telecmd_pkt_sem;   // For rx_telecmd_pkt_task and
 RT_SEM proc_telecmd_pkt_sem; // For proc_telecmd_pkt_task and exec_cmd 
                              // task synchronization
 
+// Housekeeping telemetry variable definitions:
+uint8_t val_telecmd_pkt_cnt = 0; // Valid telecommand packet counter
+uint8_t inv_telecmd_pkt_cnt = 0; // Invalid telecommand packet counter
+
 void proc_telecmd_pkt(void) {
     // Print:
     rt_printf("%d (PROC_TELECMD_PKT_TASK) Task started\n",time(NULL));
@@ -113,9 +118,6 @@ void proc_telecmd_pkt(void) {
 
     // Definitions and initializations:
     int8_t ret_val; // Function return value
-
-    uint8_t val_telecmd_pkt_cnt = 0; // Valid telecommand packet counter
-    uint8_t inv_telecmd_pkt_cnt = 0; // Invalid telecommand packet counter
 
     char  telecmd_pkt_buf[TELECMD_PKT_SIZE]; // Buffer for telecommand packet
     char cmd_xfr_frm_buf[CMD_XFR_FRM_SIZE]; // Buffer for command transfer

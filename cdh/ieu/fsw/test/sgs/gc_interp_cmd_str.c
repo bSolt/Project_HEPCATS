@@ -66,7 +66,7 @@ struct telecmd_pkt_inputs gc_interp_cmd_str(char* cmd_str_arr[]) {
         // Check if command parameter flag is set:
         if (strcmp("with",cmd_str_arr[i]) == 0) {
             // Get Application Data for command parameter:
-            telecmd_pkt_inputs.pkt_app_dat_cmd_arg = 0x01; // PLACEHOLDER
+            telecmd_pkt_inputs.pkt_app_dat_cmd_arg = 0x00; // PLACEHOLDER
 	    break;
         }
         // Command parameter flag is not set:

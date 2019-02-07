@@ -27,6 +27,9 @@ extern RT_QUEUE daq_src_dat_msg_queue; // For magnetometer DAQ source data
 extern RT_QUEUE img_src_dat_msg_queue; // For imaging source data
                                        // (read_usb_im_task
                                        // --> crt_tlm_pkt_task)
+extern RT_QUEUE hk_tlm_msg_queue;      // For housekeeping telemetry
+                                       // (get_hk_tlm_task
+                                       // --> crt_tlm_pkt_task)
 extern RT_QUEUE flt_tbl_msg_queue;     // For telemetry packet transfer frames
                                        // (crt_tlm_pkt_task --> flt_tbl_task)
 extern RT_QUEUE tx_tlm_pkt_msg_queue;  // For telemetry packets transfer frames

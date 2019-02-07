@@ -34,6 +34,7 @@ extern RT_TASK tx_tlm_pkt_task;       // Transmit telemetry packet to downlink
 extern RT_TASK crt_file_task;         // Create file from telemetry packet
                                       // transfer frame
 extern RT_TASK rtrv_file_task;        // Retrieve file for downlink
+extern RT_TASK get_hk_tlm_task;	      // Get housekeeping telemetry
 
 // Task function declarations:
 void rx_telecmd_pkt(void* arg);    // Receive telecommand packet from uplink
@@ -54,3 +55,4 @@ void tx_tlm_pkt(void* arg);        // Transmit telemetry packet to downlink
 void crt_file(void* arg);          // Create file from telemetry packet
                                    // transfer frame
 void rtrv_file(void* arg);         // Retrieve file for downlink
+void get_hk_tlm(void* arg);	       // Get housekeeping telemetry

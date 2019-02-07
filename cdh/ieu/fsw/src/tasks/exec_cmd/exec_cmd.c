@@ -67,11 +67,13 @@
 #include <tasks.h>      // Task variable and function declarations
 #include <msg_queues.h> // Message queue variable declarations
 #include <sems.h>       // Semaphore variable declarations
+#include <hk_tlm_var.h> // Housekeeping telemetry variable declarations
 
 // Macro definitions:
 #define CMD_XFR_FRM_SIZE 15 // Command transfer frame size in bytes
 #define RPLY_MSG_SIZE     1 // Command execution status reply message to
                             // command executor task size in bytes
+
 #define ATC_FLG_T  1 // ATC flag value indicating that the command
                      // is absolutely timed (true)
 #define ATC_FLG_F  0 // ATC flag value indicating that the command
@@ -105,6 +107,11 @@ RT_TASK_MCB cmd_xfr_frm_mcb; // For command transfer frame to command
                              // application tasks
 RT_TASK_MCB rply_mcb;        // For command execution status reply message
                              // command applications
+// Housekeeping telemetry variable definitions:
+uint8_t val_cmd_apid_cnt = 0; // Valid command counter
+uint8_t inv_cmd_apid_cnt = 0; // Invalid command counter
+uint8_t cmd_exec_suc_cnt = 0; // Commands executed successfully counter
+uint8_t cmd_exec_err_cnt = 0; // Commands not executed (error) counter
 
 void exec_cmd(void* arg) {
     // Print:
@@ -139,11 +146,6 @@ void exec_cmd(void* arg) {
 
     // Definitions and initializations:
     int8_t ret_val; // Function return value
-
-    uint8_t val_cmd_apid_cnt = 0; // Valid command counter
-    uint8_t inv_cmd_apid_cnt = 0; // Invalid command counter
-    uint8_t cmd_exec_suc_cnt = 0; // Commands executed successfully counter
-    uint8_t cmd_exec_err_cnt = 0; // Commands not executed (error) counter
 
     uint8_t cmd_exec_stat;    // Command execution status flag
     uint8_t val_apid_flg = 1; // Valid command APID flag

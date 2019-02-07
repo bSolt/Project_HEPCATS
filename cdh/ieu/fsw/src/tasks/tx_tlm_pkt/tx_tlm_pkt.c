@@ -51,7 +51,7 @@
 #include <sems.h>       // Semaphore variable declarations
 
 // Macro definitions:
-#define TLM_PKT_XFR_FRM_SIZE 1082 // Telemetry packet transfer frame size in bytes
+#define TLM_PKT_XFR_FRM_SIZE 1089 // Telemetry packet transfer frame size in bytes
 #define TLM_PKT_SIZE         1080 // Telemetry packet in bytes
 #define B1000000          0010010 // Baud rate (as defined in terminos.h)
 
@@ -127,7 +127,7 @@ void tx_tlm_pkt(void* arg) {
         }
 
         // Remove telemetry packet from transfer frame:
-        memcpy(&tlm_pkt_buf,tlm_pkt_xfr_frm_buf+2,TLM_PKT_SIZE);
+        memcpy(&tlm_pkt_buf,tlm_pkt_xfr_frm_buf+9,TLM_PKT_SIZE);
 
         // Write telemetry packet to downlink serial port:
         ret_val = write(fd,&tlm_pkt_buf,TLM_PKT_SIZE);

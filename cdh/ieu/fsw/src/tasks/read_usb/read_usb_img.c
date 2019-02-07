@@ -53,6 +53,10 @@
 RT_QUEUE img_src_dat_msg_queue; // For imaging source data
                                 // (read_usb_im_task --> crt_tlm_pkt_task)
 
+// Semaphore definitions:
+RT_SEM crt_tlm_pkt_sem; // For crt_tlm_pkt_task and read_usb tasks
+                        // synchronization
+
 void read_usb_img(void) {
     // Print:
     rt_printf("%d (READ_USB_IMG_TASK) Task started\n",time(NULL));
@@ -73,7 +77,7 @@ void read_usb_img(void) {
     char daq_src_dat_buf[IMG_SRC_DAT_SIZE]; // Buffer for source data
 
      while (1) {
-        sleep(60);
+        sleep(100);
 
         // Send source data to create telemetry packet task via message queue:
         ret_val = rt_queue_write(&img_src_dat_msg_queue,&daq_src_dat_buf,\

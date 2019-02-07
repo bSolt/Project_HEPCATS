@@ -63,14 +63,18 @@
 #include <msg_queues.h> // Message queue variable declarations
 #include <sems.h>       // Semaphore variable declarations
 
-// Message queue definitions:
-RT_QUEUE daq_src_dat_msg_queue; // For magnetometer DAQ source data
-                                // (read_usb_daq_task --> crt_tlm_pkt_task)
-
 // Macro definitions:
 #define DAQ_PKT_SIZE      128 // Magnetometer DAQ packet size in bytes.
 #define DAQ_SRC_DAT_SIZE 1064 // Magnetometer DAQ source data message queue
                               // size in bytes
+
+// Message queue definitions:
+RT_QUEUE daq_src_dat_msg_queue; // For magnetometer DAQ source data
+                                // (read_usb_daq_task --> crt_tlm_pkt_task)
+
+// Semaphore definitions:
+RT_SEM crt_tlm_pkt_sem; // For crt_tlm_pkt_task and read_usb tasks
+                        // synchronization
 
 void read_usb_daq(void) {
     // Print:
@@ -125,7 +129,7 @@ void read_usb_daq(void) {
         // message queue buffer during each iteration to fill message. When
         // exiting the while loop, will have the message buffer completely
         // filled.
-        sleep(30);
+        sleep(100);
         // Send source data to create telemetry packet task via message queue:
         ret_val = rt_queue_write(&daq_src_dat_msg_queue,&daq_src_dat_buf,\
             DAQ_SRC_DAT_SIZE,Q_NORMAL);

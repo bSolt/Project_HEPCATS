@@ -28,7 +28,8 @@
  /usr/xenomai/include/alchemy/compat.h /usr/xenomai/include/trank/trank.h \
  /usr/xenomai/include/alchemy/queue.h /usr/xenomai/include/alchemy/sem.h \
  /home/xenomai/fsw/include/open_port.h \
- /home/xenomai/fsw/include/msg_queues.h /home/xenomai/fsw/include/sems.h
+ /home/xenomai/fsw/include/msg_queues.h /home/xenomai/fsw/include/sems.h \
+ /home/xenomai/fsw/include/hk_tlm_var.h
 :
 /home/xenomai/fsw/src/tasks/rx_telecmd_pkt/rx_telecmd_pkt.c:
 /usr/xenomai/include/cobalt/stdlib.h:
@@ -64,3 +65,4 @@
 /home/xenomai/fsw/include/open_port.h:
 /home/xenomai/fsw/include/msg_queues.h:
 /home/xenomai/fsw/include/sems.h:
+/home/xenomai/fsw/include/hk_tlm_var.h:

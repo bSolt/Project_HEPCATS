@@ -16,4 +16,5 @@
 
 // Function declaration:
 void crt_tlm_pkt_xfr_frm(char* src_dat, size_t src_dat_size,
-    char* tlm_pkt_xfr_frm_buf, uint16_t apid, uint8_t grp_flg);
+    char* tlm_pkt_xfr_frm_buf, uint16_t apid, uint8_t grp_flg,
+    uint16_t seq_cnt);

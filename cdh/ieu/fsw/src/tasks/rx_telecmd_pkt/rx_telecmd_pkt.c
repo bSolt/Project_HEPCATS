@@ -44,6 +44,7 @@
 #include <open_port.h>  // Open serial port function declaration
 #include <msg_queues.h> // Message queue variable declarations
 #include <sems.h>       // Semaphore variable declarations
+#include <hk_tlm_var.h> // Housekeeping variable declarations
 
 // Macro definitions:
 #define TELECMD_PKT_SIZE 20 // Telecommand packet size in bytes
@@ -57,6 +58,9 @@ RT_QUEUE telecmd_pkt_msg_queue; // For telecommand packets
 // Semaphore definitions:
 RT_SEM rx_telecmd_pkt_sem; // For rx_telecmd_pkt_task and proc_telecmd_pkt_task
                            // task synchronization
+
+// Housekeeping telemetry variable definitions:
+uint8_t rx_telecmd_pkt_cnt = 0; // Received telecommand packet count
 
 void rx_telecmd_pkt(void* arg) {
     // Print:
@@ -127,6 +131,9 @@ void rx_telecmd_pkt(void* arg) {
         // Print:
         rt_printf("%d (RX_TELECMD_PKT_TASK) Telecommand packet received from"
             " uplink serial port\n",time(NULL));
+
+        // Increment counter:
+        rx_telecmd_pkt_cnt++;
 
         // Send telecommand packet to telecommand packet processor task 
         // via message que:

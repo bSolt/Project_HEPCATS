@@ -2,20 +2,26 @@
 //
 // Retrieve File
 //
-// Task responsible for playing back stored magnetometer DAQ or imaging data.
-// This is done by retrieving files (saved telemetry packet transfer frames)
-// and sending them to transmit telemetry packet task for downlink via
-// message queue.
+// Task responsible for playing back stored houskeeping telemetry, magnetometer
+// DAQ or imaging data. This is done by retrieving files (saved telemetry
+// packet transfer frames) and sending them to transmit telemetry packet task
+// for downlink via message queue. Transfer frames consist of the following:
+//     - Packet Identification
+//       - APID (origin)
+//       - Group flag (packet sequence)
+//     - Creation Time
+//       - Second
+//       - Millisecond
+//     - Telemetry Packet
 //
-// The command to playback magnetometer DAQ or imaging data is received from
-// command software task via synchronous message passing.
+// The command to playback housekeeping telemetry, magnetometer DAQ, or
+// imaging data is received from command software task via synchronous message
+// passing.
 //
 // File retrieval is done by reading directory listing files created by
 // create file task. These listings are in time order such that files are
-// downlinked oldest -> newest.
-//
-// Files are found in the following tree (names may not be correct but
-// structure is)
+// downlinked oldest -> newest. Files are found as binary files in the
+// following tree (names may not be correct but structure is)
 //
 //  |--data
 //     |-- mag
@@ -31,6 +37,11 @@
 //             |-- n.dat
 //         |-- sec_msec_dir.ls
 //         |-- ...
+//     |-- hk
+//         |-- sec_msec.dat
+//         |-- sec_msec.dat
+//         |-- ...
+//         |-- hk_dir.ls
 //
 // -------------------------------------------------------------------------- /
 //
@@ -77,11 +88,12 @@
 #define CMD_XFR_FRM_SIZE       15 // Command transfer frame size in bytes
 #define RPLY_MSG_SIZE           1 // Command execution status reply message to
                                   // command executor task size in bytes
-#define TLM_PKT_XFR_FRM_SIZE 1082 // Telemetry packet transfer frame size in
+#define TLM_PKT_XFR_FRM_SIZE 1089 // Telemetry packet transfer frame size in
                                   // bytes
 
-#define ARG_MDQ 0x00 // Command argument: Magnetometer DAQ
-#define ARG_IMG 0x01 // Command argument: Imaging
+#define ARG_SW  0x00 // Command argument: Housekeeping telemetry
+#define ARG_MDQ 0x01 // Command argument: Magnetometer DAQ
+#define ARG_IMG 0x02 // Command argument: Imaging
 
 // Message queue definitions:
 RT_QUEUE tx_tlm_pkt_msg_queue; // For telemetry packets
@@ -91,8 +103,8 @@ RT_QUEUE tx_tlm_pkt_msg_queue; // For telemetry packets
 // Semaphore definitions:
 RT_SEM tx_tlm_pkt_sem;   // For tx_tlm_pkt_task and flt_tbl_task
                          // synchronization
-RT_SEM rtrv_file_sem; // For rtrv_file_task and cmd_sw_task
-                      // synchronization 
+RT_SEM rtrv_file_sem;    // For rtrv_file_task and cmd_sw_task
+                         // synchronization 
 
 // Message control blocks definitions:
 RT_TASK_MCB cmd_xfr_frm_rtrv_mcb; // For command transfer frame message from
@@ -182,13 +194,13 @@ void rtrv_file(void* arg) {
         memcpy(&cmd_arg,cmd_xfr_frm_buf+11,4);
 
         // Check command argument to retrieve files:
-        if (cmd_arg == ARG_MDQ) {
+        if (cmd_arg == ARG_SW) { 
             // Print:
-            rt_printf("%d (RTRV_FILE_TASK) Dumping magnetometer DAQ"
+            rt_printf("%d (RTRV_FILE_TASK) Dumping housekeeping"
                 " data\n",time(NULL));
 
             // Open directory listing file:
-            dir_ls_file_ptr = fopen("/home/xenomai/tmp/mag/mag_dir.ls", "r");
+            dir_ls_file_ptr = fopen("/home/xenomai/data/hk/hk_dir.ls", "r");
 
             // Loop to read directory listing file:
             while (fgets(file_line,sizeof(file_line),dir_ls_file_ptr) != NULL) {
@@ -196,9 +208,9 @@ void rtrv_file(void* arg) {
                 file_line[strcspn(file_line,"\n")] = 0;
 
                 // Ignore directory listing file:
-                if (strcmp(file_line,"mag_dir.ls") != 0) {
+                if (strcmp(file_line,"hk_dir.ls") != 0) {
                     // Append directory to file name:
-                    sprintf(file_path,"/home/xenomai/tmp/mag/%s",file_line);
+                    sprintf(file_path,"/home/xenomai/data/hk/%s",file_line);
 
                     // Open file to read
                     src_dat_file_ptr = fopen(file_path,"rb");
@@ -236,19 +248,73 @@ void rtrv_file(void* arg) {
 
             // Close file:
             fclose(dir_ls_file_ptr);
+        } else if (cmd_arg == ARG_MDQ) {
+            // Print:
+            rt_printf("%d (RTRV_FILE_TASK) Dumping magnetometer DAQ"
+                " data\n",time(NULL));
+
+            // Open directory listing file:
+            dir_ls_file_ptr = fopen("/home/xenomai/data/mag/mag_dir.ls", "r");
+
+            // Loop to read directory listing file:
+            while (fgets(file_line,sizeof(file_line),dir_ls_file_ptr) != NULL) {
+                // Strip newline character:
+                file_line[strcspn(file_line,"\n")] = 0;
+
+                // Ignore directory listing file:
+                if (strcmp(file_line,"mag_dir.ls") != 0) {
+                    // Append directory to file name:
+                    sprintf(file_path,"/home/xenomai/data/mag/%s",file_line);
+
+                    // Open file to read
+                    src_dat_file_ptr = fopen(file_path,"rb");
+
+                    // Read file:
+                    fread(&tlm_pkt_xfr_frm_buf,1,TLM_PKT_XFR_FRM_SIZE,\
+                        src_dat_file_ptr);
+
+                    // Send transfer frame to transmit telemetry packet task
+                    // via message queue:
+                    ret_val = rt_queue_write(&tx_tlm_pkt_msg_queue,\
+                        &tlm_pkt_xfr_frm_buf,TLM_PKT_XFR_FRM_SIZE,\
+                        Q_NORMAL); // Append message to queue
+
+                    // Check success:
+                    if ((ret_val > 0) || (ret_val == 0)) {
+                        // Print:
+                        rt_printf("%d (RTRV_FILE_TASK) Telemetry packet"
+                            " transfer frame sent to transmit telemetry packet"
+                            " task\n",time(NULL));
+                    } else {
+                        // Print:
+                        rt_printf("%d (RTRV_FILE_TASK) Error sending telemetry"
+                            " packet transfer frame\n",time(NULL));
+                        // NEED ERROR HANDLING
+                    }
+
+                    // Close file:
+                    fclose(src_dat_file_ptr);
+
+                    // Increment file count:
+                    file_cnt++;
+                }
+            }
+
+            // Close file:
+            fclose(dir_ls_file_ptr);
         } else if (cmd_arg == ARG_IMG) {
             // Print:
             rt_printf("%d (RTRV_FILE_TASK) Dumping imaging data\n",time(NULL));
 
             // Open directory:
-            dir = opendir("/home/xenomai/tmp/img/");
+            dir = opendir("/home/xenomai/data/img/");
 
             // Loop to read directory listing file:
             while ((ent = readdir(dir)) != NULL) {
                 // Only accept listing files (and not directories):
                 if(strstr(ent->d_name, "_dir.ls") != NULL) {
                     // Create full file name:
-                    sprintf(file_name,"/home/xenomai/tmp/img/%s",ent->d_name);
+                    sprintf(file_name,"/home/xenomai/data/img/%s",ent->d_name);
 
                     // Open directory listing file:
                     dir_ls_file_ptr = fopen(file_name, "r");
@@ -260,7 +326,7 @@ void rtrv_file(void* arg) {
                         file_line[strcspn(file_line,"\n")] = 0;
 
                         // Append directory to file name:
-                        sprintf(file_path,"/home/xenomai/tmp/img/%.*s/%s",14,\
+                        sprintf(file_path,"/home/xenomai/data/img/%.*s/%s",14,\
                             ent->d_name,file_line);
 
                         // Open file to read
@@ -270,8 +336,8 @@ void rtrv_file(void* arg) {
                         ret_val = fread(&tlm_pkt_xfr_frm_buf,1,\
                             TLM_PKT_XFR_FRM_SIZE,src_dat_file_ptr);
 
-                        // Send transfer frame to transmit telemetry packet task via
-                        // message queue:
+                        // Send transfer frame to transmit telemetry packet
+                        // task via message queue:
                         ret_val = rt_queue_write(&tx_tlm_pkt_msg_queue,\
                             &tlm_pkt_xfr_frm_buf,TLM_PKT_XFR_FRM_SIZE,\
                             Q_NORMAL); // Append message to queue

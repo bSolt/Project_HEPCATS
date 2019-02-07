@@ -51,6 +51,8 @@ RT_QUEUE daq_src_dat_msg_queue; // For magnetometer DAQ source data
                                 // (read_usb_daq_task --> crt_tlm_pkt_task)
 RT_QUEUE img_src_dat_msg_queue; // For imaging source data
                                 // (read_usb_im_task --> crt_tlm_pkt_task)
+RT_QUEUE hk_tlm_msg_queue;      // For housekeeping telemetry
+                                // (get_hk_tlm_task --> crt_tlm_pkt_task)
 RT_QUEUE flt_tbl_msg_queue;     // For telemetry packet transfer frames
                                 // (crt_tlm_pkt_task --> flt_tbl_task)
 RT_QUEUE tx_tlm_pkt_msg_queue;  // For telemetry packets
@@ -86,14 +88,17 @@ RT_SEM rtrv_file_sem;        // For rtrv_file_task and cmd_sw_task
 #define CMD_XFR_QUEUE_NMSG     10 // Message queue limit
 #define DAQ_SRC_DAT_QUEUE_NMSG 10 // Message queue limit
 #define IMG_SRC_DAT_QUEUE_NMSG 10 // Message queue limit
+#define HK_TLM_QUEUE_NMSG      10 // Message queue limit
 #define FLT_TBL_QUEUE_NMSG     10 // Message queue limit
 #define TX_TLM_PKT_QUEUE_NMSG  10 // Message queue limit
 #define CRT_FILE_QUEUE_NMSG    10 // Message queue limit
 
 #define TELECMD_PKT_SIZE       20 // Telecommand packet size in bytes
 #define CMD_XFR_FRM_SIZE       15 // Command transfer frame size in bytes
-#define TLM_PKT_XFR_FRM_SIZE 1082 // Telemetry transfer frame size in bytes
+#define TLM_PKT_XFR_FRM_SIZE 1089 // Telemetry transfer frame size in bytes
 #define DAQ_SRC_DAT_SIZE     1064 // Magnetometer DAQ source data message queue
+                                  // size in bytes
+#define HK_TLM_SIZE             7 // Housekeeping telemetry message queue
                                   // size in bytes
 #define IMG_SRC_DAT_SIZE     3000 // Imaging source data message queue
                                   // size in bytes (UPDATE)
@@ -119,6 +124,10 @@ void crt_msg_queues_pipes() {
     // Create message queues:
     rt_queue_create(&img_src_dat_msg_queue,"img_src_dat_msg_queue",\
         IMG_SRC_DAT_SIZE*IMG_SRC_DAT_QUEUE_NMSG,IMG_SRC_DAT_QUEUE_NMSG,Q_FIFO);
+
+    // Create message queues:
+    rt_queue_create(&hk_tlm_msg_queue,"hk_tlm_msg_queue",\
+        HK_TLM_SIZE*HK_TLM_QUEUE_NMSG,HK_TLM_QUEUE_NMSG,Q_FIFO);
 
     // Create message queues:
     rt_queue_create(&flt_tbl_msg_queue,"flt_tbl_msg_queue",\

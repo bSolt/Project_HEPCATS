@@ -38,6 +38,9 @@
 // Header files:
 #include <tasks.h> // Task variable and function declarations
 
+// Macro definitions:
+#define GET_HK_TLM_FREQ 1e9 // Housekeeping telemetry frequency in seconds
+
 // Task definitions:
 RT_TASK rx_telecmd_pkt_task;   // Receive telecommand packet from uplink
                                // serial port
@@ -56,6 +59,7 @@ RT_TASK tx_tlm_pkt_task;       // Transmit telemetry packet to downlink
                                // serial port
 RT_TASK crt_file_task;         // Create file
 RT_TASK rtrv_file_task;        // Retrieve file for downlink
+RT_TASK get_hk_tlm_task;       // Get housekeeping telemetry
 
 // Create tasks
 void crt_tasks(void) {
@@ -74,10 +78,14 @@ void crt_tasks(void) {
     rt_task_create(&crt_tlm_pkt_task,"crt_tlm_pkt_task",0,50,0);
     rt_task_create(&read_usb_daq_task,"read_usb_daq_task",0,50,0);
     rt_task_create(&read_usb_img_task,"read_usb_img_task",0,50,0);
+    rt_task_create(&get_hk_tlm_task,"get_hk_tlm_task",0,50,0);
     rt_task_create(&flt_tbl_task,"flt_tbl_task",0,50,0);
     rt_task_create(&tx_tlm_pkt_task,"tx_tlm_pkt_task",0,50,0);
     rt_task_create(&crt_file_task,"crt_file_task",0,50,0);
     rt_task_create(&rtrv_file_task,"rtrv_file_task",0,50,0);
+
+    // Set periodic mode on select tasks:
+    rt_task_set_periodic(&get_hk_tlm_task,TM_NOW,GET_HK_TLM_FREQ); // Set NOW
 
     // Print:
     rt_printf("%d (STARTUP/CRT_TASKS) All tasks created\n",time(NULL));
@@ -106,6 +114,7 @@ void str_tasks(void){
     rt_task_start(&tx_tlm_pkt_task,&tx_tlm_pkt,0);
     rt_task_start(&crt_file_task,&crt_file,0);
     rt_task_start(&rtrv_file_task,&rtrv_file,0);
+    rt_task_start(&get_hk_tlm_task,&get_hk_tlm,0);
 
     // Print:
     rt_printf("%d (STARTUP/STR_TASKS) All tasks started\n",time(NULL));

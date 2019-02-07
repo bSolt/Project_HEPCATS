@@ -6,7 +6,12 @@
 // or storage for later downlink. Transfer frames are received via message
 // queue from either create telemetry packet task or retrieve file task. 
 // Telemetry packet transfer frames are fixed length and consist of
-//     - APID (origin)
+//     - Packet Identification
+//       - APID (origin)
+//       - Group flag (packet sequence)
+//     - Creation Time
+//       - Second
+//       - Millisecond
 //     - Telemetry Packet
 //
 // -------------------------------------------------------------------------- /
@@ -48,10 +53,11 @@
 #include <sems.h>       // Semaphore variable declarations
 
 // Macro definitions:
-#define TLM_PKT_XFR_FRM_SIZE 1082 // Telemetry transfer frame size in bytes
+#define TLM_PKT_XFR_FRM_SIZE 1089 // Telemetry transfer frame size in bytes
 
-#define APID_IMG 0x64 // Image destination APID
-#define APID_MDQ 0xC8 // Magnetometer DAQ destination APID
+#define APID_SW  0x00 // Software origin
+#define APID_IMG 0x64 // Image origin
+#define APID_MDQ 0xC8 // Magnetometer DAQ origin
 
 // Message queue definitions:
 RT_QUEUE flt_tbl_msg_queue;     // For telemetry packet transfer frames
@@ -142,7 +148,11 @@ void flt_tbl(void* arg) {
         memcpy(&tlm_pkt_xfr_frm_apid,tlm_pkt_xfr_frm_buf+0,2);
 
         // Direct transfer frame based on APID:
-        if (tlm_pkt_xfr_frm_apid == APID_MDQ) {
+        if (tlm_pkt_xfr_frm_apid == APID_SW) {
+            // Set direction flags:
+            dl_tlm_pkt_flg = 1;   // Downlink packet
+            rcrd_tlm_pkt_flg = 0; // Do not record
+        } else if (tlm_pkt_xfr_frm_apid == APID_MDQ) {
             // Set direction flags:
             dl_tlm_pkt_flg = 1;   // Downlink packet
             rcrd_tlm_pkt_flg = 0; // Do not record

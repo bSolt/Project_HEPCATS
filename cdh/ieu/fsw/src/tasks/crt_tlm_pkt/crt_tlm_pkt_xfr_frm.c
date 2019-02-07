@@ -2,8 +2,9 @@
 //
 // Create Telemetry Packet Transfer Frame
 // 
-// Telemetry packet transfer frames are created from source data and the origin
-// of said source data (APID). 
+// Telemetry packet transfer frames are created from source data, source
+// origin APID, group flag, and sequence count. These parameters are placed
+// into packet fields.
 //
 // Source data passed that is not TLM_PKT_USR_DAT_SIZE bytes in size is made
 // to TLM_PKT_USR_DAT_SIZE bytes by populating the remaining space with NULL.
@@ -74,7 +75,8 @@ struct pkt_dat_fld {
 };
 
 void crt_tlm_pkt_xfr_frm(char* src_dat, size_t src_dat_size,
-    char* tlm_pkt_xfr_frm_buf, uint16_t apid, uint8_t grp_flg) {
+    char* tlm_pkt_xfr_frm_buf, uint16_t apid, uint8_t grp_flg,
+    uint16_t seq_cnt) {
     // Definitions and initializations: 
     struct timeval tv; // Unix timestamp structure
 
@@ -89,7 +91,7 @@ void crt_tlm_pkt_xfr_frm(char* src_dat, size_t src_dat_size,
 
     // Populate packet sequence control fields
     pkt_hdr.pkt_seq_cnt_grp_flg = grp_flg; // Grouping flag
-    pkt_hdr.pkt_seq_cnt_seq_cnt = 0;       // Current value of counter
+    pkt_hdr.pkt_seq_cnt_seq_cnt = seq_cnt; // Sequence count
 
     // Populate packet length field:
     pkt_hdr.pkt_len = 1073; // "C" (Octets in packet data field - 1)
@@ -127,14 +129,17 @@ void crt_tlm_pkt_xfr_frm(char* src_dat, size_t src_dat_size,
     // Populate packer error control field:
     pkt_dat_fld.pkt_err_cnt = 0xFFFF; // "1"s (no error detection)
 
-    // Copy APID to transfer frame buffer:
-    memcpy(tlm_pkt_xfr_frm_buf,&apid,2);
+    // Copy APID, group flag, and creation time to transfer frame buffer:
+    memcpy(tlm_pkt_xfr_frm_buf+0,&apid,2);
+    memcpy(tlm_pkt_xfr_frm_buf+2,&grp_flg,1);
+    memcpy(tlm_pkt_xfr_frm_buf+3,&pkt_dat_fld.pkt_sec_hdr_t_sec,4);
+    memcpy(tlm_pkt_xfr_frm_buf+7,&pkt_dat_fld.pkt_sec_hdr_t_msec,2);
 
     // Copy Packet Header to transfer frame buffer:
-    memcpy(tlm_pkt_xfr_frm_buf+2,&pkt_hdr,6);
+    memcpy(tlm_pkt_xfr_frm_buf+9,&pkt_hdr,6);
 
     // Copy Packet Data Field to transfer frame buffer:
-    memcpy(tlm_pkt_xfr_frm_buf+8,&pkt_dat_fld,1074);
+    memcpy(tlm_pkt_xfr_frm_buf+15,&pkt_dat_fld,1074);
 
     return;
 }
