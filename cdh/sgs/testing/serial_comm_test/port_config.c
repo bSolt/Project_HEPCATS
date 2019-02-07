@@ -35,13 +35,9 @@
 #include <errno.h>   // Error number definitions 
 #include <termios.h> // POSIX terminal control definitions
 
-void port_config(int fd, int speed)
-{
+void port_config(int fd, int speed) {
     // Creat POSIX structure for port options:
     struct termios options;
-
-    // Fill memory with 0:
-    //memset(&options, 0, sizeof options);
 
     // Get the current options for the port:
     tcgetattr(fd,&options);
@@ -67,8 +63,8 @@ void port_config(int fd, int speed)
     options.c_cflag     |= (CLOCAL | CREAD);
     options.c_lflag     &= ~(ICANON | ECHO | ECHOE | ISIG);
     options.c_oflag     &= ~OPOST;
-    options.c_cc[VMIN]  = 1;  // Minimum number of characters to read
-    options.c_cc[VTIME] = 1;  // Time to wait for every character to be 
+    options.c_cc[VMIN]  = 0;  // Minimum number of characters to read
+    options.c_cc[VTIME] = 5;  // Time to wait for every character to be 
                               // read [tenths of seconds]
 
     // Set the options now:

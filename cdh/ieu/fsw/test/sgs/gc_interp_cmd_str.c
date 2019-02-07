@@ -58,15 +58,16 @@ struct telecmd_pkt_inputs gc_interp_cmd_str(char* cmd_str_arr[]) {
     }
 
     // Get APID and Packet Name for command mnemonic:
-    telecmd_pkt_inputs.pkt_apid = 0xC8; // PLACEHOLDER
-    telecmd_pkt_inputs.pkt_name = 0x00; // PLACEHOLDER
+    telecmd_pkt_inputs.pkt_apid = 0x00; // PLACEHOLDER
+    telecmd_pkt_inputs.pkt_name = 0x01; // PLACEHOLDER
 
     // Check for command parameter:
     for (i = 0; i < 10; ++i) {
         // Check if command parameter flag is set:
         if (strcmp("with",cmd_str_arr[i]) == 0) {
             // Get Application Data for command parameter:
-            telecmd_pkt_inputs.pkt_app_dat_cmd_arg = 0; // PLACEHOLDER
+            telecmd_pkt_inputs.pkt_app_dat_cmd_arg = 0x00; // PLACEHOLDER
+	    break;
         }
         // Command parameter flag is not set:
         if (i == 9) {

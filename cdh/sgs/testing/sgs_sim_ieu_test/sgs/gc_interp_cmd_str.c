@@ -67,6 +67,9 @@ struct telecmd_pkt_inputs gc_interp_cmd_str(char* cmd_str_arr[]) {
         if (strcmp("with",cmd_str_arr[i]) == 0) {
             // Get Application Data for command parameter:
             telecmd_pkt_inputs.pkt_app_dat_cmd_arg = 0; // PLACEHOLDER
+            
+            // Exit loop:
+            break;
         }
         // Command parameter flag is not set:
         if (i == 9) {

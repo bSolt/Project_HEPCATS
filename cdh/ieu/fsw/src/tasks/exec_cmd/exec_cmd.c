@@ -6,7 +6,7 @@
 // telecommand processor task OR the command scheduler. Commands are received
 // from each source in command transfer frames via the same message queue.
 //
-// Command transfer frames consist of
+// Command transfer frames are fixed length and consist of
 //     - APID
 //     - Packet name
 //     - Execution time
@@ -67,24 +67,17 @@
 #include <tasks.h>      // Task variable and function declarations
 #include <msg_queues.h> // Message queue variable declarations
 #include <sems.h>       // Semaphore variable declarations
+#include <hk_tlm_var.h> // Housekeeping telemetry variable declarations
 
 // Macro definitions:
 #define CMD_XFR_FRM_SIZE 15 // Command transfer frame size in bytes
 #define RPLY_MSG_SIZE     1 // Command execution status reply message to
                             // command executor task size in bytes
 
-#define CMD_EXEC_T 1 // Command execution status indicating command
-                     // executed
-#define CMD_EXEC_F 0 // Command execution status indicating command
-                     // did not execute
 #define ATC_FLG_T  1 // ATC flag value indicating that the command
                      // is absolutely timed (true)
 #define ATC_FLG_F  0 // ATC flag value indicating that the command
                      // is to execute now (false)
-#define VAL_APID_T 1 // Valid APID flag indicating that the
-                     // command's APID is valid (matches)
-#define VAL_APID_F 0 // Valid APID flag indicating that the
-                     // command's APID is Invalid (no match)
 
 #define DEST_APID_SW  0x00 // Software destination APID
 #define DEST_APID_IMG 0x64 // Image destination APID
@@ -114,6 +107,11 @@ RT_TASK_MCB cmd_xfr_frm_mcb; // For command transfer frame to command
                              // application tasks
 RT_TASK_MCB rply_mcb;        // For command execution status reply message
                              // command applications
+// Housekeeping telemetry variable definitions:
+uint8_t val_cmd_apid_cnt = 0; // Valid command counter
+uint8_t inv_cmd_apid_cnt = 0; // Invalid command counter
+uint8_t cmd_exec_suc_cnt = 0; // Commands executed successfully counter
+uint8_t cmd_exec_err_cnt = 0; // Commands not executed (error) counter
 
 void exec_cmd(void* arg) {
     // Print:
@@ -147,12 +145,7 @@ void exec_cmd(void* arg) {
         " ready; continuing\n",time(NULL));
 
     // Definitions and initializations:
-    int8_t ret_val;          // Function return value
-
-    uint8_t val_cmd_apid_cnt = 0; // Valid command counter
-    uint8_t inv_cmd_apid_cnt = 0; // Invalid command counter
-    uint8_t cmd_exec_suc_cnt = 0; // Commands executed successfully counter
-    uint8_t cmd_exec_err_cnt = 0; // Commands not executed (error) counter
+    int8_t ret_val; // Function return value
 
     uint8_t cmd_exec_stat;    // Command execution status flag
     uint8_t val_apid_flg = 1; // Valid command APID flag
@@ -189,7 +182,7 @@ void exec_cmd(void* arg) {
     // if command is to be executed now or is absolutely timed (execute later).
     // If ATC flag = 0, then the command transfer frame is sent to the command
     // scheduler.
-    while(1) {
+    while (1) {
         // Read command transfer frames from message queue:
         ret_val = rt_queue_read(&cmd_xfr_frm_msg_queue,&cmd_xfr_frm_buf,\
             CMD_XFR_FRM_SIZE,TM_INFINITE); // Will wait infinite amount of
@@ -287,7 +280,7 @@ void exec_cmd(void* arg) {
             }
             
             // Check for valid APID (command APID matches known destinations):
-            if (val_apid_flg == VAL_APID_T) {
+            if (val_apid_flg == 1) {
                 // Increase counter:
                 ++val_cmd_apid_cnt;
 
@@ -310,14 +303,14 @@ void exec_cmd(void* arg) {
                 }
 
                 // Check command execution status:
-                if (cmd_exec_stat == CMD_EXEC_T) {
+                if (cmd_exec_stat == 1) {
                     // Print:
                     rt_printf("%d (EXEC_CMD_TASK) Command executed" 
                         " successfully\n",time(NULL));
 
                     // Increment counter:
                     ++cmd_exec_suc_cnt;
-                } else if (cmd_exec_stat == CMD_EXEC_F) {
+                } else if (cmd_exec_stat == 0) {
                     // Print:
                     rt_printf("%d (EXEC_CMD_TASK) Command did not"
                         " execute\n",time(NULL));

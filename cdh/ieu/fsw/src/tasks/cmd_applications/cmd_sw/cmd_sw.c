@@ -59,15 +59,16 @@
 #define RPLY_MSG_SIZE     1 // Command execution status reply message to
                             // command executor task size in bytes
 
-#define CMD_EXEC_T 1 // Command execution status indicating command
-                     // executed
-#define CMD_EXEC_F 0 // Command execution status indicating command
-                     // did not execute
+#define CMD_NOOP 0x00 // Command: Non-operationa
+#define CMD_PBK  0x01 // Command: Playback
 
-#define CMD_NOOP 0x00 // Command: Non-operational
+// Task definitions:
+RT_TASK rtrv_file_task; // Retrieve file
 
 // Semaphore definitions:
-RT_SEM cmd_sw_sem; // For exec_cmd and cmd_sw task synchronization
+RT_SEM cmd_sw_sem;    // For exec_cmd and cmd_sw task synchronization
+RT_SEM rtrv_file_sem; // For rtrv_file_task and cmd_sw_task
+                      // synchronization 
 
 // Message control blocks definitions:
 RT_TASK_MCB cmd_xfr_frm_sw_mcb; // For command transfer frame message from
@@ -78,6 +79,18 @@ RT_TASK_MCB rply_sw_mcb;        // For command execution status reply message
 void cmd_sw(void* arg) {
     // Print:
     rt_printf("%d (CMD_SW_TASK) Task started\n",time(NULL));
+
+    // Task synchronize with retrieve file task:
+    // (wait for task to be ready to receive command transfer frames)
+    rt_printf("%d (CMD_SW_TASK) Waiting for retrieve file task to be ready"
+        "\n",time(NULL));
+
+    // Wait for signal:
+    rt_sem_p(&rtrv_file_sem,TM_INFINITE);
+
+    // Print:
+    rt_printf("%d (CMD_SW_TASK) Retrieve file task is ready;"
+        " continuing\n",time(NULL));
 
     // Declarations and initialization:
     int8_t ret_val; // Function return value
@@ -102,7 +115,7 @@ void cmd_sw(void* arg) {
     rply_sw_mcb.data = &cmd_exec_stat; // Set reply message buffer
     rply_sw_mcb.size = RPLY_MSG_SIZE;  // Set reply message size
 
-    // Task synchronize with exec_cmd task
+    // Task synchronize with execute command task
     // (tell task that it is now ready to receive frames)
     rt_printf("%d (CMD_SW_TASK) Ready to receive command transfer"
         " frames\n",time(NULL));
@@ -163,7 +176,7 @@ void cmd_sw(void* arg) {
 
                     // Set reply message data field to indicate command
                     // executed:
-                    cmd_exec_stat = CMD_EXEC_T; 
+                    cmd_exec_stat = 1; 
                 } else {
                     // Print:
                     rt_printf("%d (CMD_SW_TASK) Command did not execute"
@@ -171,9 +184,29 @@ void cmd_sw(void* arg) {
 
                     // Set reply message data field to indicate command
                     // executed:
-                    cmd_exec_stat = CMD_EXEC_F; 
+                    cmd_exec_stat = 0; 
                 }
 
+                // Exit switch:
+                break;
+            case CMD_PBK :
+                // Print:
+                rt_printf("%d (CMD_SW_TASK) Executing PBK command with"
+                    " arguments: %u\n",time(NULL),cmd_arg);
+
+                ret_val = rt_task_send(&rtrv_file_task,&cmd_xfr_frm_sw_mcb,\
+                    &rply_sw_mcb,TM_INFINITE);
+
+                if (ret_val > 0) {
+                    // Print:
+                    rt_printf("%d (CMD_SW_TASK) Reply message received"
+                        " from retrieve file\n",time(NULL));
+                } else { 
+                    // Print:
+                    rt_printf("%d (CMD_SW_TASK) Error sending command"
+                        " transfer frame to retrieve file task\n",time(NULL));
+                    // NEED ERROR HANDLING
+                }
                 // Exit switch:
                 break;
             // If command packet name does not match:
@@ -185,7 +218,7 @@ void cmd_sw(void* arg) {
 
                 // Set reply message data field to indicate command
                 // did not execute:
-                cmd_exec_stat = CMD_EXEC_F;
+                cmd_exec_stat = 0;
         }
 
         // Reply to command executor task with command execution status:

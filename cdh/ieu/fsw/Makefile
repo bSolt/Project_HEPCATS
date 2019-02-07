@@ -52,7 +52,7 @@ OBJEXT := o
 CFLAGS   := $(shell $(XENO_CONFIG) --posix --alchemy --cflags)
 LDFLAGS  := $(shell $(XENO_CONFIG) --posix --alchemy --ldflags)
 
-LIB     := 
+LIB     := -lusb-1.0
 INC     := -I$(INCDIR) -I/usr/local/include
 INCDEP  := -I$(INCDIR)
 
