@@ -1,0 +1,95 @@
+Model Time Testing Log
+
+Classifications done on images.office.png with 30 repetitions
+Load Time of Killed means that the model failed to load with amount of RAM allocated
+Times are in units of seconds
+
+My surface Pro has an Intel i5 @ 2712 MHz
+
+Runs with High resources 2712MHz (100%) x2 cores and 4096 MB RAM
+=============================================
+Model			Load Time		Classify Time
+=============================================
+
+VGG16			8.65			0.48
+				2.89			0.45
+				2.88			0.48
+VGG19			4.45			0.57
+				3.03			0.56
+				3.04			0.55
+incepResNetV2	39.36			0.62
+				38.67			0.64
+NAS_large		63.42			1.53 #only doing 1 run here
+inception		16.10			0.31
+				16.00			0.31
+				15.39			0.31
+xception		7.83			0.47
+				7.62			0.48
+resnet50		10.05			0.26
+				9.84			0.26
+mobileNet		4.42			0.10
+				4.43			0.10
+				4.32			0.09
+mobileV2		8.95			0.12
+				8.41			0.12
+				8.43			0.12
+dense121		22.07			0.36
+				21.52			0.35
+				22.04			0.35
+dense201		38.76			0.52
+NAS_mobile		40.79			0.27
+				40.59			0.26
+				40.53			0.27
+
+Runs with Medium resources 2712MHz (100%) and 2048 MB RAM
+=============================================
+Model			Load Time		Classify Time
+=============================================
+
+VGG16			Killed			N/A
+VGG19			Killed			N/A
+incepResNetV2	Killed			N/A
+NAS_large		Killed			N/A
+inception		19.10			0.54
+				16.49			0.49
+				17.35			0.50
+xception		8.01			0.80
+				7.59			0.79
+				7.60			0.80
+resnet50		12.20			0.52
+				11.54			0.42
+				10.66			0.44
+mobileNet		5.86			0.18
+				5.29			0.18
+				4.96			0.16
+mobileV2		10.56			0.20
+				9.73			0.19
+				8.95			0.18
+dense201		43.19			0.82
+				39.65			0.78
+				39.64			0.78
+NAS_mobile		47.21			0.36
+				46.40			0.36
+				40.98			0.34
+				41.72			0.35
+
+Runs with Low resources 1356MHz (50%) and 1024 MB RAM
+=============================================
+Model			Load Time		Classify Time
+=============================================
+
+VGG16			Killed			N/A
+VGG19			Killed			N/A
+incepResNetV2	Killed			N/A
+NAS_large		Killed			N/A
+inception		Killed			N/A
+xception		Killed			N/A
+resnet50		Killed			N/A
+mobileNet		11.82			0.41
+				11.09			0.41
+				11.27			0.42
+mobileV2		21.64			0.45
+				20.41			0.48
+				21.66			0.51
+dense201		Killed			N/A
+NAS_mobile		Killed			N/A
