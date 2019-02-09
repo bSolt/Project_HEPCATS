@@ -36,7 +36,7 @@
 
 void main(int argc, char const *argv[]) {
     // Open port:
-    int fd = sim_ieu_open_port("/dev/pts/12");
+    int fd = sim_ieu_open_port("/dev/pts/10");
 
     // Read from buffer:
     char* buffer = malloc(20*sizeof(char));

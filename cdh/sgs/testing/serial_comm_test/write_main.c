@@ -40,14 +40,13 @@ struct header {
 };
 struct data {
     uint8_t d1; // 1 bytes
-    uint8_t d2; //
 };
 
 void main(int argc, char const *argv[])
 {
 	// Declarations:
 	int bytes_sent;
-	unsigned char buffer[4]; // Buffer 3 bytes in size
+	unsigned char buffer[3]; // Buffer 3 bytes in size
 
 	// Define port name:
 	char* port = "/dev/ttyUSB0"; // Will have to update!!
@@ -60,25 +59,23 @@ void main(int argc, char const *argv[])
 	struct data data;
 
 	// Fill in data for structure:
-	header.h1 = 255;
-	header.h2 = 255;
-	data.d1 =   255;
-	data.d2 =   255;
-
-	// Build buffer:
-	memcpy(buffer+0,&header.h1,1);
-	memcpy(buffer+1,&header.h2,1);
-	memcpy(buffer+2,&data.d1,1);
-	memcpy(buffer+3,&data.d2,1);
+	header.h1 = 250;
+	header.h2 = 150;
+	data.d1 = 31;
 
 	// Write data to port:
 	do {
 		// Change data:
-		//header.h1 = header.h1 + 1;
-		//header.h2 = header.h2 + 5;
-		//data.d1 = data.d1 + 2;
+		header.h1 = header.h1 + 1;
+		header.h2 = header.h2 + 5;
+		data.d1 = data.d1 + 2;
 
-		bytes_sent = write(fd,&buffer,sizeof(buffer));
+		// Build buffer:
+		memcpy(buffer+0,&header.h1,1);
+		memcpy(buffer+1,&header.h2,1);
+		memcpy(buffer+2,&data.d1,1);
+
+		bytes_sent = write(fd,buffer,sizeof(buffer));
 
 		// Check for success:
 		if (bytes_sent != sizeof(buffer)) {

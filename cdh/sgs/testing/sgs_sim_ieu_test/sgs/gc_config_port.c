@@ -70,5 +70,4 @@ void gc_config_port(int fd, int speed) {
     tcsetattr(fd,TCSANOW,&options);
 
     return;
-
 }

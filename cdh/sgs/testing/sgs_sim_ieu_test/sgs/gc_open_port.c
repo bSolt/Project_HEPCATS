@@ -39,7 +39,7 @@ int gc_open_port(char* port) {
   int fd;
 
   // Open port:
-  fd = open(port, O_WRONLY | O_NOCTTY | O_SYNC);
+  fd = open(port, O_RDWR | O_NOCTTY | O_NDELAY);
 
   // Check for success 
   if (fd == -1) {
@@ -50,7 +50,7 @@ int gc_open_port(char* port) {
     exit(0);
   } else{
     // Set file status:
-    fcntl(fd,F_SETFL,0);
+    fcntl(fd, F_SETFL, 0);
   }
 
   // Set speed to  bps, 8n1 (no parity)
