@@ -43,7 +43,7 @@ void main(int argc, char const *argv[]) {
     buffer = sim_ieu_crt_tlm_pkt(buffer);
 
     // Open port:
-    int fd = sim_ieu_open_port("/dev/pts/3");
+    int fd = sim_ieu_open_port("/dev/pts/2");
 
     // Write buffer to port:
     sim_ieu_write_port(fd,buffer);
