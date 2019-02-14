@@ -62,13 +62,12 @@ void gc_config_port(int fd, int speed) {
     options.c_cflag     |= (CLOCAL | CREAD);
     options.c_lflag     &= ~(ICANON | ECHO | ECHOE | ISIG);
     options.c_oflag     &= ~OPOST;
-    options.c_cc[VMIN]  = 1;  // Minimum number of characters to read
-    options.c_cc[VTIME] = 1;  // Time to wait for every character to be 
-                              // read [tenths of seconds]
+    options.c_cc[VMIN]  = 1; // Minimum number of characters to read
+    options.c_cc[VTIME] = 1; // Time to wait for every character to be 
+                             // read [tenths of seconds]
 
     // Set the options now:
     tcsetattr(fd,TCSANOW,&options);
 
     return;
-
 }

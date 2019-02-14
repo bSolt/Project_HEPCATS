@@ -54,7 +54,7 @@ int sim_ieu_open_port(char* port) {
   }
 
   // Set speed to  bps, 8n1 (no parity)
-  sim_ieu_config_port(fd,B115200); 
+  sim_ieu_config_port(fd,B1000000); 
 
   // Return fd:
   return (fd);

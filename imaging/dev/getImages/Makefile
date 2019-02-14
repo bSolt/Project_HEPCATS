@@ -1,7 +1,7 @@
 ################################################################################
 # GetImages Makefile
 ################################################################################
-PROJECT_ROOT=../
+PROJECT_ROOT=.
 OPT_INC = ${PROJECT_ROOT}/common/make/common_spin.mk
 -include ${OPT_INC}
 

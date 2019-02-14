@@ -76,7 +76,7 @@ char* gc_crt_telecmd_pkt(struct telecmd_pkt_inputs telecmd_pkt_inputs,\
 
     // Populate packet I.D. fields:
     pkt_hdr.pkt_id_vrs =         0; // "000" (always)
-    pkt_hdr.pkt_id_typ =         1; // "1"   (telecommand packet)
+    pkt_hdr.pkt_id_typ =         1; // "0"   (telecommand packet)
     pkt_hdr.pkt_id_sec_hdr_flg = 1; // "1"   (not idle packet)
     pkt_hdr.pkt_id_apid = \
         telecmd_pkt_inputs.pkt_apid;

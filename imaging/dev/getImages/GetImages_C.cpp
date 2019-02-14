@@ -17,6 +17,7 @@ Returns: int, 0 success, 1 error
 #include "SpinnakerC.h"
 #include "stdio.h"
 #include "string.h"
+#include "stdlib.h" //Needed for memory allocation
 #include "fcntl.h" //Needed for writing buffer to files
 #include "unistd.h" //Needed to facilitate waiting between pictures.
 #include "time.h" //Needed for timestamping files.
@@ -44,16 +45,16 @@ spinError Acquire(spinCamera hCam, spinNodeMapHandle hNodeMap, spinNodeMapHandle
 	int64_t acquisitionModeSingle = 0;
 	
 	err = spinNodeMapGetNode(hNodeMap, "AcquisitionMode", &hAcquisitionMode);
-	printf("Got acquisition mode");
+	printf("Got acquisition mode node map\n");
 	err = spinEnumerationGetEntryByName(hAcquisitionMode, "SingleFrame", &hAcquisitionModeSingle);
 	if (err != SPINNAKER_ERR_SUCCESS)
 	{
-		printf("Error setting camera to single frame aquisition");
+		printf("Error setting camera to single frame aquisition\n");
 		return err;
 	}
 	else
 	{
-		printf("Single frame aquisition set successfully");
+		printf("Single frame aquisition set successfully\n");
 	}
 	
 	err = spinEnumerationEntryGetIntValue(hAcquisitionModeSingle, &acquisitionModeSingle);
@@ -77,77 +78,70 @@ spinError Acquire(spinCamera hCam, spinNodeMapHandle hNodeMap, spinNodeMapHandle
 	err = spinCameraGetNextImage(hCam, &hResultImage);
 	if (err != SPINNAKER_ERR_SUCCESS)
 	{
-		printf("Tried to get the picture but couldn't read the buffer");
+		printf("Tried to get the picture but couldn't\n");
 		return err;
 	}
 	//If we have a picture, let the user know.
-	size_t width = 0;
-	size_t height = 0;
-	printf("Retreived an image with width %u, ",(unsigned int)width);
-	printf("height %u. \n", (unsigned int)height);
+	printf("Retreived an image");
 	
-	//Try to get the rawImage buffer
-	int fd = open("testOutputRaw", O_WRONLY);
-		if(fd < 0)
-			printf("Couldn't get file descriptor to save unconverted buffer. Skipping");
-		else
-		{
-			if(write(fd,hResultImage, 4000000) < 0)
-			{
-				printf("Tried to write unconverted image buffer to file but failed. Continuing.\n");
-				int fderr=close(fd);
-				if(fderr)
-					printf("there was a goof up closing the buffer file");
-			}
-			else
-			{
-			printf("Successfully wrote image buffer to file testOutput. Hopefully this will be useful");
-			int fderr=close(fd);
-			if(fderr)
-				printf("There was a goof up closing the buffer file, we may have lost the data. Not my fault.\n");
-			}
-		}
 	//Convert the buffer to the right pixelspace
 	spinImage hConvertedImage = NULL;
 	
 	err = spinImageCreateEmpty(&hConvertedImage);
 	err = spinImageConvert(hResultImage, PixelFormat_BayerRG8, hConvertedImage);
-	
-	//Try to write the converted buffer to a file
-	        fd = open("testOutputConverted", O_WRONLY);
-                if(fd < 0)
-                        printf("Couldn't get file descriptor to save converted buffer. Skipping\n");
-                else
-                {
-                        if(write(fd,hConvertedImage, 4000000) < 0)
-                        {
-                                printf("Tried to write converted image buffer to file but failed. Continuing.\n");
-                                int fderr=close(fd);
-                                if(fderr)
-                                        printf("there was a goof up closing the buffer file\n");
-                        }
-                        else
-                        {
-                        printf("Successfully wrote image buffer to file testOutputConverted. \nHopefully this will be useful");
-                        int fderr=close(fd);
-                        if(fderr)
-			{                        
-        			printf("There was a goof up closing the buffer file, we may have lost the data. \nNot my fault.");
-			}                        
-}
-                }
+
+
+
 	//For now, save to a file
-	time_t now;
-	time(&now);
 	char filename[MAX_BUFF_LEN];
-	sprintf(filename,"Acquisition-C-GetImage-Ex_%s",ctime(&now));
-	err = spinImageSave(hConvertedImage, filename, JPEG);//Need to see what hConvertedImage actually is.
-	printf("Saved the image. Let's not set our expectations too high tho, something's probably broken.\n");
-	
+	sprintf(filename,"newImage");
+	err = spinImageSave(hConvertedImage, filename, RAW);
+		if(err != SPINNAKER_ERR_SUCCESS)
+		{
+		printf("Failed to save the Image\n");
+		return err;
+		}
+		else
+		{
+		printf("Saved the image to current directory\n");
+		}
 	//Clean up, clean up, everybody do your share
+	printf("Cleaning up image and camera handles\n");
 	err = spinImageDestroy(hConvertedImage);
-	err = spinImageRelease(hResultImage);
 	err = spinCameraEndAcquisition(hCam);
+	printf("Camera handles cleaned up");
+
+	
+
+
+	//Write raw to buffer
+        
+		//Open the file read only
+		FILE *imgFile=fopen(filename, O_RDONLY);
+		if (imgFile < 0)
+			printf("Could not get file descriptor for raw image");
+		else
+		{
+		printf("Got file descriptor for image file");
+		size_t imageSize=2304000;
+		//Open the buffer file for writing
+		const char *Buff_location="/dev/rtp1/";
+		int destFile = open(Buff_location, O_CREAT, O_WRONLY);
+		int ferr;
+		ferr = write(destFile,imgFile, imageSize); //All raw images are exactly 2304000 bytes so long as bRG8 is set as pixelspace
+		if (ferr > 0)
+			printf("\nSuccessfuly wrote %d to buffer\n", ferr);
+		else
+			printf("\n Could not write to buffer\n");
+		ferr=fclose(imgFile);
+		ferr=close(destFile);
+		}
+
+
+
+//Cleanup the result image
+	err = spinImageDestroy(&hResultImage);
+
 	return err;
 } //END OF FUNCTION ACQUIRE
 
@@ -186,7 +180,6 @@ spinError RunSingleCamera(spinCamera hCam)
 int main(/*int argc, char** argv*/)
 {
 	spinError err=SPINNAKER_ERR_SUCCESS;
-	spinError errReturn=SPINNAKER_ERR_SUCCESS; 
 	
 
 	//Make a system object

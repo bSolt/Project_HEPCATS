@@ -1,1 +1,0 @@
-void port_config(int fd, int speed);

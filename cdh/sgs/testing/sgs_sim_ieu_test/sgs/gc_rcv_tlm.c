@@ -38,18 +38,18 @@
 
 void main(int argc, char const *argv[]) {
     // Open port:
-    int fd = gc_open_port("/dev/pts/2");
+    int fd = gc_open_port("/dev/pts/3");
 
-    // Allocate buffer:
-    char* buffer = malloc(1080*sizeof(char));
+    // Allocate buffer for telemetry packet:
+    char* buf = malloc(1080*sizeof(char));
         
     // Read from port forever:
     while(1) {
         // Read from port:
-        buffer = gc_read_port(fd,buffer);
+        buf = gc_read_port(fd,buf);
 
         // Process telemetry packet:
-        gc_proc_tlm_pkt(buffer);
+        gc_proc_tlm_pkt(buf);
     }
 
     // Will never reach this:

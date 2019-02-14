@@ -32,7 +32,8 @@
 
 #include "port_config.h"
 
-int open_port(char* port) {
+int open_port(char* port)
+{
   // File descriptor for the port:
   int fd;
 
@@ -40,10 +41,11 @@ int open_port(char* port) {
   fd = open(port, O_RDWR | O_NOCTTY | O_NDELAY);
 
   // Check for success 
-  if (fd == -1) {
+  if (fd == -1){
     // Could not open port:
     perror("open_port: Unable to open port - ");
-  } else{
+  }
+  else{
     // Set file status:
     fcntl(fd, F_SETFL, 0);
   }

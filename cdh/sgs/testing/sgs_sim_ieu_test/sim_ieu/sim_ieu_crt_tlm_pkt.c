@@ -73,7 +73,7 @@ char* sim_ieu_crt_tlm_pkt(char* buffer) {
     pkt_hdr.pkt_id_vrs =         0;  // "000"          (version 1)
     pkt_hdr.pkt_id_typ =         0;  // "0"            (telemetry packet)
     pkt_hdr.pkt_id_sec_hdr_flg = 0;  // "0"            (idle packet)
-    pkt_hdr.pkt_id_apid =     0x7FF; // "11111111111"  (idle packet APID)
+    pkt_hdr.pkt_id_apid =        0; // "11111111111"  (idle packet APID)
 
     // Populate packet sequence control fields: 
     pkt_hdr.pkt_seq_cnt_grp_flg = 3; // "11" (unsegmented data)  
