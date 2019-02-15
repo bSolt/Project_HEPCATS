@@ -35,7 +35,8 @@ spinError Acquire(spinCamera hCam, spinNodeMapHandle hNodeMap, spinNodeMapHandle
 {
 
 	spinError err = SPINNAKER_ERR_SUCCESS;
-	printf("\n STARTING IMAGE AQUISISTION \n");
+	//Commented out for WIP to minimize camera state commanding inside aquisition function
+	/*printf("\n STARTING IMAGE AQUISISTION \n");
 
 	//Set the camera to single aquisition mode
 
@@ -64,7 +65,7 @@ spinError Acquire(spinCamera hCam, spinNodeMapHandle hNodeMap, spinNodeMapHandle
 	{
 		printf("Could not set camera to single frame");
 		return err;
-	}
+	}*/
 	
 	//Take a picture
 	err = spinCameraBeginAcquisition(hCam);
@@ -109,6 +110,11 @@ spinError Acquire(spinCamera hCam, spinNodeMapHandle hNodeMap, spinNodeMapHandle
 	printf("Cleaning up image and camera handles\n");
 	err = spinImageDestroy(hConvertedImage);
 	err = spinCameraEndAcquisition(hCam);
+	if (err != SPINNAKER_ERR_SUCCESS)
+	{
+		printf("Could not end image aquisition! Future images may not capture");
+	}
+	else
 	printf("Camera handles cleaned up\n");
 
 	
@@ -145,7 +151,7 @@ spinError Acquire(spinCamera hCam, spinNodeMapHandle hNodeMap, spinNodeMapHandle
 	return err;
 } //END OF FUNCTION ACQUIRE
 
-spinError RunSingleCamera(spinCamera hCam)
+/*spinError RunSingleCamera(spinCamera hCam)
 {
 	spinError err= SPINNAKER_ERR_SUCCESS;
 	
@@ -176,13 +182,13 @@ spinError RunSingleCamera(spinCamera hCam)
 	{
 		printf("Aquisition returned an error. Try agian or turning it off then on again\n");
 		return err;
-	}*/
+	}
 	//Now that we have a picture, we gotta release the camera
 	err = spinCameraDeInit(hCam);
 	
 	return err;
 } //END OF FUNCTION RunSingleCamera
-
+*/
 int main(/*int argc, char** argv*/)
 {
 	spinError err=SPINNAKER_ERR_SUCCESS;
@@ -219,20 +225,89 @@ int main(/*int argc, char** argv*/)
 		return -1;
 	}
 	// Get some images every so often.
+	//We'll initialize the camera here
 	int imageCount = 1; //Number of pictures we want to take
 	int imageInterval = 5; //Number of seconds to wait between images.
+	
+	//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@//
+	//FROM RUN SINGLE CAMERA//
+	//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@//
 	spinCamera hCamera = NULL;
 	err = spinCameraListGet(hCameraList, 0, &hCamera); //Only one camera, lives at index 0
+	//Need TL nodemaps
+	spinNodeMapHandle hNodeMapTLDevice=NULL;
+        err = spinCameraGetTLDeviceNodeMap(hCamera, &hNodeMapTLDevice);
+
+        //Initialize camera
+        err= spinCameraInit(hCam);
+        if(err!= SPINNAKER_ERR_SUCCESS)
+        {
+		//If we can't initiallize, yell at the user a bit
+                printf("Could not initialize camera. Aborting cause Chris' code is probs broken \n");
+                printf("Or someone just doesn't know how to use a USB port\n");
+                printf("Make sure the camera is NOT plugged into the paddleboard\n");
+                printf("The camera has to be plugged into the 3.1 port on the IEU\n");
+                printf("The first is more likely tho, cause I have like, ZERO idea what I'm doing\n");
+                return err;
+        }
+
+        //Get the full nodeMap using GenICam
+        spinNodeMapHandle hNodeMap = NULL;
+
+        err = spinCameraGetNodeMap(hCamera, &hNodeMap);
+
+	//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@//
+	//END FROM RUN SINGLE CAMERA//
+
+	//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@//
+	//FROM MAIN ACQUIRE FUNCTION//
+	printf("\n STARTING IMAGE AQUISISTION \n");
+
+        //Set the camera to single aquisition mode
+
+        //Make node handles
+        spinNodeHandle hAcquisitionMode = NULL;
+        spinNodeHandle hAcquisitionModeSingle = NULL;
+        int64_t acquisitionModeSingle = 0;
+
+        err = spinNodeMapGetNode(hNodeMap, "AcquisitionMode", &hAcquisitionMode);
+        printf("Got acquisition mode node map\n");
+        err = spinEnumerationGetEntryByName(hAcquisitionMode, "SingleFrame", &hAcquisitionModeSingle);
+        if (err != SPINNAKER_ERR_SUCCESS)
+        {
+                printf("Error setting camera to single frame aquisition\n");
+                return err;
+        }
+        else
+        {
+                printf("Single frame aquisition set successfully\n");
+        }
+
+        err = spinEnumerationEntryGetIntValue(hAcquisitionModeSingle, &acquisitionModeSingle);
+        //Set the integer as the new enumeration value:
+        err = spinEnumerationSetIntValue(hAcquisitionMode, acquisitionModeSingle);
+        if (err != SPINNAKER_ERR_SUCCESS)
+        {
+                printf("Could not set camera to single frame");
+                return err;
+        }
+	//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@//
+	//END FROM MAIN AQUIRE FUNCTION//
+
+	//Ready to aquire. 
+
 	for(int i=0; i < imageCount; i++)
 	{
 		printf("Taking picture %d \n", i);
-		err = RunSingleCamera(hCamera);
+		err = Acquire(hCamera, hNodeMap, hNodeMapTLDevice);
 		//Release the camera
 		printf("Waiting for %d seconds", imageInterval);
 		//wait for a the interval
 		//sleep(imageInterval);
 	}
-	//Clean up the system
+	//Clean up the system and release camera referances
+	
+	err = spinCameraDeInit(hCamera);
 	err=spinCameraRelease(hCamera);
 	err=spinCameraListClear(hCameraList);
 	err = spinCameraListDestroy(hCameraList);
