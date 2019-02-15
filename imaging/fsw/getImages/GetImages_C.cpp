@@ -186,8 +186,18 @@ spinError RunSingleCamera(spinCamera hCam)
 int main(/*int argc, char** argv*/)
 {
 	spinError err=SPINNAKER_ERR_SUCCESS;
-	
-
+	//check permissions
+	{
+	FILE *temp;
+	temp=fopen("test.txt","w+")
+	if (temp == NULL)
+	{
+		printf("Cannot save images in current folder. Invalid permissions\n");
+		return SPINNAKER_ERR_ACCESS_DENIED;
+	}
+	fclose(temp);
+	remove("test.txt");
+	}
 	//Make a system object
 	spinSystem hSystem=NULL;
 	
@@ -211,20 +221,19 @@ int main(/*int argc, char** argv*/)
 	// Get some images every so often.
 	int imageCount = 1; //Number of pictures we want to take
 	int imageInterval = 5; //Number of seconds to wait between images.
+	spinCamera hCamera = NULL;
+	err = spinCameraListGet(hCameraList, 0, &hCamera); //Only one camera, lives at index 0
 	for(int i=0; i < imageCount; i++)
 	{
 		printf("Taking picture %d \n", i);
-		spinCamera hCamera = NULL;
-		err = spinCameraListGet(hCameraList, 0, &hCamera); //pass 0 as second argument since we only have 1 camera
 		err = RunSingleCamera(hCamera);
-		
 		//Release the camera
-		err = spinCameraRelease(hCamera);
-		printf("Released the camera");
+		printf("Waiting for %d seconds", imageInterval);
 		//wait for a the interval
 		//sleep(imageInterval);
 	}
 	//Clean up the system
+	err=spinCameraRelease(hCamera);
 	err=spinCameraListClear(hCameraList);
 	err = spinCameraListDestroy(hCameraList);
 	
