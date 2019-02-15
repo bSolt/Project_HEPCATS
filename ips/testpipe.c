@@ -2,9 +2,11 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <errno.h>
 
 int main(int argc, char* argv[])
 {
+	extern int errno;
 	// printf("%d",argc);
 	if( argc<3 )
 	{
@@ -22,27 +24,35 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		printf("Error, pipe was opened with a probelm (pid=%d)\n", id_in);
+		printf("Error, pipe was opened with a problem (pid=%d)\n", id_in);
 	}
 
 	// Write a simple message to the pipe
 
-	char* IMAGE = "mro.jpg";
-	int img = open(IMAGE, O_RDONLY);
-	printf("Image file opened with id:%d\n", img );	
-	void *buf;
+	char* DATA = "pipes.txt";
+	int img = open(DATA, O_RDONLY);
+	printf("DATA file opened with id:%d\n", img );	
+	size_t n_bytes = 5000;
+	char buf[n_bytes];
 
-	size_t r_out = read(img, buf, 0);
-	printf("r_out = %ld\t",r_out);
+	int r_out = read(img, &buf, n_bytes);
+	if( r_out<0 )
+		perror("DATA could not be read");
+	printf("r_out = %d\t",r_out);
 
-	size_t w_out = write(id_in, buf, r_out);
-	printf("w_out = %ld\n",w_out);
+	int w_out = write(id_in, &buf, r_out);
+	if (w_out<0)
+	{
+		printf("DATA could not be written to %d:%s\n",id_in,PIPE_IN);
+		perror("Error Code");
+	}
+	printf("w_out = %d\n",w_out);
 
 	int result;
 
 	result = close(img);
 	if(result<0) 
-		printf("Error when closing image file\n");
+		perror("Error when closing image file");
 
 	// result = close(pid);
 	// if(result == 0)
@@ -55,19 +65,26 @@ int main(int argc, char* argv[])
 	// }
 
 	int id_ou = open(PIPE_OUT, O_RDONLY);
-	printf("Output pipe opened as %d\n", id_ou);
+	if( id_ou < 0 )
+		perror("Error when opening output pipe");
+	else
+		printf("Output pipe opened as %d\n", id_ou);
 	// Read from pipe
-	void *m = calloc(100,sizeof(char));
-	size_t sz = read(id_ou, m, 100);
-	printf("%ld bytes were read from pipe.\n", sz);
+	void *m = malloc(n_bytes);
+	size_t sz = read(id_ou, m, n_bytes);
+	if ((int)sz < 0)
+		perror("Error when reading from output pipe");
+	else
+		printf("%ld bytes were read from output pipe:\n", sz);
 
+	printf("%s\n",(char*) m);
 	// Close pipe when done
 	result = close(id_in);
 	if(result<0) 
-		printf("Error when closing input pipe\n");
+		perror("Error when closing input pipe");
 	result = close(id_ou);
 	if(result<0) 
-		printf("Error when closing output pipe\n");
+		perror("Error when closing output pipe");
 	
 
 	return 1;
