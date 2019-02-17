@@ -1,0 +1,47 @@
+How to simulate the pipe:
+A novelette by Ben Spen
+
+So you uh you need a raw image (make in matlab)
+Write a c script that writes reads the raw image and writes it to /dev/rtp0
+	fd = open("/dev/rtp0",rdwr)
+	buf = fopen(image.raw)
+	write(fd,buf)
+	buf_proc = read(fd,bytes_expected)
+	if (buf_proc != NULL)
+		write(crt_tlm_pkt_task,buf_proc)
+	return
+In python, read /dev/rtp0 for the image
+	fd = open("/dev/rtp0",rdwr)
+
+	running=1
+	while (running) {
+		buf = read(fd,bytes_expected) #raw format
+		buf_proc = pre_process(buf)
+		classify(buf_proc)
+		if classification < 0.5 {
+			buf_proc = NULL #try this
+			# if it doesn't work, try zeros
+			# if that doesn't work we need another channel.
+			write(fd,buf_proc)
+		}
+		buf_comp = compress(buf_proc)
+		write(fd,buf_comp)
+	}
+	#never closes, until shutdown
+
+
+	For reals
+		USB_READ {
+			open("/dev/rtp0",rdwr)
+			while(1) {\
+				buf = getimage()
+				// Possible convert??
+				write(fd,buf)
+				buf_proc = read(fd)
+				if (buf_proc != NULL)
+					write(crt_tlm_pkt_task,buf_proc)
+				}
+			}
+
+		}
+		

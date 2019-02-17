@@ -1,0 +1,15 @@
+# Ignore the old stuff
+./old_data/
+./old_tests/
+
+# Ignore the big stuff
+./RAW/
+./compression/final_images/
+./compression/uncompressed_images/
+./models/
+
+# I actually don't want any of these files on there
+*.pickle
+*.p
+*.cdf
+*.h5
