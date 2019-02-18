@@ -81,19 +81,22 @@ def auto_crop(im_array):
         elif (meanY+meanR) > (height-2*borderPad): # Need to point better, Earth is too far down
             pointingCode = 4
 
-    return [I_crop, pointingCode, errorCode]
+    return (I_crop, pointingCode, errorCode)
     
     
 # Script
-fileName = 'image9.png'
-in_image = cv2.imread(fileName)
-[out_image, pointingError, errorCode] = auto_crop(in_image)
+# We only run this if this is the main file.
+if __name__ == '__main__':
 
-if errorCode == 1:
-    print("Error: No circles found.")
-else:
-    print("Image cropped successflly.")
-    cv2.imwrite("cropped.png", out_image)
-    if pointingError != 0:
-        print("Camera not pointing correctly, error code %s." % pointingError)
+    fileName = 'image9.png'
+    in_image = cv2.imread(fileName)
+    [out_image, pointingError, errorCode] = auto_crop(in_image)
+
+    if errorCode == 1:
+        print("Error: No circles found.")
+    else:
+        print("Image cropped successflly.")
+        cv2.imwrite("cropped.png", out_image)
+        if pointingError != 0:
+            print("Camera not pointing correctly, error code %s." % pointingError)
 

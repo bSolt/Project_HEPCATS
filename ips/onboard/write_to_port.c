@@ -61,23 +61,33 @@ int main(int argc, char* argv[])
 	}
 	printf("w_out = %d\n",w_out);
 
-	// char end = '\0';
-	// w_out = write(id_in, &end, 1*sizeof(char));
-	// printf("Sent EOF with resulting size %d\n", w_out);
-
-	// int result;
-
-	// result = close(dti);
-	// if(result<0) 
-		// perror("Error when closing image file");
-
 	result = close(id_in);
 	if(result<0) 
 		perror("Error when closing input pipe");
+
+	//read from output pipe
 	
-	// result = close(id_ou);
-	// if(result<0) 
-	// 	perror("Error when closing output pipe");
+	int id_ou = open(PIPE_OUT, O_RDONLY);
+	if( id_ou < 0 )
+		perror("Error when opening output pipe");
+	else
+		printf("Output pipe opened as %d\n", id_ou);
+	// Read from pipe
+	void *m = malloc(n_bytes);
+	size_t sz = read(id_ou, m, n_bytes);
+	if ((int)sz < 0)
+		perror("Error when reading from output pipe");
+	else
+		printf("%ld bytes were read from output pipe:\n", sz);
+
+	printf("%s\n",(char*) m);
+	// Close pipe when done
+	result = close(id_in);
+	if(result<0) 
+		perror("Error when closing input pipe");
+	result = close(id_ou);
+	if(result<0) 
+		perror("Error when closing output pipe");
 	
 
 	return 1;
