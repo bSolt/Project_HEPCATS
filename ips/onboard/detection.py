@@ -62,14 +62,15 @@ while(run):
 	print(f'[INFO] {100*pred[0][0]:.2f}% chance of Aurora detected in image from {INPUT_PIPE}')
 
 	## Write to pipe part
-	with open(OUT_TEST,'wb') as pipe:
-		if (pred >= THRESHOLD):
-			np.save(pipe,rgb_crop)
-			# pipe.write(compr_stream)
-			print(f'[INFO] rgb array saved to {OUT_TEST}. Array shape: {rgb_crop.shape}')
-		else:
-			pipe.seek(999999999)
-			pipe.write('\0')
+	
+	if (pred >= THRESHOLD):
+		message = f'Aurora Detected with probability {100*pred[0][0]:.2f}%\0'
+		pid.write(message.encode())
+	
+	else:
+		message = b'[P] No Aurora was detected.\0'
+		pid.write(message)
+	print(f'[P] Message written to pipe, size = {len(message)} bytes')
 
 	run = False
 
