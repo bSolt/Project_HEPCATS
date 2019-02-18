@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 
 # Meta
-fileName = 'image2.png'
+fileName = 'image6.png'
 
 # Predicted Radii
 startingRadius = 800
@@ -23,7 +23,7 @@ BLACK = [0, 0, 0]
 borderPad = 300
 
 # Load Image
-I_bw = cv2.imread(fileName, 0)
+I_bw = cv2.imread(fileName,0)
 I_bw = cv2.GaussianBlur(I_bw, (blurSigma, blurSigma), 0)
 I_bw = cv2.GaussianBlur(I_bw, (blurSigma, blurSigma), 0)
 I_bw = cv2.GaussianBlur(I_bw, (blurSigma, blurSigma), 0)
@@ -67,7 +67,7 @@ meanR = int(np.round(meanC[0,2], 0))
 # Cropping
 deltaCrop = int((deltaCropRatio+1)*meanR)
 height, width, depth = I_col.shape
-I_crop = I_col[meanY-deltaCrop:meanY+deltaCrop, meanX-deltaCrop:meanX+deltaCrop]
+I_crop = I_col[meanY-deltaCrop+borderPad:meanY+deltaCrop+borderPad, meanX-deltaCrop+borderPad:meanX+deltaCrop+borderPad]
 cv2.imwrite("cropped.png", I_crop)
 
     
