@@ -23,7 +23,7 @@ BLACK = [0, 0, 0]
 borderPad = 300
 
 # Load Image
-I_bw = cv2.imread("temp_image.png",0)
+I_bw = cv2.imread(fileName, 0)
 I_bw = cv2.GaussianBlur(I_bw, (blurSigma, blurSigma), 0)
 I_bw = cv2.GaussianBlur(I_bw, (blurSigma, blurSigma), 0)
 I_bw = cv2.GaussianBlur(I_bw, (blurSigma, blurSigma), 0)
@@ -58,12 +58,13 @@ while True:
     else:
         break
 
-
 circles = np.uint16(np.around(circles))
 meanC = np.mean(circles, 1)
 meanX = int(np.round(meanC[0,0], 0))
 meanY = int(np.round(meanC[0,1], 0))
 meanR = int(np.round(meanC[0,2], 0))
+
+# Cropping
 deltaCrop = int((deltaCropRatio+1)*meanR)
 height, width, depth = I_col.shape
 I_crop = I_col[meanY-deltaCrop:meanY+deltaCrop, meanX-deltaCrop:meanX+deltaCrop]
