@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 
 # Meta
-fileName = 'image6.png'
+fileName = 'image2.png'
 
 # Predicted Radii
 startingRadius = 800
