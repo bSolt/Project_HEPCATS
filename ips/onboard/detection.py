@@ -9,23 +9,15 @@ from croppingScript import auto_crop
 
 MODEL_FILE = "../models/winter_model_1.h5"
 # INPUT_PIPE = "/dev/rtp0"
-<<<<<<< HEAD
+
 if len(sys.argv)>2:
-	INPUT_PIPE = sys.argv[1]
-	OUTPUT_PIPE = sys.argv[2]
+	INPUT_PIPE = sys.argv[2]
+	OUTPUT_PIPE = sys.argv[1]
 else:
 	INPUT_PIPE = "/dev/pts/4"
 	OUTPUT_PIPE = "/dev/pts/3"
 THRESHOLD = 0.5
 
-=======
-if len(sys.argv)>1:
-	INPUT_PIPE = sys.argv[1]
-else:
-	INPUT_PIPE = "/dev/pts/4"
-THRESHOLD = 0.5
-OUT_TEST = "/dev/pts/3"
->>>>>>> ae746e2edf5b64bc0cdeca329d95cc35511c89f0
 BYTES = 9861950; #This is for the testing image
 # BYTES = 10253806;
 # BYTES = 2304000
@@ -79,7 +71,7 @@ while(run):
 
 	# NOTE: Could not accieve adequate compression at this time
 
-	pid = open(OUT_PIPE,'wb')
+	pid = open(OUTPUT_PIPE,'wb')
 
 	result, buf = cv2.imencode('.png', rgb_crop)
 	compr_stream = zlib.compress(buf,zlib.Z_BEST_COMPRESSION)

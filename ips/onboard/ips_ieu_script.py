@@ -10,15 +10,10 @@ from croppingScript import auto_crop
 MODEL_FILE = "../models/winter_model_1.h5"
 # INPUT_PIPE = "/dev/rtp0"
 if len(sys.argv)>1:
-<<<<<<< HEAD
 	COMM_PIPE = sys.argv[1]
 else:
 	COMM_PIPE = "/dev/rtp/0"
-=======
-	INPUT_PIPE = sys.argv[1]
-else:
-	INPUT_PIPE = "/dev/rtp/0"
->>>>>>> ae746e2edf5b64bc0cdeca329d95cc35511c89f0
+
 THRESHOLD = 0.5
 # OUT_TEST = "/dev/pts/3"
 # BYTES = 9861950; #This is for the testing image
