@@ -26,6 +26,8 @@ model = tf.keras.models.load_model(MODEL_FILE)
 #The program will loop while run is True
 run = True
 # Open the input pipe for reading and writing
+p0 =  open(COMM_PIPE, 'rb')
+p_in = FixedBufferReader(p0.raw, read_size=BYTES)
 p_out = open(COMM_PIPE, 'wb')
 
 
@@ -33,16 +35,13 @@ while(run):
 	# Find out if this works and is blocking
 	print(f"[P] Reading from {COMM_PIPE}")
 	# First we open the pipe as a file-like object
-
-	p0 =  open(COMM_PIPE, 'rb')
-	p_in = FixedBufferReader(p0.raw, read_size=BYTES)
 	
 	# Then we peek at the file to cause a block to wait for image data
 	p_in.peek();
 	# interpret the pipe content as a rawpy object
 	print("[P] Now processing raw image!")
-	with rawpy.imread(p_in) as raw:
-		rgb_full = raw.postprocess()
+	raw = rawpy.imread(p_in)
+	rgb_full = raw.postprocess()
 
 	# pid.close()
 	# KIAN'S FUNCTION
