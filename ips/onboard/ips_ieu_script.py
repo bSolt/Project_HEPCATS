@@ -26,7 +26,7 @@ model = tf.keras.models.load_model(MODEL_FILE)
 #The program will loop while run is True
 run = True
 # Open the input pipe for reading and writing
-# pipe = open(COMM_PIPE,'r+b')
+p_out = open(COMM_PIPE, 'wb')
 
 
 while(run):
@@ -34,16 +34,17 @@ while(run):
 	print(f"[P] Reading from {COMM_PIPE}")
 	# First we open the pipe as a file-like object
 
-	pbase = open(COMM_PIPE,"rb")
-	pid = FixedBufferReader(pbase.raw, read_size=BYTES)
+	p0 =  open(COMM_PIPE, 'rb')
+	p_in = FixedBufferReader(p0.raw, read_size=BYTES)
+	
 	# Then we peek at the file to cause a block to wait for image data
-	pid.peek();
+	p_in.peek();
 	# interpret the pipe content as a rawpy object
 	print("[P] Now processing raw image!")
-	with rawpy.imread(pid) as raw:
+	with rawpy.imread(p_in) as raw:
 		rgb_full = raw.postprocess()
 
-	pid.close()
+	# pid.close()
 	# KIAN'S FUNCTION
 	# concerned about run time, might need to fix later
 	# in the future we might 
@@ -67,7 +68,7 @@ while(run):
 
 	# NOTE: Could not accieve adequate compression at this time
 
-	pid = open(COMM_PIPE,'wb')
+	# pid = open(COMM_PIPE,'wb')
 
 
 	result, buf = cv2.imencode('.jpg', rgb_crop)
@@ -75,22 +76,22 @@ while(run):
 	print("[P] Compression done.")
 	## Write to pipe part
 	
-	if (pred < THRESHOLD):
+	if (pred > THRESHOLD):
 		print(f"[P] Attempting to write to {COMM_PIPE}")
 		# First we write the size of the compressed buffer as a 32 bit unsigned integer
-		pid.write(
+		p_out.write(
 			np.uint32(
 				len(compr_stream)
 				)
 			)
-		pid.write(compr_stream)
+		p_out.write(compr_stream)
 		print(f'[P] rgb array written to {COMM_PIPE}, size = {len(compr_stream)} bytes')
 	else:
 		message = b'[P] No Aurora was detected.'
-		pid.write(np.uint32(0))
+		p_out.write(np.uint32(0))
 		print(f'[P] EOF written to pipe')
 
-	pid.close()
+	# pid.close()
 	# pid.close()
 # 	run = False
 
