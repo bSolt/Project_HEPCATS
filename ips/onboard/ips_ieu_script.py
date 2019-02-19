@@ -76,6 +76,7 @@ while(run):
 
 	print(f'[P] {100*pred[0][0]:.2f}% chance of Aurora detected in image from {COMM_PIPE}')
 	
+	# Check if the auroral threshold is met or not
 	if (pred > THRESHOLD):
 		# MATT COMPRESSION
 		# NOTE: Could not accieve adequate compression at this time
