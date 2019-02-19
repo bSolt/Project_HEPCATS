@@ -19,6 +19,19 @@ from FixedBufferReader import FixedBufferReader
 # This one is the cropping function based on circle segmentation
 from croppingScript import auto_crop
 
+def read_raw(pipe):
+	row = 1920; col = 1200;
+	raw_arr = np.frombuffer(pipe.read(),np.uint8).reshape((col,row))
+	# blk_arr = cv2.cvtColor(raw_arr, cv2.COLOR_BayerBG2GRAY)
+	rgb_arr = cv2.cvtColor(raw_arr, cv2.COLOR_BayerBG2RGB)
+
+	return rgb_arr
+
+# Use this option for testing
+IMAGE_FORMAT = "ieu"
+# Use this option for IEU integration
+# IMAGE_FORMAT = "ieu"
+
 # This will be the file containing the full neural network model
 MODEL_FILE = "../models/winter_model_1.h5"
 
@@ -33,21 +46,24 @@ else:
 THRESHOLD = 0.5
 
 # Expected RAW image size
-BYTES = 9861950; #This is for the testing image
-# BYTES = 10253806;
-# BYTES = 2304000 #This is expected image size, from Chris
+if ( IMAGE_FORMAT=='test' ):
+	BYTES = 9861950; #This is for the testing image
+	# Create the custom reading object for appropriate reading within rawpy
+elif ( IMAGE_FORMAT=='ieu'):
+	BYTES = 2304000 #This is expected image size, from Chris
+
+# Create buffer reader object for input
+p0 =  open(COMM_PIPE, 'rb')
+p_in = FixedBufferReader(p0.raw, read_size=BYTES)
+
+# Create Buffer writier object for output
+p_out = open(COMM_PIPE, 'wb')
 
 model = tf.keras.models.load_model(MODEL_FILE)
 
 #The program will loop while run is True
 # It is not designed to stop in its current state
 run = True
-# Create buffer reader object for input
-p0 =  open(COMM_PIPE, 'rb')
-# Create the custom reading object for appropriate reading within rawpy
-p_in = FixedBufferReader(p0.raw, read_size=BYTES)
-# Create Buffer writier object for output
-p_out = open(COMM_PIPE, 'wb')
 
 # Infinite Loop
 while(run):
@@ -57,15 +73,23 @@ while(run):
 	p_in.peek();
 	# interpret the pipe content as a rawpy object
 	print("[P] Now processing raw image!")
-	raw = rawpy.imread(p_in)
-	# Convert the raw image to a uint8 numpy array
-	rgb_full = raw.postprocess()
+
+	if ( IMAGE_FORMAT=='test' ):
+		raw = rawpy.imread(p_in)
+		# Convert the raw image to a uint8 numpy array
+		rgb_arr = raw.postprocess(gamma=(1,1))
+	elif ( IMAGE_FORMAT=='ieu'):
+		rgb_arr = read_raw(p_in)
 
 	# KIAN'S FUNCTION
 	# Run time is lacking, needs optimization
 	print("[P] Now cropping... Cross your fingers")
-	rgb_crop, pcode, ecode = auto_crop(rgb_full)
+	rgb_crop, pcode, ecode = auto_crop(rgb_arr)
 	print(f"[P] Crop done: pcode = {pcode} ecode = {ecode}, now classifying image")
+	# Stop the program if there's a cropping error.
+	if (pcode!=0 or ecode!=0):
+		print("[P] Cropping Error")
+		exit(1)
 
 	# resizing is done using the opencv function
 	rgb_small = cv2.resize(rgb_crop, (256,256))
