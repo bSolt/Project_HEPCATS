@@ -39,12 +39,11 @@ while(run):
 	# Then we peek at the file to cause a block to wait for image data
 	pid.peek();
 	# interpret the pipe content as a rawpy object
-	raw = rawpy.imread(pid)
+	print("[P] Now processing raw image!")
+	with rawpy.imread(pid) as raw:
+		rgb_full = raw.postprocess()
 
 	pid.close()
-
-	print("[P] Now processing raw image!")
-	rgb_full = raw.postprocess()
 	# KIAN'S FUNCTION
 	# concerned about run time, might need to fix later
 	# in the future we might 
@@ -53,7 +52,7 @@ while(run):
 
 	# for now
 	# rgb_crop = rgb_full
-	print(f"[P] Crop done pcode = {pcode} ecode = {ecode}, now classifying image")
+	print(f"[P] Crop done: pcode = {pcode} ecode = {ecode}, now classifying image")
 	# resizing is done using the opencv function
 	rgb_small = cv2.resize(rgb_crop, (256,256))
 	rgb_small = np.expand_dims(rgb_small,0)
@@ -71,19 +70,25 @@ while(run):
 	pid = open(COMM_PIPE,'wb')
 
 
-	result, buf = cv2.imencode('.png', rgb_crop)
+	result, buf = cv2.imencode('.jpg', rgb_crop)
 	compr_stream = zlib.compress(buf,zlib.Z_BEST_COMPRESSION)
 	print("[P] Compression done.")
 	## Write to pipe part
 	
-	if (pred > THRESHOLD):
+	if (pred < THRESHOLD):
 		print(f"[P] Attempting to write to {COMM_PIPE}")
-		pid.write(buf)
+		# First we write the size of the compressed buffer as a 32 bit unsigned integer
+		pid.write(
+			np.uint32(
+				len(compr_stream)
+				)
+			)
+		pid.write(compr_stream)
 		print(f'[P] rgb array written to {COMM_PIPE}, size = {len(compr_stream)} bytes')
 	else:
 		message = b'[P] No Aurora was detected.'
-		pid.write(message)
-		print(f'[P] Message written to pipe, size = {len(message)} bytes')
+		pid.write(np.uint32(0))
+		print(f'[P] EOF written to pipe')
 
 	pid.close()
 	# pid.close()
