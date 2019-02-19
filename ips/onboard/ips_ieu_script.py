@@ -92,5 +92,5 @@ while(run):
 
 	pid.close()
 	# pid.close()
-	run = False
+# 	run = False
 
