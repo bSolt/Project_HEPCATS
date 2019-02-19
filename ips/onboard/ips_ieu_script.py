@@ -10,9 +10,15 @@ from croppingScript import auto_crop
 MODEL_FILE = "../models/winter_model_1.h5"
 # INPUT_PIPE = "/dev/rtp0"
 if len(sys.argv)>1:
+<<<<<<< HEAD
 	COMM_PIPE = sys.argv[1]
 else:
 	COMM_PIPE = "/dev/rtp/0"
+=======
+	INPUT_PIPE = sys.argv[1]
+else:
+	INPUT_PIPE = "/dev/rtp/0"
+>>>>>>> ae746e2edf5b64bc0cdeca329d95cc35511c89f0
 THRESHOLD = 0.5
 # OUT_TEST = "/dev/pts/3"
 # BYTES = 9861950; #This is for the testing image
@@ -34,6 +40,7 @@ while(run):
 	# Find out if this works and is blocking
 	print(f"[P] Reading from {INPUT_PIPE}")
 	# First we open the pipe as a file-like object
+
 	pbase = open(COMM_PIPE,"rb")
 	pid = FixedBufferReader(pbase.raw, read_size=BYTES)
 	# Then we peek at the file to cause a block to wait for image data
@@ -69,6 +76,7 @@ while(run):
 	# NOTE: Could not accieve adequate compression at this time
 
 	pid = open(COMM_PIPE,'wb')
+
 
 	result, buf = cv2.imencode('.png', rgb_crop)
 	compr_stream = zlib.compress(buf,zlib.Z_BEST_COMPRESSION)

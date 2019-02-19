@@ -80,7 +80,9 @@ int main(int argc, char* argv[])
 		printf("[C] Output pipe opened as %d\n", id_ou);
 	// Read from pipe
 	size_t n_bytes = 1000;
+
 	void *m = calloc(n_bytes,sizeof(char));
+
 	size_t sz = read(id_ou, m, n_bytes);
 	if ((int)sz < 0)
 		perror("[C] Error when reading from output pipe");
