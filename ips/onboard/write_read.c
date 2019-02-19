@@ -29,6 +29,8 @@ int main(int argc, char* argv[])
 	else
 	{
 		printf("[C] Error, pipe was opened with a problem (pid=%d)\n", id_in);
+		perror("Error Code");
+		return -1;
 	}
 
 	// We now want to read from a RAW image file and then write the bytes to the message pipe
@@ -63,6 +65,7 @@ int main(int argc, char* argv[])
 	{
 		printf("[C] DATA could not be written to %d:%s\n",id_in,PIPE_IN);
 		perror("[C] Error Code");
+		return -1;
 	}
 	printf("[C] w_out = %d\n",w_out);
 

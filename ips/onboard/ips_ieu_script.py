@@ -8,32 +8,30 @@ from croppingScript import auto_crop
 #from ips_helper import *
 
 MODEL_FILE = "../models/winter_model_1.h5"
-# INPUT_PIPE = "/dev/rtp0"
+# COMM_PIPE = "/dev/rtp0"
 if len(sys.argv)>1:
 	COMM_PIPE = sys.argv[1]
 else:
+	# Assume this name as a default
 	COMM_PIPE = "/dev/rtp/0"
 
 THRESHOLD = 0.5
 # OUT_TEST = "/dev/pts/3"
-# BYTES = 9861950; #This is for the testing image
+BYTES = 9861950; #This is for the testing image
 # BYTES = 10253806;
-BYTES = 2304000 #This is expected image size, from Chris
+# BYTES = 2304000 #This is expected image size, from Chris
 
 model = tf.keras.models.load_model(MODEL_FILE)
 
 #The program will loop while run is True
 run = True
 # Open the input pipe for reading and writing
-# pipe = open(INPUT_PIPE,'r+b')
+# pipe = open(COMM_PIPE,'r+b')
 
 
 while(run):
-	# raw = read_from_pipe(INPUT_PIPE)
-
-	# PIPEScd proj	
 	# Find out if this works and is blocking
-	print(f"[P] Reading from {INPUT_PIPE}")
+	print(f"[P] Reading from {COMM_PIPE}")
 	# First we open the pipe as a file-like object
 
 	pbase = open(COMM_PIPE,"rb")
@@ -61,7 +59,7 @@ while(run):
 	rgb_small = np.expand_dims(rgb_small,0)
 	pred = model.predict(rgb_small)
 
-	print(f'[P] {100*pred[0][0]:.2f}% chance of Aurora detected in image from {INPUT_PIPE}')
+	print(f'[P] {100*pred[0][0]:.2f}% chance of Aurora detected in image from {COMM_PIPE}')
 
 	# MATT COMPRESSION
 	# input has to be read-only, tests use
@@ -79,15 +77,15 @@ while(run):
 	## Write to pipe part
 	
 	if (pred > THRESHOLD):
-		print(f"[P] Attempting to write to {OUT_TEST}")
-		os.write(pid,buf)
-		print(f'[P] rgb array written to {OUT_TEST}, size = {len(compr_stream)} bytes')
+		print(f"[P] Attempting to write to {COMM_PIPE}")
+		pid.write(buf)
+		print(f'[P] rgb array written to {COMM_PIPE}, size = {len(compr_stream)} bytes')
 	else:
 		message = b'[P] No Aurora was detected.'
-		os.write(pid,message)
+		pid.write(message)
 		print(f'[P] Message written to pipe, size = {len(message)} bytes')
 
-	os.close(pid)
+	pid.close()
 	# pid.close()
 	run = False
 
