@@ -28,7 +28,7 @@ def read_raw(pipe):
 	return rgb_arr
 
 # Use this option for testing
-IMAGE_FORMAT = "ieu"
+IMAGE_FORMAT = "test"
 # Use this option for IEU integration
 # IMAGE_FORMAT = "ieu"
 
@@ -105,9 +105,9 @@ while(run):
 		# MATT COMPRESSION
 		# NOTE: Could not accieve adequate compression at this time
 		# Current strategy: Encode image to jpeg, then apply zlib
-		result, buf = cv2.imencode('.jpg', rgb_crop)
+		result, buf = cv2.imencode('.png', rgb_crop)
 		compr_stream = zlib.compress(buf,zlib.Z_BEST_COMPRESSION)
-
+		print(f"[P] Image compressed to size {len(compr_stream)}")
 		# Write to pipe part
 		print(f"[P] Attempting to write to {COMM_PIPE}")
 		# First we write the size of the compressed buffer as a 32 bit unsigned integer
@@ -123,3 +123,5 @@ while(run):
 		# If no aurora is detected, we simply write EOF (0x00) to the pipe instead
 		p_out.write(np.uint32(0))
 		print(f'[P] EOF written to pipe')
+
+	# run = False
