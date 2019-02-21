@@ -19,9 +19,9 @@ from FixedBufferReader import FixedBufferReader
 # This one is the cropping function based on circle segmentation
 from croppingScript import auto_crop
 
-def read_raw(pipe):
+def read_raw(pipe, read_size):
 	row = 1920; col = 1200;
-	raw_arr = np.frombuffer(pipe.read(),np.uint8).reshape((col,row))
+	raw_arr = np.frombuffer(os.read(pipe, read_size),np.uint8).reshape((col,row))
 	# blk_arr = cv2.cvtColor(raw_arr, cv2.COLOR_BayerBG2GRAY)
 	rgb_arr = cv2.cvtColor(raw_arr, cv2.COLOR_BayerBG2RGB)
 
@@ -56,11 +56,13 @@ elif ( IMAGE_FORMAT=='ieu'):
 	BYTES = 2304000 #This is expected image size, from Chris
 
 # Create buffer reader object for input
-p0 =  open(COMM_PIPE, 'rb')
-p_in = FixedBufferReader(p0.raw, read_size=BYTES)
+# p0 =  open(COMM_PIPE, 'rb')
+# p_in = FixedBufferReader(p0.raw, read_size=BYTES)
 
 # Create Buffer writier object for output
-p_out = open(COMM_PIPE, 'wb')
+# p_out = open(COMM_PIPE, 'wb')
+
+pipe = os.open(COMM_PIPE, os.O_RDWR)
 
 #The program will loop while run is True
 # It is not designed to stop in its current state
@@ -71,9 +73,8 @@ while(run):
 	print("[P] Reading from {}".format(COMM_PIPE))
 	
 	# Peek at the file to cause a block and wait for image data to be input
-	p_in.peek();
+	# p_in.peek();
 	# interpret the pipe content as a rawpy object
-	print("[P] Now processing raw image!")
 
 	if ( IMAGE_FORMAT=='test' ):
 		raw = rawpy.imread(p_in)
@@ -114,17 +115,17 @@ while(run):
 		# Write to pipe part
 		print("[P] Attempting to write to {}".format(COMM_PIPE))
 		# First we write the size of the compressed buffer as a 32 bit unsigned integer
-		p_out.write(
+		os.write(pipe,
 			np.uint32(
 				len(compr_stream)
 				)
 			)
 		# Then we write the compressed buffer
-		p_out.write(compr_stream)
+		os.write(pipe,compr_stream)
 		print('[P] rgb array written, size = {} bytes'.format(len(compr_stream)))
 	else:
 		# If no aurora is detected, we simply write EOF (0x00) to the pipe instead
-		p_out.write(np.uint32(0))
+		os.write(pipe,np.uint32(0))
 		print('[P] EOF written to pipe')
 
 	# run = False
