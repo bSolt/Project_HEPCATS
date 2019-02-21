@@ -89,16 +89,17 @@ while(run):
 	# Stop the program if there's a cropping error.
 	if (pcode!=0 or ecode!=0):
 		print("[P] Cropping Error")
-		exit(1)
+		# Set pred to 0 so that it is equivalent to aurora not found
+		pred=0
+	else:
+		# resizing is done using the opencv function
+		rgb_small = cv2.resize(rgb_crop, (256,256))
+		# expand dims to prepare for input to neural net
+		rgb_small = np.expand_dims(rgb_small,0)
+		# apply neural net model
+		pred = model.predict(rgb_small)
 
-	# resizing is done using the opencv function
-	rgb_small = cv2.resize(rgb_crop, (256,256))
-	# expand dims to prepare for input to neural net
-	rgb_small = np.expand_dims(rgb_small,0)
-	# apply neural net model
-	pred = model.predict(rgb_small)
-
-	print(f'[P] {100*pred[0][0]:.2f}% chance of Aurora detected in image from {COMM_PIPE}')
+		print(f'[P] {100*pred[0][0]:.2f}% chance of Aurora detected in image from {COMM_PIPE}')
 	
 	# Check if the auroral threshold is met or not
 	if (pred > THRESHOLD):
