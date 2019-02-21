@@ -28,9 +28,9 @@ def read_raw(pipe):
 	return rgb_arr
 
 # Use this option for testing
-IMAGE_FORMAT = "test"
+# IMAGE_FORMAT = "test"
 # Use this option for IEU integration
-# IMAGE_FORMAT = "ieu"
+IMAGE_FORMAT = "ieu"
 
 # This will be the file containing the full neural network model
 MODEL_FILE = "../models/winter_model_1.h5"
