@@ -77,11 +77,11 @@ while(run):
 	# interpret the pipe content as a rawpy object
 
 	if ( IMAGE_FORMAT=='test' ):
-		raw = rawpy.imread(p_in)
+		raw = rawpy.imread(pipe)
 		# Convert the raw image to a uint8 numpy array
 		rgb_arr = raw.postprocess(gamma=(1,1))
 	elif ( IMAGE_FORMAT=='ieu'):
-		rgb_arr = read_raw(p_in)
+		rgb_arr = read_raw(pipe, BYTES)
 
 	# KIAN'S FUNCTION
 	# Run time is lacking, needs optimization
