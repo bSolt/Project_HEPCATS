@@ -40,7 +40,7 @@ if len(sys.argv)>1:
 	COMM_PIPE = sys.argv[1]
 else:
 	# Assume this name as a default
-	COMM_PIPE = "/dev/rtp/0"
+	COMM_PIPE = "/dev/rtp0"
 
 # Threshold for Aurora Detection
 THRESHOLD = 0.5
