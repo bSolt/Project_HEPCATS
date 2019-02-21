@@ -67,7 +67,7 @@ run = True
 
 # Infinite Loop
 while(run):
-	print(f"[P] Reading from {COMM_PIPE}")
+	print("[P] Reading from {}".format(COMM_PIPE))
 	
 	# Peek at the file to cause a block and wait for image data to be input
 	p_in.peek();
@@ -85,7 +85,7 @@ while(run):
 	# Run time is lacking, needs optimization
 	print("[P] Now cropping... Cross your fingers")
 	rgb_crop, pcode, ecode = auto_crop(rgb_arr)
-	print(f"[P] Crop done: pcode = {pcode} ecode = {ecode}, now classifying image")
+	print("[P] Crop done: pcode = {} ecode = {}, now classifying image".format(pcode, ecode))
 	# Stop the program if there's a cropping error.
 	if (pcode!=0 or ecode!=0):
 		print("[P] Cropping Error")
@@ -99,7 +99,7 @@ while(run):
 		# apply neural net model
 		pred = model.predict(rgb_small)
 
-		print(f'[P] {100*pred[0][0]:.2f}% chance of Aurora detected in image from {COMM_PIPE}')
+		print('[P] {:.2f}% chance of Aurora detected in image'.format(100*pred[0][0]))
 	
 	# Check if the auroral threshold is met or not
 	if (pred > THRESHOLD):
@@ -108,9 +108,9 @@ while(run):
 		# Current strategy: Encode image to jpeg, then apply zlib
 		result, buf = cv2.imencode('.png', rgb_crop)
 		compr_stream = zlib.compress(buf,zlib.Z_BEST_COMPRESSION)
-		print(f"[P] Image compressed to size {len(compr_stream)}")
+		print("[P] Image compressed to size {}".format(len(compr_stream)))
 		# Write to pipe part
-		print(f"[P] Attempting to write to {COMM_PIPE}")
+		print("[P] Attempting to write to {}".format(COMM_PIPE))
 		# First we write the size of the compressed buffer as a 32 bit unsigned integer
 		p_out.write(
 			np.uint32(
@@ -119,10 +119,10 @@ while(run):
 			)
 		# Then we write the compressed buffer
 		p_out.write(compr_stream)
-		print(f'[P] rgb array written to {COMM_PIPE}, size = {len(compr_stream)} bytes')
+		print('[P] rgb array written, size = {} bytes'.format(len(compr_stream)))
 	else:
 		# If no aurora is detected, we simply write EOF (0x00) to the pipe instead
 		p_out.write(np.uint32(0))
-		print(f'[P] EOF written to pipe')
+		print('[P] EOF written to pipe')
 
 	# run = False
