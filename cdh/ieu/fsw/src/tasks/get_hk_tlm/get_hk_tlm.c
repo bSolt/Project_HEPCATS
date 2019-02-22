@@ -2,10 +2,11 @@
 //
 // Get Housekeeping (HK) Telemetry
 //
-// Task responsible for retrievig values of counters (housekeeping telemetry)
-// and sending it to create telemetry packet task via message queue. This is
-// done be reading variables defined in the housekeeping variable declaration
-// header file.
+// Task responsible for retrievig values of counters (housekeeping telemetry),
+// creating telemetry packet transfer frames, and send those frames to filter
+// table task for either downlink or recording on storage for later downlink.
+// This is done be reading variables defined in the housekeeping variable
+// declaration header file.
 //
 // This is a periodic task with a frequency set during task creation. The
 // frequency should nominally be 1 Hz (once every second).
@@ -46,41 +47,48 @@
 #include <alchemy/timer.h> // Timer management services
 
 // Header files:
-#include <msg_queues.h> // Message queue variable declarations
-#include <sems.h>       // Semaphore variable declarations
-#include <hk_tlm_var.h> // Housekeeping telemetry variable declarations
-
+#include <msg_queues.h>          // Message queue variable declarations
+#include <sems.h>                // Semaphore variable declarations
+#include <hk_tlm_var.h>          // Housekeeping telemetry variable
+                                 // declarations
+#include <crt_tlm_pkt_xfr_frm.h> // Create telemetry packet transfer frame
+                                 // function declaration
 // Macro definitions:
-#define HK_TLM_SIZE 7 // Housekeeping telemetry message queue size in bytes
+#define HK_TLM_SIZE             9 // Housekeeping telemetry message queue size
+                                  // in bytes
+#define TLM_PKT_XFR_FRM_SIZE 1089 // Telemetry transfer frame size in bytes
+
+#define APID_SW 0x00 // Software origin
 
 // Message queue definitions:
-RT_QUEUE hk_tlm_msg_queue; // For housekeeping telemetry
-                           // (get_hk_tlm_task --> crt_tlm_pkt_task)
+RT_QUEUE flt_tbl_msg_queue; // For telemetry packet transfer frames
+                            // (read_usb/get_hk_tlm --> flt_tbl_task)
 
 // Semaphore definitions:
-RT_SEM crt_tlm_pkt_sem; // For crt_tlm_pkt_task and read_usb tasks
+RT_SEM flt_tbl_sem;     // For flt_tbl_task, read_usb, and get_hk_tlm task
                         // synchronization
 
 // Definitions for housekeeping telemetry variables:
-uint8_t val_telecmd_pkt_cnt; // Valid telecommand packet counter
-uint8_t inv_telecmd_pkt_cnt; // Invalid telecommand packet counter
-uint8_t rx_telecmd_pkt_cnt;  // Received telecommand packet count
-uint8_t val_cmd_apid_cnt;    // Valid command counter
-uint8_t inv_cmd_apid_cnt;    // Invalid command counter
-uint8_t cmd_exec_suc_cnt;    // Commands executed successfully counter
-uint8_t cmd_exec_err_cnt;    // Commands not executed (error) counter
+uint8_t val_telecmd_pkt_cnt;      // Valid telecommand packet counter
+uint8_t inv_telecmd_pkt_cnt;      // Invalid telecommand packet counter
+uint8_t rx_telecmd_pkt_cnt;       // Received telecommand packet count
+uint8_t val_cmd_apid_cnt;         // Valid command counter
+uint8_t inv_cmd_apid_cnt;         // Invalid command counter
+uint8_t cmd_exec_suc_cnt;         // Commands executed successfully counter
+uint8_t cmd_exec_err_cnt;         // Commands not executed (error) counter
+uint16_t tlm_pkt_xfr_frm_seq_cnt; // Packet sequence count
 
 void get_hk_tlm(void* arg){
     // Print:
     rt_printf("%d (GET_HK_TLM_TASK) Task started\n",time(NULL));
 
-    // Task synchronize with create telemetry packet:
-    // (wait for task to be ready to receive source data)
-    rt_printf("%d (GET_HK_TLM_TASK) Waiting for create telemetry packet task"
+    // Task synchronize with filter table task:
+    // (wait for task to be ready to telemetry packet transfer frames)
+    rt_printf("%d (GET_HK_TLM_TASK) Waiting for filter table task"
         " to be ready\n",time(NULL));
 
     // Wait for signals:
-    rt_sem_p(&crt_tlm_pkt_sem,TM_INFINITE);
+    rt_sem_p(&flt_tbl_sem,TM_INFINITE);
 
     // Print:
     rt_printf("%d (GET_HK_TLM_TASK) Create telemetry packet task is" 
@@ -89,15 +97,30 @@ void get_hk_tlm(void* arg){
     // Definitions and initializations:
     int8_t ret_val; // Function return value
 
+    uint8_t tlm_pkt_xfr_frm_grp_flg; // Packet sequence grouping flag
+
     char hk_tlm_buf[HK_TLM_SIZE]; // Buffer housekeeping telemetry
 
+    char tlm_pkt_xfr_frm_buf[TLM_PKT_XFR_FRM_SIZE]; // Buffer for telemetry
+                                                    // packet transfer frame
+                                                    // buffer
+
     // Print 
-    rt_printf("%d (GET_HK_TLM_TASK) Ready to get housekeeping telemetry\n",\
-        time(NULL));
+    rt_printf("%d (GET_HK_TLM_TASK) Ready to get housekeeping telemetry"
+        " and create telemetry packets\n",time(NULL));
 
     // Infinite loop to get housekeeping telemetry and send to create
     // telemetry packet task via message queue:
     while (1) {
+        // Increment sequence count:
+        tlm_pkt_xfr_frm_seq_cnt++;
+
+        // Force counter roll over at 16383:
+        // (the field in the packet that sequence occupies is only 14 bits)
+        if (tlm_pkt_xfr_frm_seq_cnt == 16383) {
+            tlm_pkt_xfr_frm_seq_cnt = 1; // 1 because it's logical (0 ain't)
+        }
+
         // Copy housekeeping telemetry to buffer:
         memcpy(hk_tlm_buf,&rx_telecmd_pkt_cnt,1);
         memcpy(hk_tlm_buf+1,&val_telecmd_pkt_cnt,1);
@@ -106,20 +129,37 @@ void get_hk_tlm(void* arg){
         memcpy(hk_tlm_buf+4,&inv_cmd_apid_cnt,1);
         memcpy(hk_tlm_buf+5,&cmd_exec_suc_cnt,1);
         memcpy(hk_tlm_buf+6,&cmd_exec_err_cnt,1);
+        memcpy(hk_tlm_buf+7,&tlm_pkt_xfr_frm_seq_cnt,2);
 
-        // Send source data to create telemetry packet task via message queue:
-        ret_val = rt_queue_write(&hk_tlm_msg_queue,&hk_tlm_buf,\
-            HK_TLM_SIZE,Q_NORMAL); // Append message to queue
+        // Set grouping flag:
+        tlm_pkt_xfr_frm_grp_flg = 3; // Unsegmented data
+
+        // Create transfer frame:
+        crt_tlm_pkt_xfr_frm(hk_tlm_buf,HK_TLM_SIZE,\
+            tlm_pkt_xfr_frm_buf,APID_SW,\
+            tlm_pkt_xfr_frm_grp_flg,tlm_pkt_xfr_frm_seq_cnt);
+
+        // Send transfer frame to filter table task via message queue:
+        ret_val = rt_queue_write(&flt_tbl_msg_queue,&tlm_pkt_xfr_frm_buf,\
+            TLM_PKT_XFR_FRM_SIZE,Q_NORMAL); // Append message to queue
 
         // Check success:
         if ((ret_val > 0) || (ret_val == 0)) {
             // Print:
-            rt_printf("%d (GET_HK_TLM_TASK) Housekeeping telemetry"
-                " sent to create telemetry packet task\n",time(NULL));
+            rt_printf("%d (CRT_TLM_PKT_TASK) Telemetry packet transfer"
+                " frame sent to filter table task\n",time(NULL));
+        } else if (ret_val == -ENOMEM) {
+            // Wait for a set time to allow filter table task to
+            // process message queue:
+            sleep(0.35);
+
+            // Send transfer frame to filter table task via message queue:
+            ret_val = rt_queue_write(&flt_tbl_msg_queue,&tlm_pkt_xfr_frm_buf,\
+                TLM_PKT_XFR_FRM_SIZE,Q_NORMAL); // Append message to queue 
         } else {
-            rt_printf("%d (GET_HK_TLM_TASK) Error sending"
-                " housekeeping telemetry to create telemetry packet task\n",\
-                time(NULL));
+            // Print:
+            rt_printf("%d (CRT_TLM_PKT_TASK) Error sending telemetry"
+                " packet transfer frame\n",time(NULL));
             // NEED ERROR HANDLING
         }
 

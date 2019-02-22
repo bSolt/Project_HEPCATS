@@ -4,7 +4,7 @@
 //
 // Task responsible for directing telemetry transfer frames for either downlink
 // or storage for later downlink. Transfer frames are received via message
-// queue from either create telemetry packet task or retrieve file task. 
+// queue from read_usb tasks, get_hk_tlm task, or retrieve file task. 
 // Telemetry packet transfer frames are fixed length and consist of
 //     - Packet Identification
 //       - APID (origin)
@@ -69,7 +69,7 @@ RT_QUEUE crt_file_msg_queue;    // For telemetry packet transfer frames
                                 // (flt_tbl_task --> crt_file_task)
 
 // Semaphore definitions:
-RT_SEM flt_tbl_sem;     // For flt_tbl_task and crt_tlm_pkt_task
+RT_SEM flt_tbl_sem;     // For flt_tbl_task, read_usb, and get_hk_tlm task
                         // synchronization
 RT_SEM tx_tlm_pkt_sem;  // For tx_tlm_pkt_task and flt_tbl_task
                         // synchronization
@@ -104,6 +104,7 @@ void flt_tbl(void* arg) {
         time(NULL));  
 
     // Definitions and initializations:
+    uint8_t i;
     int16_t ret_val = 0; // Function return value
 
     uint8_t dl_tlm_pkt_flg;   // Downlink telemetry packet flag
@@ -115,13 +116,15 @@ void flt_tbl(void* arg) {
                                                     // packet transfer frame
                                                     // buffer
 
-    // Task synchronize with crt_tlm_pkt_task
-    // (tell task that it is now ready to receive packets)
+    // Task synchronize with read_usb and get_hk_tlm tasks:
+    // (tell task that it is now ready to receive telemetry packet transfer
+    // frames)
     rt_printf("%d (FLT_TBL_TASK) Filter table task ready to receive telemetry"
-        " packet transfer frames \n",time(NULL));
+        " packet transfer frames\n",time(NULL));
     
     // Signal:
-    rt_sem_v(&flt_tbl_sem);
+    for (i = 0; i < 3; ++i)
+        rt_sem_v(&flt_tbl_sem);
 
     // Infinite loop to receive telemetry packet transfer frames via message
     // queue and direct to either transmit telemetry packet task or create file
@@ -171,8 +174,8 @@ void flt_tbl(void* arg) {
 
             // Send transfer frame to transmit telemetry packet task via
             // message queue:
-            ret_val = rt_queue_write(&tx_tlm_pkt_msg_queue,&tlm_pkt_xfr_frm_buf,\
-                TLM_PKT_XFR_FRM_SIZE,Q_NORMAL); // Append message to queue
+            ret_val = rt_queue_write(&tx_tlm_pkt_msg_queue,\
+                &tlm_pkt_xfr_frm_buf,TLM_PKT_XFR_FRM_SIZE,Q_NORMAL);
 
             // Check success:
             if ((ret_val > 0) || (ret_val == 0)) {
@@ -180,6 +183,14 @@ void flt_tbl(void* arg) {
                 rt_printf("%d (FLT_TBL_TASK) Telemetry packet transfer"
                     " frame sent to transmit telemetry packet task\n",\
                     time(NULL));
+            } else if (ret_val == -ENOMEM) {
+                // Wait for a set time to allow transmit packet task to
+                // process message queue:
+                sleep(0.35);
+
+                // Send transfer frame to filter table task via message queue:
+                ret_val = rt_queue_write(&tx_tlm_pkt_msg_queue,\
+                &tlm_pkt_xfr_frm_buf,TLM_PKT_XFR_FRM_SIZE,Q_NORMAL);
             } else {
                 // Print:
                 rt_printf("%d (FLT_TBL_TASK) Error sending telemetry"

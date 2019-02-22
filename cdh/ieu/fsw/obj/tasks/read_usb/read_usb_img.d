@@ -1,7 +1,6 @@
 /home/xenomai/fsw/obj/tasks/read_usb/read_usb_img.o: /home/xenomai/fsw/src/tasks/read_usb/read_usb_img.c \
- /usr/xenomai/include/cobalt/stdlib.h \
+ /usr/xenomai/include/cobalt/stdlib.h /usr/xenomai/include/cobalt/stdio.h \
  /usr/xenomai/include/cobalt/unistd.h /usr/xenomai/include/alchemy/task.h \
- /usr/xenomai/include/xeno_config.h \
  /usr/xenomai/include/boilerplate/list.h \
  /usr/xenomai/include/boilerplate/scope.h \
  /usr/xenomai/include/boilerplate/shared-list.h \
@@ -25,13 +24,17 @@
  /usr/xenomai/include/boilerplate/setup.h \
  /usr/xenomai/include/alchemy/timer.h \
  /usr/xenomai/include/alchemy/compat.h /usr/xenomai/include/trank/trank.h \
- /usr/xenomai/include/alchemy/queue.h /usr/xenomai/include/alchemy/sem.h \
- /home/xenomai/fsw/include/msg_queues.h /home/xenomai/fsw/include/sems.h
+ /usr/xenomai/include/alchemy/queue.h /usr/xenomai/include/alchemy/pipe.h \
+ /usr/xenomai/include/cobalt/uapi/kernel/pipe.h \
+ /usr/xenomai/include/alchemy/sem.h \
+ /home/xenomai/fsw/include/msg_queues.h \
+ /home/xenomai/fsw/include/msg_pipes.h /home/xenomai/fsw/include/sems.h \
+ /home/xenomai/fsw/include/crt_tlm_pkt_xfr_frm.h
 /home/xenomai/fsw/src/tasks/read_usb/read_usb_img.c:
 /usr/xenomai/include/cobalt/stdlib.h:
+/usr/xenomai/include/cobalt/stdio.h:
 /usr/xenomai/include/cobalt/unistd.h:
 /usr/xenomai/include/alchemy/task.h:
-/usr/xenomai/include/xeno_config.h:
 /usr/xenomai/include/boilerplate/list.h:
 /usr/xenomai/include/boilerplate/scope.h:
 /usr/xenomai/include/boilerplate/shared-list.h:
@@ -57,6 +60,10 @@
 /usr/xenomai/include/alchemy/compat.h:
 /usr/xenomai/include/trank/trank.h:
 /usr/xenomai/include/alchemy/queue.h:
+/usr/xenomai/include/alchemy/pipe.h:
+/usr/xenomai/include/cobalt/uapi/kernel/pipe.h:
 /usr/xenomai/include/alchemy/sem.h:
 /home/xenomai/fsw/include/msg_queues.h:
+/home/xenomai/fsw/include/msg_pipes.h:
 /home/xenomai/fsw/include/sems.h:
+/home/xenomai/fsw/include/crt_tlm_pkt_xfr_frm.h:

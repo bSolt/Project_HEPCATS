@@ -12,9 +12,23 @@
 # Source files in src/ are detected via shell find command source files from 
 # a directory are built into one object file placed in a mirrored directory 
 # path under obj/. The target binary program is created and placed in bin/.
-# 
-# Only edit directory paths and flags, libraries, and includes. There should
-# not be a reason to edit the rules (below the variable definitions).
+#
+# Any header files located in defined include directories are automatically
+# found and must use <> instead of "" when included in a source file
+# (otherwise they are not found). Include directories defined are:
+#     - /usr/local/include (for standard and Xenomai header files)
+#     - /usr/include/spinnaker/spinc (for FLIR Spinnaker header files)
+#     - ${Root}/include (for user-defined header files)
+#
+# Xenomai configure file is called when linking object files together to
+# run flight software on the real-time kernel. This configure file is
+# located in ${XENO_CONFIG} and called with the following parameters:
+#     - --posix: Wrap POSIX functions to keep regular POSIX names for
+#	             calling POSIX-compliant Xenomai services
+#     - -alchemy: Use alchemy API
+#
+# NOTE: only edit directory paths and flags, libraries, and includes. There
+# should not be a reason to edit the rules (below the variable definitions).
 #
 # -------------------------------------------------------------------------- #
 #
@@ -33,7 +47,7 @@ CC := gcc
 TARGET := program
 
 # Root directories:
-ROOT        := /home/xenomai/fsw
+ROOT        := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 XENO_CONFIG := /usr/xenomai/bin/xeno-config
 
 # Directories:
@@ -52,8 +66,8 @@ OBJEXT := o
 CFLAGS   := $(shell $(XENO_CONFIG) --posix --alchemy --cflags)
 LDFLAGS  := $(shell $(XENO_CONFIG) --posix --alchemy --ldflags)
 
-LIB     := -lusb-1.0
-INC     := -I$(INCDIR) -I/usr/local/include
+LIB     := -lusb-1.0 -Bdynamic -lSpinnaker${D} -lSpinnaker_C${D}
+INC     := -I$(INCDIR) -I/usr/local/include -I/usr/include/spinnaker/spinc
 INCDEP  := -I$(INCDIR)
 
 # Find source and object files:
@@ -62,7 +76,7 @@ OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,\
 	$(SOURCES:.$(SRCEXT)=.$(OBJEXT)))
 
 # -------------------------------------------------------------------------- #
-# Rules
+# Rules (DO NOT EDIT)
 # -------------------------------------------------------------------------- #
 
 # Default make:

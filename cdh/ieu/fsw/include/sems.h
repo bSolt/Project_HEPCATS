@@ -30,13 +30,13 @@ extern RT_SEM cmd_mdq_sem;          // For exec_cmd and cmd_mdq task
                                     // synchronization
 extern RT_SEM cmd_ers_sem;          // For exec_cmd and cmd_ers task 
                                     // synchronization
-extern RT_SEM crt_tlm_pkt_sem;      // For crt_tlm_pkt_task and read_usb tasks
-                                    // synchronization
-extern RT_SEM flt_tbl_sem;          // For flt_tbl_task and crt_tlm_pkt_task
-                                    // synchronization
+extern RT_SEM flt_tbl_sem;          // For flt_tbl_task, read_usb, and
+                                    // get_hk_tlm task synchronization
 extern RT_SEM tx_tlm_pkt_sem;       // For tx_tlm_pkt_task, flt_tbl_task
                                     // and rtrv_file_task synchronization
 extern RT_SEM crt_file_sem;         // For crt_file_task and flt_tbl_task
                                     // synchronization
 extern RT_SEM rtrv_file_sem;        // For rtrv_file_task and cmd_sw_task
-                                    // synchronization  
+                                    // synchronization
+extern RT_SEM new_img_sem;          // For run_cam_sgl and read_usb_img task
+                                    // synchronization     

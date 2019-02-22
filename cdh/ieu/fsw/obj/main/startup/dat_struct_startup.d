@@ -16,7 +16,11 @@
  /usr/xenomai/include/cobalt/boilerplate/limits.h \
  /usr/xenomai/include/copperplate/debug.h \
  /usr/xenomai/include/cobalt/ticks.h /usr/xenomai/include/alchemy/sem.h \
- /home/xenomai/fsw/include/msg_queues.h /home/xenomai/fsw/include/sems.h
+ /usr/xenomai/include/alchemy/pipe.h \
+ /usr/xenomai/include/cobalt/uapi/kernel/pipe.h \
+ /usr/xenomai/include/alchemy/compat.h /usr/xenomai/include/trank/trank.h \
+ /home/xenomai/fsw/include/msg_queues.h \
+ /home/xenomai/fsw/include/msg_pipes.h /home/xenomai/fsw/include/sems.h
 :
 /home/xenomai/fsw/src/main/startup/dat_struct_startup.c:
 /usr/xenomai/include/cobalt/time.h:
@@ -38,5 +42,10 @@
 /usr/xenomai/include/copperplate/debug.h:
 /usr/xenomai/include/cobalt/ticks.h:
 /usr/xenomai/include/alchemy/sem.h:
+/usr/xenomai/include/alchemy/pipe.h:
+/usr/xenomai/include/cobalt/uapi/kernel/pipe.h:
+/usr/xenomai/include/alchemy/compat.h:
+/usr/xenomai/include/trank/trank.h:
 /home/xenomai/fsw/include/msg_queues.h:
+/home/xenomai/fsw/include/msg_pipes.h:
 /home/xenomai/fsw/include/sems.h:

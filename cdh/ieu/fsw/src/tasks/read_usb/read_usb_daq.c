@@ -2,8 +2,10 @@
 //
 // Read USB (Magnetometer) DAQ
 //
-// Task responsible for reading data from the magnetometer DAQ and passing
-// the source data to create telemetry packet task via message queue. 
+// Task responsible for reading data from the magnetometer DAQ, creating
+// telemetry packet transfer frames from the source data, and sending those
+// frames to the filter table task via message queue for for either downlink
+// or recording to storage for later downlink.
 //
 // Libusb is used to control data transfers from the DAQ. From the
 // manufacturer, must use the following constants:
@@ -18,8 +20,8 @@
 // packet of data. The device returns a 16 bit value for each channel. Libusb
 // converts this whole message into a char* array. Each char is 8 bits, so
 // the measurement in each channel is composed of two chars: the one at 2n and
-// the one at 2n+1. Conversion from char to a 16 bit number takes place on the
-// ground.
+// the one at 2n+1. Conversion from char to a 16 bit number takes place before
+// telemetry packet transfer frames are created.
 // (https://github.com/samdejong86/DI-2108-P-High-Speed-DAQ/blob/master/DI-2108-P.cpp)
 // -------------------------------------------------------------------------- /
 //
@@ -69,28 +71,28 @@
                               // size in bytes
 
 // Message queue definitions:
-RT_QUEUE daq_src_dat_msg_queue; // For magnetometer DAQ source data
-                                // (read_usb_daq_task --> crt_tlm_pkt_task)
+RT_QUEUE flt_tbl_msg_queue; // For telemetry packet transfer frames
+                            // (read_usb/get_hk_tlm --> flt_tbl_task)
 
 // Semaphore definitions:
-RT_SEM crt_tlm_pkt_sem; // For crt_tlm_pkt_task and read_usb tasks
-                        // synchronization
+RT_SEM flt_tbl_sem; // For flt_tbl_task, read_usb, and get_hk_tlm task
+                    // synchronization
 
 void read_usb_daq(void) {
     // Print:
     rt_printf("%d (READ_USB_DAQ_TASK) Task started\n",time(NULL));
 
-    // Task synchronize with create telemetry packet:
-    // (wait for task to be ready to receive source data)
-    rt_printf("%d (READ_USB_DAQ_TASK) Waiting for create telemetry packet task"
+    // Task synchronize with filter table task:
+    // (wait for task to be ready to telemetry packet transfer frames)
+    rt_printf("%d (READ_USB_DAQ_TASK) Waiting for filter table task"
         " to be ready\n",time(NULL));
 
     // Wait for signals:
-    rt_sem_p(&crt_tlm_pkt_sem,TM_INFINITE);
+    rt_sem_p(&flt_tbl_sem,TM_INFINITE);
 
     // Print:
-    rt_printf("%d (READ_USB_DAQ_TASK) Create telemetry packet task is" 
-        " ready; continuing\n",time(NULL));
+    rt_printf("%d (READ_USB_DAQ_TASK) Filter table task is ready;"
+        " continuing\n",time(NULL));
 
     // Definitions and initializations:
     int8_t ret_val; // Function return value
@@ -119,6 +121,10 @@ void read_usb_daq(void) {
     // Warnings:
     libusb_set_debug(ctx,3); // Set verbosity level to 3
 
+    // Print:
+    rt_printf("%d (READ_USB_DAQ_TASK) Ready to read magnetometer DAQ and"
+        " create telemetry packets\n",time(NULL));
+
     // Add device setup and all the jazz ...
 
     // Infinite loop to read magnetometer DAQ data. Libusb is used to read data
@@ -129,22 +135,7 @@ void read_usb_daq(void) {
         // message queue buffer during each iteration to fill message. When
         // exiting the while loop, will have the message buffer completely
         // filled.
-        sleep(100);
-        // Send source data to create telemetry packet task via message queue:
-        ret_val = rt_queue_write(&daq_src_dat_msg_queue,&daq_src_dat_buf,\
-            DAQ_SRC_DAT_SIZE,Q_NORMAL);
-
-        // Check success:
-        if ((ret_val > 0) || (ret_val == 0)) {
-            // Print:
-            rt_printf("%d (READ_USB_DAQ_TASK) Magnetometer DAQ source data"
-                " sent to create telemetry packet task\n",time(NULL));
-        } else {
-            rt_printf("%d (READ_USB_DAQ_TASK) Error sending magnetometer DAQ"
-                " source data to create telemetry packet task\n",\
-                time(NULL));
-            // NEED ERROR HANDLING
-        }
+        sleep(1000);
 
         // PLACEHOLDER
     }

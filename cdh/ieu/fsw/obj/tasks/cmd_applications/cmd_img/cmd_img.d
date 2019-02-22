@@ -25,7 +25,8 @@
  /usr/xenomai/include/boilerplate/setup.h \
  /usr/xenomai/include/alchemy/timer.h \
  /usr/xenomai/include/alchemy/compat.h /usr/xenomai/include/trank/trank.h \
- /usr/xenomai/include/alchemy/sem.h /home/xenomai/fsw/include/sems.h
+ /usr/xenomai/include/alchemy/sem.h /home/xenomai/fsw/include/sems.h \
+ /home/xenomai/fsw/include/init_cam.h /home/xenomai/fsw/include/acq_img.h
 /home/xenomai/fsw/src/tasks/cmd_applications/cmd_img/cmd_img.c:
 /usr/xenomai/include/cobalt/stdlib.h:
 /usr/xenomai/include/cobalt/unistd.h:
@@ -57,3 +58,5 @@
 /usr/xenomai/include/trank/trank.h:
 /usr/xenomai/include/alchemy/sem.h:
 /home/xenomai/fsw/include/sems.h:
+/home/xenomai/fsw/include/init_cam.h:
+/home/xenomai/fsw/include/acq_img.h:

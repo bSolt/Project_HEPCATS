@@ -95,7 +95,7 @@ RT_QUEUE daq_src_dat_msg_queue; // For magnetometer DAQ source data
 RT_QUEUE img_src_dat_msg_queue; // For imaging source data
                                 // (read_usb_im_task --> crt_tlm_pkt_task)
 RT_QUEUE flt_tbl_msg_queue;     // For telemetry packet transfer frames
-                                // (crt_tlm_pkt_task --> flt_tbl_task)
+                                // (read_usb/get_hk_tlm --> flt_tbl_task)
 RT_QUEUE hk_tlm_msg_queue;      // For housekeeping telemetry
                                 // (get_hk_tlm_task --> crt_tlm_pkt_task)
 
@@ -148,7 +148,7 @@ void crt_tlm_pkt(void) {
                                                     // packet transfer frame
                                                     // buffer
 
-    RTIME queue_timeout = 0.5e9; // Read message queue timeout in nanoseconds
+    RTIME queue_timeout = 100e9; // Read message queue timeout in nanoseconds
 
     // Task synchronize with read USB tasks:
     // (tell tasks that it is now ready to receive source data)

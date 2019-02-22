@@ -107,6 +107,7 @@ RT_TASK_MCB cmd_xfr_frm_mcb; // For command transfer frame to command
                              // application tasks
 RT_TASK_MCB rply_mcb;        // For command execution status reply message
                              // command applications
+
 // Housekeeping telemetry variable definitions:
 uint8_t val_cmd_apid_cnt = 0; // Valid command counter
 uint8_t inv_cmd_apid_cnt = 0; // Invalid command counter
@@ -287,7 +288,7 @@ void exec_cmd(void* arg) {
                 // Send command transfer frame to final destination via
                 // synchronous message passing. Final destination is command
                 // application task. Reply required from destination task for
-                // command execution status.
+                // command execution status:
                 ret_val = rt_task_send(&dest_task,&cmd_xfr_frm_mcb,\
                     &rply_mcb,TM_INFINITE);
 
@@ -321,9 +322,6 @@ void exec_cmd(void* arg) {
                     // Print:
                     rt_printf("%d (EXEC_CMD_TASK) Command execution status"
                     " is unkown\n",time(NULL));
-
-                    // Increment counter:   
-                    ++cmd_exec_err_cnt;
                 }
             // Invalid command APID:
             } else {
