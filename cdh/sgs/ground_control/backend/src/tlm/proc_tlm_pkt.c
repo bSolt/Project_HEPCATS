@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Process Telemetry Packet
-// 
+//
 // Telemetry packet processor
 //
 // -------------------------------------------------------------------------- /
@@ -30,9 +30,11 @@
 #include <stdint.h>  // Integer types
 
 // Macro definitions:
-#define APID_SW 0x00  // Software origin
+#define APID_SW  0x00 // Software origin
 #define APID_IMG 0x64 // Image origin
 #define APID_MDQ 0xC8 // Magnetometer DAQ origin
+
+#define TLM_PKT_USR_DAT_SIZE 1064 // Telemetry packet user data size in bytes
 
 // Telemetry processor function
 void proc_tlm_pkt(char* buffer) {   
@@ -44,16 +46,17 @@ void proc_tlm_pkt(char* buffer) {
     uint32_t pkt_dat_fld_sec_hdr_t_fld_sec;
     uint16_t pkt_dat_fld_sec_hdr_t_fld_msec;
     uint8_t pkt_dat_fld_sec_hdr_p_fld;
-    uint32_t pkt_dat_fld_usr_data;
+    char pkt_dat_fld_usr_data[TLM_PKT_USR_DAT_SIZE];
     uint16_t pkt_dat_fld_pkt_err_cnt;
 
-    uint8_t val_telecmd_pkt_cnt; // Valid telecommand packet counter
-    uint8_t inv_telecmd_pkt_cnt; // Invalid telecommand packet counter
-    uint8_t rx_telecmd_pkt_cnt;  // Received telecommand packet count
-    uint8_t val_cmd_apid_cnt;    // Valid command counter
-    uint8_t inv_cmd_apid_cnt;    // Invalid command counter
-    uint8_t cmd_exec_suc_cnt;    // Commands executed successfully counter
-    uint8_t cmd_exec_err_cnt;    // Commands not executed (error) counter
+    uint8_t  val_telecmd_pkt_cnt = 0;     // Valid telecommand packet counter
+    uint8_t  inv_telecmd_pkt_cnt = 0;     // Invalid telecommand packet counter
+    uint8_t  rx_telecmd_pkt_cnt = 0;      // Received telecommand packet count
+    uint8_t  val_cmd_apid_cnt = 0;        // Valid command counter
+    uint8_t  inv_cmd_apid_cnt = 0;        // Invalid command counter
+    uint8_t  cmd_exec_suc_cnt = 0;        // Commands executed successfully counter
+    uint8_t  cmd_exec_err_cnt = 0;        // Commands not executed (error) counter
+    uint16_t tlm_pkt_xfr_frm_seq_cnt = 0; // Packet sequence count
 
     char file_path[50];
     char file_name[100];
@@ -133,10 +136,6 @@ void proc_tlm_pkt(char* buffer) {
     pkt_p_fld_frc = pkt_dat_fld_sec_hdr_p_fld & 0xC0; // Mask to keep bit 6-7
     pkt_p_fld_frc = pkt_p_fld_frc >> 6;               // Shift right by 5 bits
 
-    // Packet Data Field Application Data
-    int pkt_usr_data[1064]; 
-    memcpy(pkt_usr_data,&pkt_dat_fld_usr_data,1064);
-
     // Packet Data Field Packet Error Control:
     uint16_t pkt_err_cnt = pkt_dat_fld_pkt_err_cnt;
 
@@ -144,21 +143,23 @@ void proc_tlm_pkt(char* buffer) {
     // magnetometer data, save file:
     if (pkt_id_apid == APID_SW) {
         // Parse data:
-        memcpy(&rx_telecmd_pkt_cnt,pkt_usr_data+0,1);
-        memcpy(&val_telecmd_pkt_cnt,pkt_usr_data+1,1);
-        memcpy(&inv_telecmd_pkt_cnt,pkt_usr_data+2,1);
-        memcpy(&val_cmd_apid_cnt,pkt_usr_data+3,1);
-        memcpy(&inv_cmd_apid_cnt,pkt_usr_data+4,1);
-        memcpy(&cmd_exec_suc_cnt,pkt_usr_data+5,1);
-        memcpy(&cmd_exec_err_cnt,pkt_usr_data+6,1);
+        memcpy(&rx_telecmd_pkt_cnt,pkt_dat_fld_usr_data+0,1);
+        memcpy(&val_telecmd_pkt_cnt,pkt_dat_fld_usr_data+1,1);
+        memcpy(&inv_telecmd_pkt_cnt,pkt_dat_fld_usr_data+2,1);
+        memcpy(&val_cmd_apid_cnt,pkt_dat_fld_usr_data+3,1);
+        memcpy(&inv_cmd_apid_cnt,pkt_dat_fld_usr_data+4,1);
+        memcpy(&cmd_exec_suc_cnt,pkt_dat_fld_usr_data+5,1);
+        memcpy(&cmd_exec_err_cnt,pkt_dat_fld_usr_data+6,1);
+        memcpy(&tlm_pkt_xfr_frm_seq_cnt,pkt_dat_fld_usr_data+7,2);
 
         // Print:
-        printf("%u,%u,%u,%u,%u,%u,%u\n",rx_telecmd_pkt_cnt,\
+        printf("%u,%u,%u,%u,%u,%u,%u,%u\n",rx_telecmd_pkt_cnt,\
             val_telecmd_pkt_cnt,inv_telecmd_pkt_cnt,val_cmd_apid_cnt,\
-            inv_cmd_apid_cnt,cmd_exec_suc_cnt,cmd_exec_err_cnt);
+            inv_cmd_apid_cnt,cmd_exec_suc_cnt,cmd_exec_err_cnt,\
+            tlm_pkt_xfr_frm_seq_cnt);
     } else if (pkt_id_apid == APID_MDQ) {
         // Set file path:
-        strcpy(file_path,"/tmp/mag/");
+        strcpy(file_path,"/home/xenomai/temp/mag/");
 
         // Create file name:
         sprintf(file_name,"%s%u_%u.bin",file_path,pkt_t_fld_sec,pkt_t_fld_msec);
@@ -167,7 +168,7 @@ void proc_tlm_pkt(char* buffer) {
         FILE* file_ptr = fopen(file_name,"wb");
 
         // Print user data to file:
-        fwrite(&pkt_usr_data,1,1064,file_ptr);
+        fwrite(&pkt_dat_fld_usr_data,1,1064,file_ptr);
 
         // Close file:
         fclose(file_ptr);
@@ -175,17 +176,17 @@ void proc_tlm_pkt(char* buffer) {
         // If first segment, create new file:
         if (pkt_seq_cnt_grp_flg == 1) {
             // Set filepath:
-            strcpy(file_path,"/tmp/img/");
+            strcpy(file_path,"/home/xenomai/temp/img/");
 
             // Create file name:
             sprintf(file_name,"%s%u_%u.bin",file_path,pkt_t_fld_sec,\
                 pkt_t_fld_msec);
-            
+
             // Open file:
             FILE* file_ptr = fopen(file_name,"wb");
 
             // Print user data to file:
-            fwrite(&pkt_usr_data,1,1064,file_ptr);
+            fwrite(&pkt_dat_fld_usr_data,1,1064,file_ptr);
 
             // Close file:
             fclose(file_ptr);
@@ -213,37 +214,14 @@ void proc_tlm_pkt(char* buffer) {
             file_ptr = fopen(file_name,"ab");
 
              // Print user data to file:
-            fwrite(&pkt_usr_data,1,1064,file_ptr);
+            fwrite(&pkt_dat_fld_usr_data,1,1064,file_ptr);
 
             // Close file:
             fclose(file_ptr);
         }
     }
 
-    // Print results:
-    printf("Packet Header\n");
-    printf("  Packet I.D.\n");
-    printf("      Version               : %u\n",pkt_id_vrs);
-    printf("      Type                  : %u\n",pkt_id_typ);
-    printf("      Secondary Header Flag : %u\n",pkt_id_sec_hdr_flg);
-    printf("      APID                  : %u\n",pkt_id_apid);
-    printf("  Packet Sequence Control\n");
-    printf("      Grouping Flags        : %u\n",pkt_seq_cnt_grp_flg);
-    printf("      Sequence Count        : %u\n",pkt_seq_cnt_pkt_name);
-    printf("  Packet Length\n");
-    printf("      Packet Length         : %u\n",pkt_len);
-    printf("Packet Data Field\n");
-    printf("  Packet Secondary Header\n");
-    printf("      T-Field Sec             : %u\n",pkt_t_fld_sec);
-    printf("      T-Field mSec            : %u\n",pkt_t_fld_msec);
-    printf("      P-Field Ext             : %u\n",pkt_p_fld_ext);
-    printf("      P-Field I.D.            : %u\n",pkt_p_fld_id);
-    printf("      P-Field Basic Octets    : %u\n",pkt_p_fld_bas);
-    printf("      P-Field Fraction Octets : %u\n",pkt_p_fld_frc);
-    printf("  Packet Error Control\n");
-    printf("      Packet Error Control  : %u\n",pkt_err_cnt);
-    printf("\n");
-
+    // Will never reach this:
     return;
 }
 
