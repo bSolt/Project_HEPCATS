@@ -3,11 +3,10 @@ import cv2
 import numpy as np
 
 
-def auto_crop(im_array):
+def auto_crop(im_array,
+    startingRadius = 50, radiusDelta = 25, endingRadius = 1000):
     # Radii Parameters
-    startingRadius = 100
-    radiusDelta = 25
-    endingRadius = 600
+    radiusDelta = (endingRadius-startingRadius)//20
 
     # Detection Parameters
     blurSigma = 15
