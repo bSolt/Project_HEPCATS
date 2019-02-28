@@ -13,7 +13,7 @@ echo "Running C Script"
 ./write_pipe $IMG $PIPE &
 
 echo "Running Python Script"
-python3 ips_ieu_script.py $PIPE
+python3 ips_ieu_script.py $PIPE test
 
 
 rm $PIPE

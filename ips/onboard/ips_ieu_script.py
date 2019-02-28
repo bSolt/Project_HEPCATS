@@ -14,11 +14,24 @@
 import tensorflow as tf
 import numpy as np
 import os, sys, rawpy, zlib, cv2
-import argparse as ap
+import argparse
 # This one is a custom buffer reading object
 from FixedBufferReader import FixedBufferReader
 # This one is the cropping function based on circle segmentation
 from croppingScript import auto_crop
+
+ap = argparse.ArgumentParser()
+ap.add_argument("pipe", type=str, default="/dev/rtp0",
+  help="name of pipe (fifo) to use")
+ap.add_argument("image_type", type=str, default="ieu",
+  help="string for method of reading image: test for using rawpy or ieu for direct array file")
+
+args = vars(ap.parse_args())
+# IMAGE_FORMAT = "test"
+# Use this option for IEU integration
+IMAGE_FORMAT = args['image_type']
+# Name of pipe to be used
+COMM_PIPE = args['pipe']
 
 def read_raw(pipe):
 	row = 1920; col = 1200;
@@ -28,20 +41,8 @@ def read_raw(pipe):
 
 	return rgb_arr
 
-# Use this option for testing
-# IMAGE_FORMAT = "test"
-# Use this option for IEU integration
-IMAGE_FORMAT = "test"
-
 # This will be the file containing the full neural network model
 MODEL_FILE = "../models/winter_model_1.h5"
-
-# Get pipe name from sys.argv if necessary
-if len(sys.argv)>1:
-	COMM_PIPE = sys.argv[1]
-else:
-	# Assume this name as a default
-	COMM_PIPE = "/dev/rtp0"
 
 # Threshold for Aurora Detection
 THRESHOLD = 0.5
@@ -112,7 +113,8 @@ while(run):
 		# Current strategy: Encode image to jpeg, then apply zlib
 		result, buf = cv2.imencode('.png', rgb_crop)
 		compr_stream = zlib.compress(buf,zlib.Z_BEST_COMPRESSION)
-		print("[P] Image compressed to size {}".format(len(compr_stream)))
+		print("[P] Image compressed to size {}\tratio = {}".format(\
+			len(compr_stream),len(compr_stream)/BYTES))
 		# Write to pipe part
 		print("[P] Attempting to write to {}".format(COMM_PIPE))
 		# First we write the size of the compressed buffer as a 32 bit unsigned integer
