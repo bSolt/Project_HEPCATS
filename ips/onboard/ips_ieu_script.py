@@ -14,6 +14,7 @@
 import tensorflow as tf
 import numpy as np
 import os, sys, rawpy, zlib, cv2
+import argparse as ap
 # This one is a custom buffer reading object
 from FixedBufferReader import FixedBufferReader
 # This one is the cropping function based on circle segmentation
@@ -30,7 +31,7 @@ def read_raw(pipe):
 # Use this option for testing
 # IMAGE_FORMAT = "test"
 # Use this option for IEU integration
-IMAGE_FORMAT = "ieu"
+IMAGE_FORMAT = "test"
 
 # This will be the file containing the full neural network model
 MODEL_FILE = "../models/winter_model_1.h5"
@@ -45,6 +46,9 @@ else:
 # Threshold for Aurora Detection
 THRESHOLD = 0.5
 
+# Read the neural network model from a file
+model = tf.keras.models.load_model(MODEL_FILE)
+
 # Expected RAW image size
 if ( IMAGE_FORMAT=='test' ):
 	BYTES = 9861950; #This is for the testing image
@@ -58,8 +62,6 @@ p_in = FixedBufferReader(p0.raw, read_size=BYTES)
 
 # Create Buffer writier object for output
 p_out = open(COMM_PIPE, 'wb')
-
-model = tf.keras.models.load_model(MODEL_FILE)
 
 #The program will loop while run is True
 # It is not designed to stop in its current state
@@ -81,6 +83,8 @@ while(run):
 	elif ( IMAGE_FORMAT=='ieu'):
 		rgb_arr = read_raw(p_in)
 
+	# from matplotlib import pyplot as plts
+	# plt.imshow(rgb_arr); plt.show()
 	# KIAN'S FUNCTION
 	# Run time is lacking, needs optimization
 	print("[P] Now cropping... Cross your fingers")
