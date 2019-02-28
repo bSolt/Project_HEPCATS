@@ -5,9 +5,9 @@ import numpy as np
 
 def auto_crop(im_array):
     # Radii Parameters
-    startingRadius = 800
+    startingRadius = 100
     radiusDelta = 25
-    endingRadius = 1200
+    endingRadius = 600
 
     # Detection Parameters
     blurSigma = 15

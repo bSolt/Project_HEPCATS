@@ -21,7 +21,9 @@ from croppingScript import auto_crop
 
 def read_raw(pipe, read_size):
 	row = 1920; col = 1200;
-	raw_arr = np.frombuffer(os.read(pipe, read_size),np.uint8).reshape((col,row))
+	raw_arr = np.frombuffer(
+		os.read(pipe, read_size)
+		,np.uint8).reshape((col,row))
 	# blk_arr = cv2.cvtColor(raw_arr, cv2.COLOR_BayerBG2GRAY)
 	rgb_arr = cv2.cvtColor(raw_arr, cv2.COLOR_BayerBG2RGB)
 
