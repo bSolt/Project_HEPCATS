@@ -39,11 +39,11 @@
 
 void main(int argc, char const *argv[]) {
     // Open port:
-    int fd = open_port("/dev/pts/3");
+    int fd = open_port("/dev/pts/5");
 
     // Allocate buffer for telemetry packet:
     char* buf = malloc(1080*sizeof(char));
-        
+
     // Read from port forever:
     while(1) {
         // Read from port:
