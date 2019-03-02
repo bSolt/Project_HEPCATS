@@ -116,13 +116,13 @@ void crt_tlm_pkt_xfr_frm(char* src_dat, size_t src_dat_size,
     // as the packet's user data size:
     if (src_dat_size == TLM_PKT_USR_DAT_SIZE) {
         // Set packet user data to source data:
-        memcpy(pkt_dat_fld.pkt_usr_dat,&src_dat,TLM_PKT_USR_DAT_SIZE);
+        memcpy(pkt_dat_fld.pkt_usr_dat,src_dat,TLM_PKT_USR_DAT_SIZE);
     } else {
         // Populate packet user data with source data:
-        memcpy(pkt_dat_fld.pkt_usr_dat,&src_dat,src_dat_size);
+        memcpy(pkt_dat_fld.pkt_usr_dat+0,src_dat,src_dat_size);
 
-        // Populate remaining space with NULL:
-        memset(pkt_dat_fld.pkt_usr_dat+src_dat_size,NULL,\
+        // Populate remaining space with "E":
+        memset(pkt_dat_fld.pkt_usr_dat+src_dat_size,"E",\
             (TLM_PKT_USR_DAT_SIZE - src_dat_size));
     } 
 

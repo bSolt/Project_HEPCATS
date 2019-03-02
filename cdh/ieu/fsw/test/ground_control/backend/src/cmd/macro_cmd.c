@@ -46,7 +46,7 @@ void macro_cmd(char* cmd_str_arr[]) {
     buffer = crt_telecmd_pkt(telecmd_pkt_inputs,buffer);
 
     // Open port:
-    int fd = open_port("/dev/pts/15");
+    int fd = open_port("/dev/pts/3");
 
     // Write buffer to port:
     write_port(fd, buffer);

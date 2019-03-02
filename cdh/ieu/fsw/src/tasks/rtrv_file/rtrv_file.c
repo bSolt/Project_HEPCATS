@@ -23,12 +23,12 @@
 // downlinked oldest -> newest. Files are found as binary files in the
 // following tree (names may not be correct but structure is)
 //
-//  |--data
-//     |-- mag
+//  |--raw_record_tlm
+//     |-- mdq
 //         |-- sec_msec.dat
 //         |-- sec_msec.dat
 //         |-- ...
-//         |-- mag_dir.ls
+//         |-- mdq_dir.ls
 //     |-- img
 //         |-- sec_msec
 //             |-- 1.dat
@@ -196,8 +196,8 @@ void rtrv_file(void* arg) {
         // Check command argument to retrieve files:
         if (cmd_arg == ARG_SW) { 
             // Print:
-            rt_printf("%d (RTRV_FILE_TASK) Dumping housekeeping"
-                " data\n",time(NULL));
+            rt_printf("%d (RTRV_FILE_TASK) Starting stored housekeeping"
+                " data playback\n",time(NULL));
 
             // Open directory listing file:
             dir_ls_file_ptr = fopen("/home/xenomai/data/hk/hk_dir.ls", "r");
@@ -210,7 +210,7 @@ void rtrv_file(void* arg) {
                 // Ignore directory listing file:
                 if (strcmp(file_line,"hk_dir.ls") != 0) {
                     // Append directory to file name:
-                    sprintf(file_path,"/home/xenomai/data/hk/%s",file_line);
+                    sprintf(file_path,"../raw_record_tlm/hk/%s",file_line);
 
                     // Open file to read
                     src_dat_file_ptr = fopen(file_path,"rb");
@@ -231,6 +231,16 @@ void rtrv_file(void* arg) {
                         rt_printf("%d (RTRV_FILE_TASK) Telemetry packet"
                             " transfer frame sent to transmit telemetry packet"
                             " task\n",time(NULL));
+                    } else if (ret_val == -ENOMEM) {
+                        // Wait for a set time to allow transmit task to
+                        // process message queue:
+                        sleep(0.35);
+
+                        // Send transfer frame to filter table task via message
+                        // queue:
+                        ret_val = rt_queue_write(&tx_tlm_pkt_msg_queue,\
+                            &tlm_pkt_xfr_frm_buf,TLM_PKT_XFR_FRM_SIZE,\
+                            Q_NORMAL); // Append message to queue
                     } else {
                         // Print:
                         rt_printf("%d (RTRV_FILE_TASK) Error sending telemetry"
@@ -246,15 +256,19 @@ void rtrv_file(void* arg) {
                 }
             }
 
+            // Print:
+            rt_printf("%d (RTRV_FILE_TASK) Housekeeping data playback"
+                " complete\n",time(NULL));
+
             // Close file:
             fclose(dir_ls_file_ptr);
         } else if (cmd_arg == ARG_MDQ) {
             // Print:
-            rt_printf("%d (RTRV_FILE_TASK) Dumping magnetometer DAQ"
-                " data\n",time(NULL));
+            rt_printf("%d (RTRV_FILE_TASK) Starting stored magnetometer DAQ"
+                " playback\n",time(NULL));
 
             // Open directory listing file:
-            dir_ls_file_ptr = fopen("/home/xenomai/data/mag/mag_dir.ls", "r");
+            dir_ls_file_ptr = fopen("../raw_record_tlm/mdq/mdq_dir.ls", "r");
 
             // Loop to read directory listing file:
             while (fgets(file_line,sizeof(file_line),dir_ls_file_ptr) != NULL) {
@@ -264,7 +278,7 @@ void rtrv_file(void* arg) {
                 // Ignore directory listing file:
                 if (strcmp(file_line,"mag_dir.ls") != 0) {
                     // Append directory to file name:
-                    sprintf(file_path,"/home/xenomai/data/mag/%s",file_line);
+                    sprintf(file_path,"../raw_record_tlm/mdq/%s",file_line);
 
                     // Open file to read
                     src_dat_file_ptr = fopen(file_path,"rb");
@@ -285,6 +299,16 @@ void rtrv_file(void* arg) {
                         rt_printf("%d (RTRV_FILE_TASK) Telemetry packet"
                             " transfer frame sent to transmit telemetry packet"
                             " task\n",time(NULL));
+                    } else if (ret_val == -ENOMEM) {
+                        // Wait for a set time to allow transmit task to
+                        // process message queue:
+                        sleep(0.35);
+
+                        // Send transfer frame to filter table task via message
+                        // queue:
+                        ret_val = rt_queue_write(&tx_tlm_pkt_msg_queue,\
+                            &tlm_pkt_xfr_frm_buf,TLM_PKT_XFR_FRM_SIZE,\
+                            Q_NORMAL); // Append message to queue
                     } else {
                         // Print:
                         rt_printf("%d (RTRV_FILE_TASK) Error sending telemetry"
@@ -300,21 +324,26 @@ void rtrv_file(void* arg) {
                 }
             }
 
+            // Print:
+            rt_printf("%d (RTRV_FILE_TASK) Magnetometer DAQ data playback"
+                " complete\n",time(NULL));
+
             // Close file:
             fclose(dir_ls_file_ptr);
         } else if (cmd_arg == ARG_IMG) {
             // Print:
-            rt_printf("%d (RTRV_FILE_TASK) Dumping imaging data\n",time(NULL));
+            rt_printf("%d (RTRV_FILE_TASK) Starting stored imaging data"
+                " playback\n",time(NULL));
 
             // Open directory:
-            dir = opendir("/home/xenomai/data/img/");
+            dir = opendir("../raw_record_tlm/img/");
 
             // Loop to read directory listing file:
             while ((ent = readdir(dir)) != NULL) {
                 // Only accept listing files (and not directories):
                 if(strstr(ent->d_name, "_dir.ls") != NULL) {
                     // Create full file name:
-                    sprintf(file_name,"/home/xenomai/data/img/%s",ent->d_name);
+                    sprintf(file_name,"../raw_record_tlm/img/%s",ent->d_name);
 
                     // Open directory listing file:
                     dir_ls_file_ptr = fopen(file_name, "r");
@@ -326,7 +355,7 @@ void rtrv_file(void* arg) {
                         file_line[strcspn(file_line,"\n")] = 0;
 
                         // Append directory to file name:
-                        sprintf(file_path,"/home/xenomai/data/img/%.*s/%s",14,\
+                        sprintf(file_path,"../raw_record_tlm/img/%.*s/%s",14,\
                             ent->d_name,file_line);
 
                         // Open file to read
@@ -348,6 +377,16 @@ void rtrv_file(void* arg) {
                             rt_printf("%d (RTRV_FILE_TASK) Telemetry packet"
                                 " transfer frame sent to transmit telemetry"
                                 " packet task\n",time(NULL));
+                        } else if (ret_val == -ENOMEM) {
+                            // Wait for a set time to allow transmit task to
+                            // process message queue:
+                            sleep(0.35);
+
+                            // Send transfer frame to filter table task via
+                            // message queue:
+                            ret_val = rt_queue_write(&tx_tlm_pkt_msg_queue,\
+                                &tlm_pkt_xfr_frm_buf,TLM_PKT_XFR_FRM_SIZE,\
+                                Q_NORMAL); // Append message to queue
                         } else {
                             // Print:
                             rt_printf("%d (RTRV_FILE_TASK) Error sending"
@@ -365,6 +404,10 @@ void rtrv_file(void* arg) {
                     fclose(dir_ls_file_ptr);
                 }
             }
+            // Print:
+            rt_printf("%d (RTRV_FILE_TASK) Image data playback"
+                " complete\n",time(NULL));
+
             // Close directory:
             closedir(dir);
         }

@@ -16,12 +16,12 @@
 // Files are created as binary files and stored in the following tree 
 // (names may not be correct but structure is)
 //
-//  |--data
-//     |-- mag
+//  |--raw_record_tlm
+//     |-- mdq
 //         |-- sec_msec.dat
 //         |-- sec_msec.dat
 //         |-- ...
-//         |-- mag_dir.ls
+//         |-- mdq_dir.ls
 //     |-- img
 //         |-- sec_msec
 //             |-- 1.dat
@@ -163,28 +163,28 @@ void crt_file(void* arg) {
         if (tlm_pkt_xfr_frm_apid == APID_SW) { 
             // Set file name dynamically:
             // (Name with format seconds_milliseconds.bin)
-            sprintf(file_name,"/home/xenomai/data/hk/%u_%u.bin",\
+            sprintf(file_name,"../raw_record_tlm/hk/%u_%u.bin",\
                 tlm_pkt_xfr_frm_sec,tlm_pkt_xfr_frm_msec);
 
             // Create listing directory command:
-            sprintf(sys_cmd,"ls /home/xenomai/data/hk/ >"
-                " /home/xenomai/data/hk/hk_dir.ls");
+            sprintf(sys_cmd,"ls ../raw_record_tlm/hk/ >"
+                " ../raw_record_tlm/hk/hk_dir.ls");
         } else if (tlm_pkt_xfr_frm_apid == APID_MDQ) {
             // Set file name dynamically:
             // (Name with format seconds_milliseconds.bin)
-            sprintf(file_name,"/home/xenomai/data/mag/%u_%u.bin",\
+            sprintf(file_name,"../raw_record_tlm/mdq/%u_%u.bin",\
                 tlm_pkt_xfr_frm_sec,tlm_pkt_xfr_frm_msec);
 
             // Create listing directory command:
-            sprintf(sys_cmd,"ls /home/xenomai/data/mag/ >"
-                " /home/xenomai/data/mag/mag_dir.ls");
+            sprintf(sys_cmd,"ls ../raw_record_tlm/mdq/ >"
+                " ../raw_record_tlm/mdq/mdq_dir.ls");
         } else if (tlm_pkt_xfr_frm_apid == APID_IMG) {
             // Check grouping flag. If first segment, create new directory;
             // otherwise, use current directory and just update file name:
             if (tlm_pkt_xfr_frm_grp_flg == 1) {
                 // Create directory name:
                 // (with format seconds_milliseconds/)
-                sprintf(dir_name,"/home/xenomai/data/img/%u_%u",\
+                sprintf(dir_name,"../raw_record_tlm/img/%u_%u",\
                     tlm_pkt_xfr_frm_sec,tlm_pkt_xfr_frm_msec);
 
                 // Create make directory command:

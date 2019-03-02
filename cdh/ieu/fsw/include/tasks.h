@@ -26,8 +26,8 @@ extern RT_TASK cmd_mdq_task;          // Execute magnetometer DAQ command
 extern RT_TASK cmd_ers_task;          // Execute electrical relay switch
                                       // command
 extern RT_TASK crt_tlm_pkt_task;      // Create telemetry packet
-extern RT_TASK read_usb_daq_task;     // Read magnetometer DAQ
-extern RT_TASK read_usb_img_task;     // Read imaging
+extern RT_TASK cmd_img_task;          // Execute imaging command
+extern RT_TASK cmd_mdq_task;          // Execute magnetometer DAQ command
 extern RT_TASK flt_tbl_task;          // (Telemetry) Filter table
 extern RT_TASK tx_tlm_pkt_task;       // Transmit telemetry packet to downlink
                                       // serial port
@@ -47,8 +47,8 @@ void cmd_img(void* arg);           // Execute imaging command
 void cmd_mdq(void* arg);           // Execute magnetometer DAQ command
 void cmd_ers(void* arg);           // Execute electrical relay switch command
 void crt_tlm_pkt(void* arg);       // Create telemetry packet 
-void read_usb_daq(void* arg);      // Read magnetometer DAQ
-void read_usb_img(void* arg);      // Read imaging
+void read_mdq(void* arg);          // Read magnetometer DAQ
+void read_img(void* arg);          // Read imaging
 void flt_tbl(void* arg);           // (Telemetry) Filter table
 void tx_tlm_pkt(void* arg);        // Transmit telemetry packet to downlink
                                    // serial port

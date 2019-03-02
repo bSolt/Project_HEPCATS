@@ -50,7 +50,7 @@ RT_QUEUE cmd_xfr_frm_msg_queue; // For command transfer frames
                                 // (proc_telecmd_pkt_task/cmd_sched_task
                                 //  --> exec_cmd_task)
 RT_QUEUE flt_tbl_msg_queue;     // For telemetry packet transfer frames
-                                // (read_usb/get_hk_tlm --> flt_tbl_task)
+                                // (read_mdq/img/get_hk_tlm --> flt_tbl_task)
 RT_QUEUE tx_tlm_pkt_msg_queue;  // For telemetry packets
                                 // (flt_tbl_task/rtrv_file_task
                                 // --> tx_tlm_pkt_task)
@@ -81,7 +81,10 @@ RT_SEM crt_file_sem;         // For crt_file_task and flt_tbl_task
 RT_SEM rtrv_file_sem;        // For rtrv_file_task and cmd_sw_task
                              // synchronization
 RT_SEM new_img_sem;          // For run_cam_sgl and read_usb_img task
-                             // synchronization    
+                             // synchronization
+RT_SEM mdq_init_sem;         // For init_mdq and read_mdq task synchronization    
+RT_SEM read_mdq_sem;         // For cmd_mdq and read_mdq task synchronization
+                             // to indicate when DAQ is readable (scanning)
 
 // Macro definitions:
 #define TELECMD_PKT_QUEUE_NMSG 10 // Message queue limit
@@ -149,6 +152,8 @@ void crt_sems() {
     rt_sem_create(&crt_file_sem,"crt_file_sem",0,S_FIFO);
     rt_sem_create(&rtrv_file_sem,"rtrv_file_sem",0,S_FIFO);
     rt_sem_create(&new_img_sem,"new_img_sem",0,S_FIFO);
+    rt_sem_create(&mdq_init_sem,"mdq_init_sem",0,S_FIFO);
+    rt_sem_create(&read_mdq_sem,"read_mdq_sem",0,S_FIFO);
 
     // Print:
     rt_printf("%d (STARTUP/CRT_SEMS)"

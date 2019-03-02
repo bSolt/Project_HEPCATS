@@ -418,8 +418,8 @@ void proc_telecmd_pkt(void) {
         // Check success:
         if (ret_val > 0) {
             // Print:
-            rt_printf("%d (PROC_TELECMD_PKT_TASK) Command transfer frame" 
-            " sent to execute command task\n",time(NULL));
+            //rt_printf("%d (PROC_TELECMD_PKT_TASK) Command transfer frame" 
+            //" sent to execute command task\n",time(NULL));
         } else {
             // Print:
             rt_printf("%d (PROC_TELECMD_PKT_TASK) Error sending command"

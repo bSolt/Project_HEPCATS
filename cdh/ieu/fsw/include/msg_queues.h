@@ -22,7 +22,7 @@ extern RT_QUEUE cmd_xfr_frm_msg_queue; // For command transfer frames
                                        // (proc_telecmd_pkt_task/cmd_sched_task
                                        //  --> exec_cmd_task)
 extern RT_QUEUE flt_tbl_msg_queue;     // For telemetry packet transfer frames
-                                       // (read_usb/get_hk_tlm
+                                       // (read_mdq/img/get_hk_tlm
                                        //  --> flt_tbl_task)
 extern RT_QUEUE tx_tlm_pkt_msg_queue;  // For telemetry packets transfer frames
                                        // (flt_tbl_task/rtrv_file_task

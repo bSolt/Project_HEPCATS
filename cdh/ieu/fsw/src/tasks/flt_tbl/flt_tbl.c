@@ -51,6 +51,7 @@
 // Header files:
 #include <msg_queues.h> // Message queue variable declarations
 #include <sems.h>       // Semaphore variable declarations
+#include <hk_tlm_var.h> // Housekeeping telemetry variable declarations
 
 // Macro definitions:
 #define TLM_PKT_XFR_FRM_SIZE 1089 // Telemetry transfer frame size in bytes
@@ -61,7 +62,7 @@
 
 // Message queue definitions:
 RT_QUEUE flt_tbl_msg_queue;     // For telemetry packet transfer frames
-                                // (crt_tlm_pkt_task --> flt_tbl_task)
+                                // (read_mdq/img/get_hk_tlm --> flt_tbl_task)
 RT_QUEUE tx_tlm_pkt_msg_queue;  // For telemetry packets
                                 // (flt_tbl_task/rtrv_file_task
                                 // --> tx_tlm_pkt_task)
@@ -69,11 +70,14 @@ RT_QUEUE crt_file_msg_queue;    // For telemetry packet transfer frames
                                 // (flt_tbl_task --> crt_file_task)
 
 // Semaphore definitions:
-RT_SEM flt_tbl_sem;     // For flt_tbl_task, read_usb, and get_hk_tlm task
+RT_SEM flt_tbl_sem;     // For flt_tbl_task, read_mdq/img, and get_hk_tlm task
                         // synchronization
 RT_SEM tx_tlm_pkt_sem;  // For tx_tlm_pkt_task and flt_tbl_task
                         // synchronization
 RT_SEM crt_file_sem;    // For crt_file_task and flt_tbl_task synchronization 
+
+// Global variable definitions:
+uint8_t flt_tbl_mode = 0; // Filter table mode
 
 void flt_tbl(void* arg) {
     // Print:
@@ -199,8 +203,8 @@ void flt_tbl(void* arg) {
             }
         } else {
             // Print:
-            rt_printf("%d (FLT_TBL_TASK) Telemetry packet will not be"
-                " downlinked\n",time(NULL));
+            //rt_printf("%d (FLT_TBL_TASK) Telemetry packet will not be"
+                //" downlinked\n",time(NULL));
         }
 
         // If directed to record, send transfer frame to create file task via
@@ -229,8 +233,8 @@ void flt_tbl(void* arg) {
             }
         } else {
             // Print:
-            rt_printf("%d (FLT_TBL_TASK) Telemetry packet will not be"
-                " recorded\n",time(NULL));
+            //rt_printf("%d (FLT_TBL_TASK) Telemetry packet will not be"
+            //    " recorded\n",time(NULL));
         }
 
     }

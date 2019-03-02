@@ -109,8 +109,8 @@ RT_TASK_MCB rply_mcb;        // For command execution status reply message
                              // command applications
 
 // Housekeeping telemetry variable definitions:
-uint8_t val_cmd_apid_cnt = 0; // Valid command counter
-uint8_t inv_cmd_apid_cnt = 0; // Invalid command counter
+uint8_t val_cmd_cnt = 0;      // Valid command counter
+uint8_t inv_cmd_cnt = 0;      // Invalid command counter
 uint8_t cmd_exec_suc_cnt = 0; // Commands executed successfully counter
 uint8_t cmd_exec_err_cnt = 0; // Commands not executed (error) counter
 
@@ -283,7 +283,7 @@ void exec_cmd(void* arg) {
             // Check for valid APID (command APID matches known destinations):
             if (val_apid_flg == 1) {
                 // Increase counter:
-                ++val_cmd_apid_cnt;
+                ++val_cmd_cnt;
 
                 // Send command transfer frame to final destination via
                 // synchronous message passing. Final destination is command
@@ -326,7 +326,7 @@ void exec_cmd(void* arg) {
             // Invalid command APID:
             } else {
                 // Increase counter:
-                ++inv_cmd_apid_cnt;
+                ++inv_cmd_cnt;
 
                 // Set valid APID flag to true:
                 val_apid_flg = 1;
