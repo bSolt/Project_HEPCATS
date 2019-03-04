@@ -21,7 +21,7 @@ from scipy import stats as stats
 
 # The default ptdnn to be used if a different one is not specified
 default_net = "xception"
-default_train = "polar"
+default_train = "winter2"
 
 """The first block of code defines several metrics which will be used to gauge 
 the network's performance. Included in this is the F1 score, which is a 
@@ -98,10 +98,11 @@ ap.add_argument("-p", "--plotting", action='store_const',
 args = vars(ap.parse_args())
 
 DIRS = {
-  "polar": "./training_v1/",
-  "iss": "./color/ISS/",
-  "image": "./IMAGE/",
-  "winter": "./winter_data/png/"
+  # "polar": "./training_v1/",
+  # "iss": "./color/ISS/",
+  # "image": "./IMAGE/",
+  "winter1": "../winter_data/png_v1/",
+  "winter2": "../winter_data/png_v2/"
 }
 
 if args["training"] not in DIRS.keys():
@@ -113,7 +114,7 @@ im_dir = DIRS[args["training"]]
 pos_dir = im_dir + "positives/"
 neg_dir = im_dir + "negatives/"
 # Store plots here
-plotdir = "./plots/"
+plotdir = "../plots/"
 
 
 if args['seeded']:
@@ -131,6 +132,7 @@ print("[INFO] Detected {} positive images and {} negative images"
 # Training Parameters #
 # Define the number of images to use for each training/ verification
 N_im = args['samplenumber']
+print(f"[INFO] Using {N_im} images for testing and validation")
 # Define ratio of images for training
 # for this script the ratio will be 1:1
 # These are the total numbers for training images
@@ -276,7 +278,16 @@ feature detector network is of size 6 by 6 by 1536 for each image as an example.
 The subsequent block does the same for validation data.
 """
 #define the rescale option
-datagen = ImageDataGenerator(rescale=1./255)
+datagen = ImageDataGenerator(rescale=1./255,
+  # shear_range=0.2,
+  # zoom_range=0.1,
+  # rotation_range=180,
+  # horizontal_flip=True,
+  # vertical_flip=True,
+  # fill_mode="constant",
+  # cval=0,
+  brightness_range = (1/2,2)
+    )
 #batch size affects performance
 batch_size = 32
 #number of epochs is taken from command line argument, default is 10
@@ -286,7 +297,8 @@ x_train = np.array([ fix_colors(np.array(Image.open(fname).resize(inshape[0:2]))
                     for fname in train_list])
 y_train = np.concatenate((np.ones(nTrain//2), np.zeros(nTrain//2)))
 # this is an iterator, trust me.
-train_generator = datagen.flow(x_train, y_train, batch_size=batch_size)
+train_generator = datagen.flow(x_train, y_train, batch_size=batch_size,
+  )
 #pre-allocate these arrays which are filled in in the loop
 train_featrs = np.zeros(
   shape=np.concatenate(([nTrain], feature_shape[1:]))
@@ -314,11 +326,12 @@ for inputs_batch, labels_batch in train_generator:
 # this print is just a new line
 print('')
 # x and y arrays for verification
-x_test = np.array([np.array( fix_colors(Image.open(fname).resize(inshape[0:2])) ) 
+x_test = np.array([ fix_colors(Image.open(fname).resize(inshape[0:2])) \
                    for fname in test_list])
 y_test = np.concatenate((np.ones(nTest//2), np.zeros(nTest//2)))
 #iterator
-test_generator = datagen.flow(x_test, y_test, batch_size=batch_size)
+test_generator = datagen.flow(x_test, y_test, batch_size=batch_size, 
+  shuffle=True)
 #pre-allocate
 test_featrs = np.zeros(
   shape=np.concatenate(([nTest], feature_shape[1:]))
@@ -457,7 +470,7 @@ if args["plotting"]:
   savefile = f'{plotdir}proportion_{args["model"]}_e{epochs}_n{N_im}_m{M}.png'
   i=1
   while os.path.isfile(savefile):
-    savefile = f'{plotdir}proportion_{args["model"]}_e{epochs}_n{N_im}_m{M}_{i}.png'
+    savefile = f'{plotdir}proportion_{args["training"]}_e{epochs}_n{N_im}_m{M}_{i}.png'
     i+=1
   print(f'[INFO] Proportion chart saved to {savefile}')
   plt.savefig(savefile)
@@ -501,7 +514,7 @@ if args["plotting"]:
   l1 = ['F1 Score Measuremets']+l
   plt.legend(h1,l1,fontsize=12,loc='best')
   # Save this figure to a png also
-  savefile = f'{plotdir}mean_f1_{args["model"]}_e{epochs}_n{N_im}_m{M}.png'
+  savefile = f'{plotdir}mean_f1_{args["training"]}_e{epochs}_n{N_im}_m{M}.png'
   i=1
   while os.path.isfile(savefile):
     savefile = f'{plotdir}mean_f1_{args["model"]}_e{epochs}_n{N_im}_m{M}_{i}.png'
@@ -525,11 +538,12 @@ if(args['ploterrors']):
   images = chain(errors,range(10))
 
   for i in images:
+    print(f'Image source: {test_list[i]}')
     # Print the classification and prediction for this case
     print(f'Image does {"" if ground_truth[i] else "not"} contain aurora,'
           f' Probability: {predictions[i]}')
     # Show the image for reference
-    plt.imshow(test_inputs[i])
+    plt.imshow(test_inputs[i,:,:,0],cmap='inferno')
     plt.title(f'Predicted Aurora Probability = {100*predictions[i]:.2f}%')
     plt.grid(False)
     plt.show()

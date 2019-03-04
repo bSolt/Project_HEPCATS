@@ -11,8 +11,8 @@ import numpy as np
 from PIL import Image 
 
 
-INDIR = './winter_data/pickle/'
-OUTDIR = './winter_data/png/'
+INDIR = '../winter_data/pickle_v2/'
+OUTDIR = '../winter_data/png_v2/'
 
 SCALING = 'maximum'
 # Other modes are 'normalize'

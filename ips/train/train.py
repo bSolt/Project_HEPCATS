@@ -12,7 +12,7 @@ from ips_helper import *
 # from PIL import Image
 # import scipy.stats as stats
 
-DIRECTORY = "./winter_data/png/"
+DIRECTORY = "../winter_data/png_v2/"
 
 
 ## Set up the feature detector
@@ -99,33 +99,62 @@ feature detector network is of size 6 by 6 by 1536 for each image as an example.
 The subsequent block does the same for validation data.
 """
 #define the training data options
-train_datagen = ImageDataGenerator(
+datagen = ImageDataGenerator(
 	rescale=1./255,
-    shear_range=0.2,
-    zoom_range=0.2,
-    horizontal_flip=True)
+    # shear_range=0.2,
+    zoom_range=0.1,
+    horizontal_flip=True,
+    vertical_flip = True,
+    brightness_range=[1/2,2.0])
 
-test_datagen = ImageDataGenerator(rescale=1./255)
+# test_datagen = ImageDataGenerator(rescale=1./255)
 
 #batch size affects performance
 batch_size = 32
 #number of epochs
-epochs = 200
+epochs = 50
 
 # train_generator = train_datagen.flow_frow_directory(
 	# DIRECTORY, batch_size=batch_size)
 
+N_im = sum([len(files) for r, d, files in os.walk(DIRECTORY)])
+
 # Change this to something faster
-train_generator = train_datagen.flow_from_directory(
-        './winter_data/png/',
+image_generator = datagen.flow_from_directory(
+        DIRECTORY,
         target_size=(256, 256),
-        batch_size=32,
+        batch_size=batch_size,
         class_mode='binary')
 
+featrs = np.zeros(
+  shape=np.concatenate(([N_im], feature_shape[1:]))
+  )
 
-history = model.fit_generator(
-        train_generator,
-        steps_per_epoch=2000//32,
-        epochs=50)
+labels = np.zeros(N_im)
+
+i=0
+for images_batch, labels_batch in image_generator:
+    print(f"[INFO] Computing Features and Labels for image batch {i}/{N_im//batch_size}",end='\r')
+    # This is the line that finds the features using the ptdnn
+    features_batch = ptdnn.predict(images_batch)
+    #Case for most batches
+    if ((i+1) * batch_size < N_im):
+      featrs[i * batch_size : (i + 1) * batch_size] = features_batch
+      labels[i * batch_size : (i + 1) * batch_size] = labels_batch
+    #Case for last batch
+    else:
+      featrs[i * batch_size : ] = features_batch[0:N_im-i*batch_size]
+      labels[i * batch_size : ] = labels_batch[0:N_im-i*batch_size]
+    i += 1
+    #break when done
+    if i * batch_size >= N_im:
+        break
+
+
+history = classifier.fit(
+        featrs, labels,
+        # steps_per_epoch=2000//32,
+        validation_split = 0.3,
+        epochs=epochs)
         # validation_data=validation_generator,
         # validation_steps=800)

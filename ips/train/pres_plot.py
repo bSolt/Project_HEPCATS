@@ -28,7 +28,7 @@ def f1_plot(results,title=None,save=None,
 	eax = np.arange(epochs)+1
 
 
-	fig,ax = plt.subplots(1,1,figsize=(12,6),facecolor='black')
+	fig,ax = plt.subplots(1,1,figsize=(8,6),facecolor='black')
 
 	if title:
 		plt.title(title,fontsize=24,color='white')
@@ -140,3 +140,69 @@ def plot_errors(model,ground_truth,test_inputs,modelname=None,mono=False):
 		if modelname:
 			plt.savefig(f'plots/ex/error_{modelname}_{i}.png')
 		plt.show()
+
+
+def plot_history(history,title=None,save=None,
+				figsize=(12,8),req=0.95):
+	"""
+	f1_plot() generates a plot for average f1 score over the course of training 
+	a neural network several times. The plot includes raw data as well as average 
+	curve and error bars
+
+	Inputs:
+	results: dictionary of metrics resulting from repeated trainings of a network
+	title: a string to be included as a plot title
+	save: a name for the plot to be saved to a png file with
+	req: Average F1 score requirement to be displayed on the plot
+	level: Statistical confidence level to calculate confidence intervals with
+	metric: change this to plot other keys of the results input
+	"""
+	epochs = np.arange(len(history['acc']))
+
+	fig,ax = plt.subplots(1,1,figsize=figsize,facecolor='black')
+
+	if title:
+		plt.title(title,fontsize=24,color='white')
+
+	plt.plot(epochs, history['acc'],
+		label='Accuracy on Training Data')
+	# plt.plot(epochs, history['loss'],
+		# label='Loss on Training Data')
+	plt.plot(epochs, history['f1'],
+		label='F1 Score on Training Data')
+	plt.plot(epochs, history['val_acc'],
+		label='Accuracy on Validation Data')
+	# plt.plot(epochs, history['val_loss'],
+		# label='Loss on Validation Data')
+	plt.plot(epochs, history['val_f1'],
+		label='F1 Score on Validation Data')
+
+	plt.xlabel('Rounds of Training (Epochs)',fontsize=18)
+	plt.ylabel('Metric Score',fontsize=18)
+	ax.xaxis.label.set_color('white')
+	ax.yaxis.label.set_color('white')
+	ax.tick_params(colors='white')
+	ax.set_facecolor('xkcd:charcoal')
+	plt.axhline(y=req,
+	  linestyle='--',
+	  color='xkcd:pale green',
+	  linewidth=2,
+	  label='F1 Score Requirement')
+	# if metric.find('f1')>1 or metric.find('acc')>1 :
+	# plt.axis((0,epochs+1,0.8,1))
+	# ax.set_xticks(np.arange(0,epochs+1,2))
+	xbox = [0,epochs+1,epochs+1,0]
+	ybox = [1,1,req,req]
+	# plt.fill(xbox,ybox,
+	# 	alpha = 0.15,
+	# 	color='xkcd:light green',
+	# 	label=f'Region for Requirement F1 >= {req:.2f}')
+	plt.grid(True,color='grey')
+	leg = plt.legend(facecolor='grey',fontsize=14)
+	plt.setp(leg.get_texts(),color='w')
+	# save the fig is we want to
+	if save:
+		plt.savefig(save+'.png',
+			facecolor='black',edgecolor='black')
+
+	plt.show()
