@@ -5,6 +5,7 @@
 
 import os, argparse
 import numpy as np
+import pres_plot
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
@@ -12,6 +13,8 @@ from ips_helper import *
 # from PIL import Image
 # import scipy.stats as stats
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['TF_CPP_MIN_VLOG_LEVEL'] = '3'
 
 ## Set up the feature detector
 """
@@ -51,7 +54,7 @@ be recorded are specified as accuracy, recall, and F1 score.
 In the last line, training settings defined above are passed to the `fit()` method. Namely a batch size of 
 32 images and a total epoch count which is specified by the command line argument.
 """
-def build_classier():
+def build_classifier(feature_shape):
   classifier = tf.keras.models.Sequential(name='Classifier')
   # The classifier input is dense, or fully connected
   classifier.add(tf.keras.layers.Dense(256, activation='relu',
@@ -68,14 +71,24 @@ This model will implement the combined model which detects image features
 and classifies the images in one pass. This will be the model which is actually
 used for the aurora identification
 """
-def build_full_model(feature_detector, classifier):
+def build_full_model(feature_detector, classifier, fine_tune_layers=0):
   model = tf.keras.models.Sequential()
   #First get the features from ptdnn
   model.add(feature_detector)
   #Then classify
   model.add(classifier)
-  #ptdnn should not be trainable for now
-  model.layers[0].trainable=False
+  # Enable fine tuning if specified
+  if fine_tune_layers:
+    # Make the layers of the feature_detector frozen up until the last n layers
+    #  where n = fine_tune_layers
+    #  and these layers will be trainable (by default)
+    print(f'[INFO] Fine-Tuning last {fine_tune_layers} of the Feature Detector')
+    for layer in feature_detector.layers[0:-fine_tune_layers]:
+      layer.trainable = False
+  else:
+    #feature_detector should not be trainable if fine_tuning_layers==0
+    feature_detector.trainable=False
+
   # Display layer information for reference
   print('[INFO] Full Model Architecture:')
   model.summary()
@@ -148,21 +161,65 @@ def compute_features_from_dir(directory,feature_detector,
   # Return the completed arrays
   return featrs, labels
 
+def train_repeatedly(M, classifier, epochs, features, labels, v_split = 0.3):
+  results = {}
+  for i in range(M):
+    print(f'[INFO] Randomizing Model and Data {i+1}/{M}', end='\r')
+    # Reset the weights
+    randomize_weights(classifier)
+    # Shuffle the features
+    order = np.random.permutation(len(labels))
+    features = features[order]
+    labels   = labels[order]
+    # print statement
+    print(f'[INFO] Training Model Simulation  {i+1}/{M}',end='\r')
+    # Train
+    history = classifier.fit(
+      features, labels,
+      validation_split = v_split,
+      epochs=epochs,
+      verbose=False)
+    # store each result
+    # First iterate on the keys present
+    for key in history.history.keys():
+      # We will have to initialize each key as an empty list in order to get
+      # A list of lists as the object which is stored by the dict.
+      if key not in results.keys():
+        results[key] = []
+      # add the current history into results as an item of a list with .append()
+      results[key].append(history.history[key])
+  print() #newline
+  return results
+
 
 def main():
+
+  ap = argparse.ArgumentParser()
+  ap.add_argument("-e", "--epochs", type=int, default=30,
+  help="nuber of epochs to train the classifier network on")
+  ap.add_argument("-m", "--simulationnumber", type=int, default=1,
+  help="number of simulations to use for training the classifier")
+  ap.add_argument("-f", "--finetuning", type=int, default=0,
+  help="number of layers to fine-tune in feature detector network")
+  ap.add_argument("-s", "--saveas", type=str, default=None,
+  help="Name to pass for saving the trained model to an h5 file")
+  # ap.add_argument("-p", "--plotting", action='store_const',
+  # const=True,default=False,
+  # help="flag for generating the stats plots, altrernative to pres_plot.f1_plot()")
+  args = vars(ap.parse_args())
 
   image_dir = '../winter_data/png_v2/'
   # Get the pre-trained deep neural network with the correct input shape
   inshape = (256,256,3)
   ptdnn = get_xception(inshape)
   # Build the classifier
-  classifier = build_classier()
+  classifier = build_classifier(ptdnn.output_shape)
   # Build and compile the full model
-  model = build_full_model()
+  model = build_full_model(ptdnn, classifier,args['finetuning'])
   # Get the features if necessary
   #  Define the files where this will is stored
   feature_file = 'feature_set/featrs.npy'
-  label_file   = 'feature_set/lables.npy'
+  label_file   = 'feature_set/labels.npy'
   # Check if computation of features is needed
   if not os.path.isfile(feature_file):
     # Compute the features
@@ -170,20 +227,33 @@ def main():
     # Save the arrays to the files
     np.save(feature_file, featrs)
     np.save(label_file, labels)
-  else
+  else:
+    print('[INFO] Loading in feature set')
     # Load the arrays from the files
     featrs = np.load(feature_file)
     labels = np.load(label_file)
 
   # Train the network
 
+  M =  args['simulationnumber']
   #define number of epochs
-  epochs = 50
+  epochs = args['epochs']
+  if M==1:
+    print(f'[INFO] Training Model Once')
+    history = classifier.fit(
+            featrs, labels,
+            validation_split = 0.3,
+            epochs=epochs)
+    pres_plot.plot_history(history.history)
+    # pres_plot.plot_errors(classifier,labels,)
+  else:
+    print(f'[INFO] Training Model {M} times')
+    results = train_repeatedly(M, classifier, epochs, featrs, labels)
+    pres_plot.f1_plot(results,
+      title=f'Validation for Training {M} Times',
+      save =f'f1_plot_{M}.png')
+  return model
 
-  history = classifier.fit(
-          featrs, labels,
-          validation_split = 0.3,
-          epochs=epochs)
 
 if __name__ == '__main__':
-  main()
+  model = main()

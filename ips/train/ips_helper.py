@@ -42,3 +42,22 @@ def fix_colors(image):
     return np.tile(np.expand_dims(array,axis=2),3)
   else:
     return array
+
+def randomize_weights(model,weights=None):
+    """Randomly permute the weights in `model`, or the given `weights`.
+
+    This is a fast approximation of re-initializing the weights of a model.
+
+    Assumes weights are distributed independently of the dimensions of the weight tensors
+      (i.e., the weights have the same distribution along each dimension).
+
+    :param Model model: Modify the weights of the given model.
+    :param list(ndarray) weights: The model's weights will be replaced by a random permutation of these weights.
+      If `None`, permute the model's current weights.
+    """
+    if weights is None:
+        weights = model.get_weights()
+    # new weights are random
+    model.set_weights(
+      [np.random.uniform(low=-0.05,high=0.05,size=w.shape) for w in weights]
+      )
