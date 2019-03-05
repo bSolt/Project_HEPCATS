@@ -1,8 +1,8 @@
 #!/bin/bash
 
-for i in {1..130}
+for i in {1..256}
 do
-  	./gc_prompt cmd hepcats haltmdqscan
-  	sleep 0.5
+  	./gc_prompt cmd hepcats magoff
+  	sleep 0.25
   	echo ${i}
 done

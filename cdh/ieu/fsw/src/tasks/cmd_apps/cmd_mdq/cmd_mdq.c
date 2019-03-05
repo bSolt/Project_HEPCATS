@@ -84,8 +84,8 @@ void cmd_mdq(void* arg) {
     rt_printf("%d (CMD_MDQ_TASK) Task started\n",time(NULL));
 
     // Declarations and initialization:
-    int8_t ret_val; // Function return value
-    int8_t flw_id;  // Flow identifier returned by rt_task_receive
+    int8_t   ret_val; // Function return value
+    uint32_t flw_id;  // Flow identifier for the message transaction
 
     uint16_t cmd_apid;           // Command APID
     uint16_t cmd_pkt_name;       // Command packet name

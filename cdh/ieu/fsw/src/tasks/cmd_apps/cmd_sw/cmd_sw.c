@@ -87,8 +87,8 @@ void cmd_sw(void* arg) {
         " continuing\n",time(NULL));
 
     // Declarations and initialization:
-    int8_t ret_val; // Function return value
-    int8_t flw_id;  // Flow identifier returned by rt_task_receive
+    int8_t   ret_val; // Function return value
+    uint32_t flw_id;  // Flow identifier for the message transaction
 
     uint16_t cmd_apid;           // Command APID
     uint16_t cmd_pkt_name;       // Command packet name
@@ -129,7 +129,7 @@ void cmd_sw(void* arg) {
         // Receive command transfer frames from command executor task via
         // synchronous message:
         flw_id = rt_task_receive(&cmd_xfr_frm_mcb,\
-            TM_INFINITE); // Will wait infinite amount of time for message 
+            TM_INFINITE); // Will wait infinite amount of time for message
 
         // Check success:
         if (flw_id > 0) {

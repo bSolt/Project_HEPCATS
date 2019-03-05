@@ -74,8 +74,8 @@
                                  // function declaration
 
 // Macro definitions:
-#define DAQ_PKT_SIZE      768     // Magnetometer DAQ packet size in bytes.
-#define DAQ_SRC_DAT_SIZE 1064     // Magnetometer DAQ source data message queue
+#define MDQ_READ_SIZE     768     // Magnetometer DAQ read size in bytes
+#define MDQ_SRC_DAT_SIZE 1064     // Magnetometer DAQ source data message queue
                                   // size in bytes
 #define TLM_PKT_XFR_FRM_SIZE 1089 // Telemetry transfer frame size in bytes
 
@@ -133,7 +133,7 @@ void read_mdq(void) {
 
     uint8_t tlm_pkt_xfr_frm_grp_flg = 3; // Packet sequence grouping flag
 
-    char mdq_buf[DAQ_PKT_SIZE]; // Buffer for DAQ
+    char mdq_buf[MDQ_READ_SIZE]; // Buffer for MDQ
 
     char tlm_pkt_xfr_frm_buf[TLM_PKT_XFR_FRM_SIZE]; // Buffer for telemetry
                                                     // packet transfer frame
@@ -158,10 +158,10 @@ void read_mdq(void) {
 
         // Get data from the DAQ:
         ret_val = libusb_bulk_transfer(dev_hdl,(1|LIBUSB_ENDPOINT_IN),\
-            (unsigned char*) mdq_buf,DAQ_PKT_SIZE,&bytes,0);
+            (unsigned char*) mdq_buf,MDQ_READ_SIZE,&bytes,0);
 
         // (If no return error and number of bytes written is expected)
-        if ((ret_val == 0) && (bytes == DAQ_PKT_SIZE)) {
+        if ((ret_val == 0) && (bytes == MDQ_READ_SIZE)) {
             // Increment sequence count:
             tlm_pkt_xfr_frm_seq_cnt++;
 
@@ -174,7 +174,7 @@ void read_mdq(void) {
             } 
 
             // Create transfer frame:
-            crt_tlm_pkt_xfr_frm(mdq_buf,DAQ_PKT_SIZE,\
+            crt_tlm_pkt_xfr_frm(mdq_buf,MDQ_READ_SIZE,\
                 tlm_pkt_xfr_frm_buf,APID_MDQ,\
                 tlm_pkt_xfr_frm_grp_flg,tlm_pkt_xfr_frm_seq_cnt);
 
@@ -186,7 +186,7 @@ void read_mdq(void) {
             // Check success:
             if ((ret_val > 0) || (ret_val == 0)) {
                 // Print:
-                rt_printf("%d (READ_IMG_TASK) Telemetry packet transfer"
+                rt_printf("%d (READ_MDQ_TASK) Telemetry packet transfer"
                     " frame sent to filter table task\n",time(NULL));
             } else if (ret_val == -ENOMEM) {
                 // Wait for a set time to allow filter table task to
@@ -199,11 +199,11 @@ void read_mdq(void) {
                     Q_NORMAL); // Append message to queue
             } else {
                 // Print:
-                rt_printf("%d (READ_IMG_TASK) Error sending telemetry"
+                rt_printf("%d (READ_MDQ_TASK) Error sending telemetry"
                     " packet transfer frame\n",time(NULL));
                 // NEED ERROR HANDLING
             }
-        } else if (bytes != DAQ_PKT_SIZE) {
+        } else if (bytes != MDQ_READ_SIZE) {
             // Print:
             rt_printf("%d (READ_MDQ_TASK) Number of bytes read (%d) from DAQ"
                 " is not what is expected; ignoring data\n",time(NULL),bytes);

@@ -34,6 +34,8 @@
 #define APID_IMG 0x64 // Image origin
 #define APID_MDQ 0xC8 // Magnetometer DAQ origin
 
+#define MDQ_BUF_SIZE 768 // Magnetometer DAQ read size in bytes
+
 // Telemetry processor function
 void proc_tlm_pkt(char* buffer) {
     // Definitions:
@@ -63,7 +65,7 @@ void proc_tlm_pkt(char* buffer) {
     uint8_t  ers_rly_swtch_state = 0;     // Electrical relay switch state
     uint8_t  flt_tbl_mode = 0;            // Filter table mode
 
-    float mdq_conv_buf[384]; // Magnetometer DAQ converted data buffer
+    float mdq_conv_buf[MDQ_BUF_SIZE/2]; // Magnetometer DAQ converted data buffer
 
     float mdq_chnl0_sum = 0; // Channel 0 sum
     float mdq_chnl1_sum = 0; // Channel 1 sum
@@ -175,12 +177,15 @@ void proc_tlm_pkt(char* buffer) {
         memcpy(&flt_tbl_mode,pkt_dat_fld_usr_data+14,1);
 
         // Print:
-        printf("0x00:%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u\n",\
+        printf("0x00:%u,%u,%u,%u,%u,%u,%u,%u,%u,%s,%s,%s,%s\n",\
             rx_telecmd_pkt_cnt,val_telecmd_pkt_cnt,inv_telecmd_pkt_cnt,\
             val_cmd_cnt,inv_cmd_cnt,cmd_exec_suc_cnt,\
             cmd_exec_err_cnt,tlm_pkt_xfr_frm_seq_cnt,acq_img_cnt,\
-            img_acq_prog_flag,ers_rly_swtch_state,mdq_scan_state,\
-            flt_tbl_mode);
+            img_acq_prog_flag ? "In progress" : "Idle",\
+            ers_rly_swtch_state ? "On" : "Off",\
+            mdq_scan_state ? "Scanning" : "Idle",\
+            flt_tbl_mode == 0 ? "Normal" : flt_tbl_mode == 1 ? \
+            "Playback" : flt_tbl_mode == 2 ? "IMG" : "MDQ");
     } else if (pkt_id_apid == APID_MDQ) {
         // Loop through channels 0, 1, and 2 raw data buffers to convert from
         // char to signed 16 bit numbers. Each char is 8 bits, so the
@@ -189,7 +194,7 @@ void proc_tlm_pkt(char* buffer) {
         // combine with char at 2n. Once converted to 16 bit numbers, convert
         // from counts to nano Tesla. The conversion is:
         // [nT] = (10*(counts/32768))[V] * (10000[nT]/1[V])
-        for (int i = 0; i < 384; ++i) {
+        for (int i = 0; i < MDQ_BUF_SIZE/2; ++i) {
             // Convert two char to signed 16 bit number:
             mdq_conv_buf[i] = (pkt_dat_fld_usr_data[2*i+1] << 8) | \
                 (pkt_dat_fld_usr_data[2*i] & 0xFF);
@@ -200,7 +205,7 @@ void proc_tlm_pkt(char* buffer) {
         }
 
         // Loop to find sum of channel 0, 1, and 2:
-        for (int i = 0; i < 382; i+=3) {
+        for (int i = 0; i < (MDQ_BUF_SIZE/2-2); i+=3) {
             mdq_chnl0_sum = mdq_chnl0_sum + mdq_conv_buf[i];
             mdq_chnl1_sum = mdq_chnl1_sum + mdq_conv_buf[i+1];
             mdq_chnl2_sum = mdq_chnl2_sum + mdq_conv_buf[i+2];
@@ -216,7 +221,7 @@ void proc_tlm_pkt(char* buffer) {
             mdq_chnl2_avg);
 
         // Set file path:
-        strcpy(file_path,"../raw_record_files/mdq/"); // Relative to bin
+        strcpy(file_path,"../../raw_record_files/mdq/"); // Relative to bin
 
         // Create file name:
         sprintf(file_name,"%s%u_%u.bin",file_path,pkt_t_fld_sec,pkt_t_fld_msec);
@@ -233,7 +238,7 @@ void proc_tlm_pkt(char* buffer) {
         // If first segment, create new file:
         if (pkt_seq_cnt_grp_flg == 1) {
             // Set filepath:
-            strcpy(file_path,"../raw_record_files/img/"); // Relative to bin
+            strcpy(file_path,"../../raw_record_files/img/"); // Relative to bin
 
             // Create file name:
             sprintf(file_name,"%s%u_%u.raw",file_path,pkt_t_fld_sec,\
@@ -249,7 +254,7 @@ void proc_tlm_pkt(char* buffer) {
             fclose(file_ptr);
 
             // Open file:
-            file_ptr = fopen("../raw_record_files/img/current_file.txt","w");
+            file_ptr = fopen("../../raw_record_files/img/current_file.txt","w");
 
             // Print file name to file:
             fprintf(file_ptr,"%s",file_name);
@@ -275,7 +280,7 @@ void proc_tlm_pkt(char* buffer) {
 
             // Open file to get current file name:
             FILE* file_ptr = \
-                fopen("../raw_record_files/img/current_file.txt","r");
+                fopen("../../raw_record_files/img/current_file.txt","r");
 
             // Get first line:
             fgets(file_name,100,file_ptr);
