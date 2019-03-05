@@ -5,7 +5,8 @@ import scipy.stats as stats
 
 
 def f1_plot(results,title=None,save=None,
-	req=0.95,level=0.95,metric='val_f1'):
+	req=0.95,level=0.95,metric='val_f1',
+	color='black',figsize=(12,8)):
 	"""
 	f1_plot() generates a plot for average f1 score over the course of training 
 	a neural network several times. The plot includes raw data as well as average 
@@ -19,6 +20,16 @@ def f1_plot(results,title=None,save=None,
 	level: Statistical confidence level to calculate confidence intervals with
 	metric: change this to plot other keys of the results input
 	"""
+	# Color themes
+	if color == 'black':
+		text_color='white'
+		face_color='xkcd:charcoal'
+		line_color='xkcd:cyan'
+	elif color=='white':
+		text_color='black'
+		face_color='white'
+		line_color='xkcd:teal'
+
 	M, epochs = np.array(results[metric]).shape
 	mean_f1 = np.mean(results[metric],axis=0)
 
@@ -28,21 +39,21 @@ def f1_plot(results,title=None,save=None,
 	eax = np.arange(epochs)+1
 
 
-	fig,ax = plt.subplots(1,1,figsize=(8,6),facecolor='black')
+	fig,ax = plt.subplots(1,1,figsize=figsize,facecolor=color)
 
 	if title:
-		plt.title(title,fontsize=24,color='white')
+		plt.title(title,fontsize=24,color=text_color)
 
 	plt.xlabel('Rounds of Training (Epochs)',fontsize=18)
 	plt.ylabel('F1 Score',fontsize=18)
-	ax.xaxis.label.set_color('white')
-	ax.yaxis.label.set_color('white')
-	ax.tick_params(colors='white')
-	ax.set_facecolor('xkcd:charcoal')
+	ax.xaxis.label.set_color(text_color)
+	ax.yaxis.label.set_color(text_color)
+	ax.tick_params(colors=text_color)
+	ax.set_facecolor(face_color)
 	meas = plt.plot(eax,np.transpose(results[metric]),'o',
 	  markersize=8,
 	  alpha=3/M,
-	  color='white')
+	  color=text_color)
 	# Line for the mean
 	# plt.plot(eax,mean_f1,
 	#   linewidth=2,
@@ -54,8 +65,8 @@ def f1_plot(results,title=None,save=None,
 		linewidth=2,
 		elinewidth=4,
 		capsize=4,
-		color='w',
-		ecolor='xkcd:cyan',
+		color=text_color,
+		ecolor=line_color,
 		label=f'Mean F1 Score with {100*level:.0f}% Confidence Intervals')
 	plt.axhline(y=req,
 	  linestyle='--',
@@ -73,11 +84,11 @@ def f1_plot(results,title=None,save=None,
 		label=f'Region for Requirement F1 >= {req:.2f}')
 	plt.grid(True,color='grey')
 	leg = plt.legend(facecolor='grey',fontsize=14)
-	plt.setp(leg.get_texts(),color='w')
+	plt.setp(leg.get_texts(),color=text_color)
 	# save the fig is we want to
 	if save:
 		plt.savefig(save+'.png',
-			facecolor='black',edgecolor='black')
+			facecolor=face_color,edgecolor=color)
 
 	plt.show()
 
@@ -141,7 +152,8 @@ def plot_errors(classifier,ground_truth,test_inputs,modelname=None,mono=False):
 
 
 def plot_history(history,title=None,save=None,
-				figsize=(12,8),loss=False,req=0.95):
+				figsize=(12,8),loss=False,
+				color='black',req=0.95):
 	"""
 	f1_plot() generates a plot for average f1 score over the course of training 
 	a neural network several times. The plot includes raw data as well as average 
@@ -155,57 +167,75 @@ def plot_history(history,title=None,save=None,
 	level: Statistical confidence level to calculate confidence intervals with
 	metric: change this to plot other keys of the results input
 	"""
-	epochs = np.arange(len(history['acc']))
+	# Colorthemes
+	if color == 'black':
+		text_color='white'
+		face_color='xkcd:charcoal'
+	elif color=='white':
+		text_color='black'
+		face_color='white'
 
-	fig,ax = plt.subplots(1,1,figsize=figsize,facecolor='black')
+	epochs = len(history['acc'])
+	eax = np.arange(epochs)+1
+
+	fig,ax = plt.subplots(1,1,figsize=figsize,facecolor=color)
+	if loss:
+		plt.axis((0,epochs,0,1))
+	else:
+		plt.axis((0,epochs,0.8,1))
 
 	if title:
-		plt.title(title,fontsize=24,color='white')
+		plt.title(title,fontsize=24,color=text_color)
 
-	plt.plot(epochs, history['acc'],
-		label='Accuracy on Training Data')
-	# plt.plot(epochs, history['loss'],
-		# label='Loss on Training Data')
-	plt.plot(epochs, history['f1'],
-		label='F1 Score on Training Data')
-	plt.plot(epochs, history['val_acc'],
-		label='Accuracy on Validation Data')
-	# plt.plot(epochs, history['val_loss'],
-		# label='Loss on Validation Data')
-	plt.plot(epochs, history['val_f1'],
-		label='F1 Score on Validation Data')
 	if loss:
-		plt.plot(epochs, history['loss'],
+		plt.plot(eax, history['loss'],
+			linewidth=2,
 			label='Loss on Training Data')
-		plt.plot(epochs, history['val_loss'],
+		plt.plot(eax, history['val_loss'],
+			linewidth=2,
 			label='Loss on Validation Data')
+	else:
+		plt.plot(eax, history['acc'],
+			linewidth=2,
+			label='Accuracy on Training Data')
+		plt.plot(eax, history['f1'],
+			linewidth=2,
+			label='F1 Score on Training Data')
+		plt.plot(eax, history['val_acc'],
+			linewidth=2,
+			label='Accuracy on Validation Data')
+		plt.plot(eax, history['val_f1'],
+			linewidth=2,
+			label='F1 Score on Validation Data')
+		xbox = [0,epochs+1,epochs+1,0]
+		ybox = [1,1,req,req]
+		plt.fill(xbox,ybox,
+			alpha = 0.15,
+			color='xkcd:light green',
+			label=f'Region for Requirement F1 >= {req:.2f}')
+		plt.axhline(y=req,
+		  linestyle='--',
+		  color='xkcd:pale green',
+		  linewidth=2,
+		  label='F1 Score Requirement')
+
 
 	plt.xlabel('Rounds of Training (Epochs)',fontsize=18)
 	plt.ylabel('Metric Score',fontsize=18)
-	ax.xaxis.label.set_color('white')
-	ax.yaxis.label.set_color('white')
-	ax.tick_params(colors='white')
-	ax.set_facecolor('xkcd:charcoal')
-	plt.axhline(y=req,
-	  linestyle='--',
-	  color='xkcd:pale green',
-	  linewidth=2,
-	  label='F1 Score Requirement')
+	ax.xaxis.label.set_color(text_color)
+	ax.yaxis.label.set_color(text_color)
+	ax.tick_params(colors=text_color)
+	ax.set_facecolor(face_color)
 	# if metric.find('f1')>1 or metric.find('acc')>1 :
 	# plt.axis((0,epochs+1,0.8,1))
 	# ax.set_xticks(np.arange(0,epochs+1,2))
-	xbox = [0,epochs+1,epochs+1,0]
-	ybox = [1,1,req,req]
-	# plt.fill(xbox,ybox,
-	# 	alpha = 0.15,
-	# 	color='xkcd:light green',
-	# 	label=f'Region for Requirement F1 >= {req:.2f}')
+	
 	plt.grid(True,color='grey')
 	leg = plt.legend(facecolor='grey',fontsize=14)
-	plt.setp(leg.get_texts(),color='w')
+	plt.setp(leg.get_texts(),color=text_color)
 	# save the fig is we want to
 	if save:
 		plt.savefig(save+'.png',
-			facecolor='black',edgecolor='black')
+			facecolor=face_color,edgecolor=color)
 
 	plt.show()

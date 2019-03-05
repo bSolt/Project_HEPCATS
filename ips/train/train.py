@@ -107,7 +107,7 @@ The next block generates batches of training data. The feature array output by t
 feature detector network is of size 8 by 8 by 2048 for each image as an example. 
 """
 def compute_features_from_dir(directory,feature_detector,
-  batch_size=32):
+  batch_size=32,save_to_dir=None):
   # Detect and load all images from a directory, use the feature detector network which
   # is passed in to compute the features for each image
   #  The directory argument should be a valid directory containing a directory for each class
@@ -122,17 +122,19 @@ def compute_features_from_dir(directory,feature_detector,
   #  and random alterations such as scaling, zooming, and flipping
   datagen = ImageDataGenerator(
     rescale=1./255,
-    zoom_range=0.1,
-    horizontal_flip=True,
-    vertical_flip = True,
-    brightness_range=[1/2,2.0])
+    # zoom_range=0.1,
+    # horizontal_flip=True,
+    # vertical_flip = True,
+    # brightness_range=[1/2,2.0]
+    )
   # Define the settings for assembling the batches
   #  including image size, directory,  and batch size
   image_generator = datagen.flow_from_directory(
     directory,
     target_size=(256, 256),
     batch_size=batch_size,
-    class_mode='binary')
+    class_mode='binary',
+    save_to_dir=save_to_dir)
   # pre-allocate features array 
   featrs = np.zeros(
     shape=np.concatenate(([N_im], feature_shape[1:]))
@@ -145,7 +147,7 @@ def compute_features_from_dir(directory,feature_detector,
   for images_batch, labels_batch in image_generator:
     print(f"[INFO] Computing Features and Labels for image batch {i}/{total_batch}",end='\r')
     # This is the line that finds the features using the ptdnn
-    features_batch = ptdnn.predict(images_batch)
+    features_batch = feature_detector.predict(images_batch)
     #Case for most batches
     if ((i+1) * batch_size < N_im):
       featrs[i * batch_size : (i + 1) * batch_size] = features_batch
@@ -203,6 +205,8 @@ def main():
   help="number of layers to fine-tune in feature detector network")
   ap.add_argument("-s", "--saveas", type=str, default=None,
   help="Name to pass for saving the trained model to an h5 file")
+  ap.add_argument("-c", "--cache", type=str, default=None,
+  help="Name to pass for saving the images which the network uses")
   # ap.add_argument("-p", "--plotting", action='store_const',
   # const=True,default=False,
   # help="flag for generating the stats plots, altrernative to pres_plot.f1_plot()")
@@ -223,7 +227,8 @@ def main():
   # Check if computation of features is needed
   if not os.path.isfile(feature_file):
     # Compute the features
-    featrs, labels = compute_features_from_dir(image_dir)
+    featrs, labels = compute_features_from_dir(image_dir,ptdnn,
+      save_to_dir=args['cache'])
     # Save the arrays to the files
     np.save(feature_file, featrs)
     np.save(label_file, labels)
@@ -244,16 +249,20 @@ def main():
             featrs, labels,
             validation_split = 0.3,
             epochs=epochs)
-    pres_plot.plot_history(history.history)
+    pres_plot.plot_history(history.history,
+      save=f'acc_{epochs}e',color='white')
     # pres_plot.plot_errors(classifier,labels,)
   else:
     print(f'[INFO] Training Model {M} times')
     results = train_repeatedly(M, classifier, epochs, featrs, labels)
     pres_plot.f1_plot(results,
       title=f'Validation for Training {M} Times',
-      save =f'f1_plot_{M}.png')
-  return model
+      save =f'f1_plot_{M}.png',
+      color='white')
+  if args['saveas']:
+    model.save('../models/' + args['saveas'] + '.h5')
+  return vars()
 
 
 if __name__ == '__main__':
-  model = main()
+  v = main()
