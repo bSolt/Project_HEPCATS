@@ -64,8 +64,8 @@ struct telecmd_pkt_inputs interp_cmd_str(char* cmd_str_arr[]) {
     int cmd_time_str_ind; // Location of execution time
 
     // Open command database:
-    fd = fopen("../cmd_db/command_database.csv", "r"); // Path relative
-                                                       // to bin directory
+    fd = fopen("../../command_database/command_database.csv",\
+        "r"); // Path relative to bin directory
 
     // Read database line by line:
     while(fgets(line, sizeof(line), fd) != NULL) {

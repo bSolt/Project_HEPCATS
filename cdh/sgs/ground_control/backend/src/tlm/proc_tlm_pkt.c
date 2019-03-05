@@ -221,7 +221,7 @@ void proc_tlm_pkt(char* buffer) {
             mdq_chnl2_avg);
 
         // Set file path:
-        strcpy(file_path,"../raw_record_files/mdq/"); // Relative to bin
+        strcpy(file_path,"../../raw_record_files/mdq/"); // Relative to bin
 
         // Create file name:
         sprintf(file_name,"%s%u_%u.bin",file_path,pkt_t_fld_sec,pkt_t_fld_msec);
@@ -238,7 +238,7 @@ void proc_tlm_pkt(char* buffer) {
         // If first segment, create new file:
         if (pkt_seq_cnt_grp_flg == 1) {
             // Set filepath:
-            strcpy(file_path,"../raw_record_files/img/"); // Relative to bin
+            strcpy(file_path,"../../raw_record_files/img/"); // Relative to bin
 
             // Create file name:
             sprintf(file_name,"%s%u_%u.raw",file_path,pkt_t_fld_sec,\
@@ -254,7 +254,7 @@ void proc_tlm_pkt(char* buffer) {
             fclose(file_ptr);
 
             // Open file:
-            file_ptr = fopen("../raw_record_files/img/current_file.txt","w");
+            file_ptr = fopen("../../raw_record_files/img/current_file.txt","w");
 
             // Print file name to file:
             fprintf(file_ptr,"%s",file_name);
@@ -280,7 +280,7 @@ void proc_tlm_pkt(char* buffer) {
 
             // Open file to get current file name:
             FILE* file_ptr = \
-                fopen("../raw_record_files/img/current_file.txt","r");
+                fopen("../../raw_record_files/img/current_file.txt","r");
 
             // Get first line:
             fgets(file_name,100,file_ptr);
