@@ -87,7 +87,9 @@ def f1_plot(results,title=None,save=None,
 	plt.setp(leg.get_texts(),color=text_color)
 	# save the fig is we want to
 	if save:
-		plt.savefig(save+'.png',
+		if '.' not in save:
+			save += '.png'
+		plt.savefig(save,
 			facecolor=face_color,edgecolor=color)
 
 	plt.show()
@@ -235,7 +237,9 @@ def plot_history(history,title=None,save=None,
 	plt.setp(leg.get_texts(),color=text_color)
 	# save the fig is we want to
 	if save:
-		plt.savefig(save+'.png',
+		if '.' not in save:
+			save += '.png'
+		plt.savefig(save,
 			facecolor=face_color,edgecolor=color)
 
 	plt.show()

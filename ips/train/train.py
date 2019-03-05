@@ -195,41 +195,56 @@ def train_repeatedly(M, classifier, epochs, features, labels, v_split = 0.3):
 
 
 def main():
-
+  # defined directory for images
+  default_dir = '../winter_data/png_v2/'
+  # Options for parsing the command line arguments
   ap = argparse.ArgumentParser()
   ap.add_argument("-e", "--epochs", type=int, default=30,
   help="nuber of epochs to train the classifier network on")
   ap.add_argument("-m", "--simulationnumber", type=int, default=1,
   help="number of simulations to use for training the classifier")
-  ap.add_argument("-f", "--finetuning", type=int, default=0,
+  ap.add_argument("-ft", "--finetuning", type=int, default=0,
   help="number of layers to fine-tune in feature detector network")
   ap.add_argument("-s", "--saveas", type=str, default=None,
   help="Name to pass for saving the trained model to an h5 file")
+  ap.add_argument("-id", "--imagedir", type=str, default=default_dir,
+  help="Directory where training images are located")
+  ap.add_argument("-fs", "--featureset", type=str, default='feature_set/',
+  help="Directory where the feature set files should be saved and loaded from")
   ap.add_argument("-c", "--cache", type=str, default=None,
   help="Name to pass for saving the images which the network uses")
   # ap.add_argument("-p", "--plotting", action='store_const',
   # const=True,default=False,
   # help="flag for generating the stats plots, altrernative to pres_plot.f1_plot()")
   args = vars(ap.parse_args())
-
-  image_dir = '../winter_data/png_v2/'
-  # Get the pre-trained deep neural network with the correct input shape
+  # defined directory for images
+  image_dir = args['imagedir']
+  # Get the pre-trained deep neural network with --the correct input shape
   inshape = (256,256,3)
   ptdnn = get_xception(inshape)
   # Build the classifier
   classifier = build_classifier(ptdnn.output_shape)
   # Build and compile the full model
   model = build_full_model(ptdnn, classifier,args['finetuning'])
+
   # Get the features if necessary
-  #  Define the files where this will is stored
-  feature_file = 'feature_set/featrs.npy'
-  label_file   = 'feature_set/labels.npy'
+  #  Define the directory where this is stored
+  if args['featureset'][-1]=='/':
+    feature_dir = args['featureset']
+  else:
+    feature_dir = args['featureset'] + '/'
+  print(f'[INFO] Using directory ./{feature_dir} for feature set')
+  # Define the path of files containing features and labels
+  feature_file = feature_dir + 'featrs.npy'
+  label_file   = feature_dir + 'labels.npy'
   # Check if computation of features is needed
   if not os.path.isfile(feature_file):
     # Compute the features
+    print(f'[INFO] Computing new feature set in {feature_dir}')
     featrs, labels = compute_features_from_dir(image_dir,ptdnn,
       save_to_dir=args['cache'])
     # Save the arrays to the files
+    print(f'[INFO] Saving feature set')
     np.save(feature_file, featrs)
     np.save(label_file, labels)
   else:
@@ -243,6 +258,14 @@ def main():
   M =  args['simulationnumber']
   #define number of epochs
   epochs = args['epochs']
+  #Determine name for figure image
+  psname = f'plot_e{epochs}_m{M}.png'
+  fi=0
+  while os.path.isfile(psname):
+    psname = f'plot_e{epochs}_m{M}_{fi}.png'
+    fi+=1
+
+  # Case for training a single time
   if M==1:
     print(f'[INFO] Training Model Once')
     history = classifier.fit(
@@ -250,17 +273,23 @@ def main():
             validation_split = 0.3,
             epochs=epochs)
     pres_plot.plot_history(history.history,
-      save=f'acc_{epochs}e',color='white')
+      save=psname,color='white',
+      title='Accuracy metrics on training and validation data')
     # pres_plot.plot_errors(classifier,labels,)
+  # Case for training multiple times
   else:
     print(f'[INFO] Training Model {M} times')
+    # Call function which trains model multiple times
     results = train_repeatedly(M, classifier, epochs, featrs, labels)
+    # Call function which plots results from this test
     pres_plot.f1_plot(results,
       title=f'Validation for Training {M} Times',
-      save =f'f1_plot_{M}.png',
+      save =psname,
       color='white')
+  # Save the model if applicable    
   if args['saveas']:
     model.save('../models/' + args['saveas'] + '.h5')
+  # return vars() s/t you can use the local variables here in interactive mode
   return vars()
 
 
