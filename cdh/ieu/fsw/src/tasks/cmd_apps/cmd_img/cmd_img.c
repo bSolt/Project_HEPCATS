@@ -116,7 +116,7 @@ void cmd_img(void* arg) {
     rply_mcb.size = RPLY_MSG_SIZE;  // Set reply message size
 
     // Initialize camera:
-    /*ret_val = init_cam();
+    ret_val = init_cam();
 
     // Check success:
     // (If unsuccessful, then re-attempt until initialize is successful)
@@ -130,7 +130,7 @@ void cmd_img(void* arg) {
 
         // Initialize camera:
         ret_val = init_cam();
-    }*/
+    }
 
     // Print:
     rt_printf("%d (CMD_IMG_TASK) Camera initialization complete\n",time(NULL));
@@ -223,7 +223,7 @@ void cmd_img(void* arg) {
                     // Loop to acquire images for specified duration:
                     while (elp_time < acq_dur) {
                         // Call acquire image function:
-                        //ret_val = acq_img();
+                        ret_val = acq_img();
 
                         // Increment counter:
                         acq_img_cnt++;
