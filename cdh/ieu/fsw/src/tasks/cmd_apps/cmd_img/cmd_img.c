@@ -94,7 +94,7 @@ void cmd_img(void* arg) {
     uint32_t acq_dur;  // Image acquisition duration (seconds)
     uint32_t elp_time; // Elapsed time (seconds)
 
-    uint32_t acq_ivl = 10;                  // Acquisition interval in seconds
+    uint16_t acq_ivl = 60;                  // Acquisition interval in seconds
     RTIME    acq_ivl_timeout = acq_ivl*1e9; // Acquisition interval timeo
                                             // in seconds
 
