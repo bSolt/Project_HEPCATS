@@ -25,7 +25,8 @@
  /usr/xenomai/include/alchemy/timer.h \
  /usr/xenomai/include/alchemy/compat.h /usr/xenomai/include/trank/trank.h \
  /usr/xenomai/include/alchemy/queue.h /usr/xenomai/include/alchemy/sem.h \
- /home/xenomai/fsw/include/msg_queues.h /home/xenomai/fsw/include/sems.h
+ /home/xenomai/fsw/include/msg_queues.h /home/xenomai/fsw/include/sems.h \
+ /home/xenomai/fsw/include/hk_tlm_var.h
 /home/xenomai/fsw/src/tasks/rtrv_file/rtrv_file.c:
 /usr/xenomai/include/cobalt/stdlib.h:
 /usr/xenomai/include/cobalt/stdio.h:
@@ -59,3 +60,4 @@
 /usr/xenomai/include/alchemy/sem.h:
 /home/xenomai/fsw/include/msg_queues.h:
 /home/xenomai/fsw/include/sems.h:
+/home/xenomai/fsw/include/hk_tlm_var.h:

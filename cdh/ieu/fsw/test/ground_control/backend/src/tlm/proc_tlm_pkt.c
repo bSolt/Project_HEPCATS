@@ -28,6 +28,7 @@
 #include <string.h>  // String function definitions
 #include <unistd.h>  // UNIX standard function definitions
 #include <stdint.h>  // Integer types
+#include <time.h>    // Standard time
 
 // Macro definitions:
 #define APID_SW  0x00 // Software origin
@@ -50,33 +51,6 @@ void proc_tlm_pkt(char* buffer) {
     uint8_t  pkt_dat_fld_sec_hdr_p_fld;
     char     pkt_dat_fld_usr_data[1064];
     uint16_t pkt_dat_fld_pkt_err_cnt;
-
-    uint8_t  val_telecmd_pkt_cnt = 0;     // Valid telecommand packet counter
-    uint8_t  inv_telecmd_pkt_cnt = 0;     // Invalid telecommand packet counter
-    uint8_t  rx_telecmd_pkt_cnt = 0;      // Received telecommand packet count
-    uint8_t  val_cmd_cnt = 0;             // Valid command counter
-    uint8_t  inv_cmd_cnt = 0;             // Invalid command counter
-    uint8_t  cmd_exec_suc_cnt = 0;        // Commands executed successfully counter
-    uint8_t  cmd_exec_err_cnt = 0;        // Commands not executed (error) counter
-    uint16_t tlm_pkt_xfr_frm_seq_cnt = 0; // Packet sequence count
-    uint16_t acq_img_cnt = 0;             // Acquired images count
-    uint8_t  img_acq_prog_flag = 0;       // Image acquisition in progress flag
-    uint8_t  mdq_scan_state = 0;          // Magnetometer DAQ scanning state
-    uint8_t  ers_rly_swtch_state = 0;     // Electrical relay switch state
-    uint8_t  flt_tbl_mode = 0;            // Filter table mode
-
-    float mdq_conv_buf[MDQ_BUF_SIZE/2]; // Magnetometer DAQ converted data buffer
-
-    float mdq_chnl0_sum = 0; // Channel 0 sum
-    float mdq_chnl1_sum = 0; // Channel 1 sum
-    float mdq_chnl2_sum = 0; // Channel 2 sum
-
-    float mdq_chnl0_avg; // Channel 0 average
-    float mdq_chnl1_avg; // Channel 1 average
-    float mdq_chnl2_avg; // Channel 2 average
-
-    char file_path[50];
-    char file_name[100];
 
     // Save input buffer to seperate fields:
     memcpy(&pkt_hdr_pkt_id,buffer,2);
@@ -161,6 +135,31 @@ void proc_tlm_pkt(char* buffer) {
     // If magnetometer, parse, print averaged magnetic field to screen, and
     // save to file)
     if (pkt_id_apid == APID_SW) {
+        // Declarations and initializations:
+        uint8_t  val_telecmd_pkt_cnt = 0;     // Valid telecommand packet counter
+        uint8_t  inv_telecmd_pkt_cnt = 0;     // Invalid telecommand packet counter
+        uint8_t  rx_telecmd_pkt_cnt = 0;      // Received telecommand packet count
+        uint8_t  val_cmd_cnt = 0;             // Valid command counter
+        uint8_t  inv_cmd_cnt = 0;             // Invalid command counter
+        uint8_t  cmd_exec_suc_cnt = 0;        // Commands executed successfully counter
+        uint8_t  cmd_exec_err_cnt = 0;        // Commands not executed (error) counter
+        uint16_t tlm_pkt_xfr_frm_seq_cnt = 0; // Packet sequence count
+        uint16_t acq_img_cnt = 0;             // Acquired images count
+        uint8_t  img_acq_prog_flag = 0;       // Image acquisition in progress flag
+        uint8_t  mdq_scan_state = 0;          // Magnetometer DAQ scanning state
+        uint8_t  ers_rly_swtch_state = 0;     // Electrical relay switch state
+        uint8_t  flt_tbl_mode = 0;            // Filter table mode
+        uint16_t img_accpt_cnt = 0;           // Accepted images (from IPS) count
+        uint16_t img_rej_cnt = 0;             // Rejected images (from IPS) count
+        time_t next_img_acq_tm = 0;         // Next image acquisition time
+        time_t next_atc_tm = 0;             // Next absolutely timed command time
+        uint8_t  pbk_prog_flg = 0;            // Playback in progress flag
+
+        char next_img_acq_tm_str[200]; // Next image acquisition time string
+        char next_atc_tm_str[200];     // Next absolutely timed command time string
+
+        struct tm* tm;
+
         // Parse data:
         memcpy(&rx_telecmd_pkt_cnt,pkt_dat_fld_usr_data+0,1);
         memcpy(&val_telecmd_pkt_cnt,pkt_dat_fld_usr_data+1,1);
@@ -175,9 +174,23 @@ void proc_tlm_pkt(char* buffer) {
         memcpy(&ers_rly_swtch_state,pkt_dat_fld_usr_data+12,1);
         memcpy(&mdq_scan_state,pkt_dat_fld_usr_data+13,1);
         memcpy(&flt_tbl_mode,pkt_dat_fld_usr_data+14,1);
+        memcpy(&img_accpt_cnt,pkt_dat_fld_usr_data+15,2);
+        memcpy(&img_rej_cnt,pkt_dat_fld_usr_data+17,2);
+        memcpy(&next_img_acq_tm,pkt_dat_fld_usr_data+19,4);
+        memcpy(&next_atc_tm,pkt_dat_fld_usr_data+23,4);
+        memcpy(&pbk_prog_flg,pkt_dat_fld_usr_data+27,1);
+
+        // Convert Unix timestamps to "YYYY/DOY-HH:MM:SS"
+        tm = gmtime(&next_img_acq_tm);
+        strftime(next_img_acq_tm_str,sizeof(next_img_acq_tm_str),\
+            "%Y/%j-%H:%M:%S",tm);
+
+        tm = gmtime(&next_atc_tm);
+        strftime(next_atc_tm_str,sizeof(next_atc_tm_str),\
+            "%Y/%j-%H:%M:%S",tm);
 
         // Print:
-        printf("0x00:%u,%u,%u,%u,%u,%u,%u,%u,%u,%s,%s,%s,%s\n",\
+        printf("0x00:%u,%u,%u,%u,%u,%u,%u,%u,%u,%s,%s,%s,%s,%u,%u,%s,%s,%s\n",\
             rx_telecmd_pkt_cnt,val_telecmd_pkt_cnt,inv_telecmd_pkt_cnt,\
             val_cmd_cnt,inv_cmd_cnt,cmd_exec_suc_cnt,\
             cmd_exec_err_cnt,tlm_pkt_xfr_frm_seq_cnt,acq_img_cnt,\
@@ -185,8 +198,24 @@ void proc_tlm_pkt(char* buffer) {
             ers_rly_swtch_state ? "On" : "Off",\
             mdq_scan_state ? "Scanning" : "Idle",\
             flt_tbl_mode == 0 ? "Normal" : flt_tbl_mode == 1 ? \
-            "Playback" : flt_tbl_mode == 2 ? "IMG" : "MDQ");
+            "Playback" : flt_tbl_mode == 2 ? "IMG" : "MDQ",\
+            img_accpt_cnt,img_rej_cnt,next_img_acq_tm_str,next_atc_tm_str,\
+            pbk_prog_flg ? "Playback" : "Idle");
     } else if (pkt_id_apid == APID_MDQ) {
+        // Declarations and initializations:
+        float mdq_conv_buf[MDQ_BUF_SIZE/2]; // Magnetometer DAQ converted data buffer
+
+        float mdq_chnl0_sum = 0; // Channel 0 sum
+        float mdq_chnl1_sum = 0; // Channel 1 sum
+        float mdq_chnl2_sum = 0; // Channel 2 sum
+
+        float mdq_chnl0_avg; // Channel 0 average
+        float mdq_chnl1_avg; // Channel 1 average
+        float mdq_chnl2_avg; // Channel 2 average
+
+        char file_path[50];
+        char file_name[100];
+
         // Loop through channels 0, 1, and 2 raw data buffers to convert from
         // char to signed 16 bit numbers. Each char is 8 bits, so the
         // measurement in each channel is composed of two chars: the one at 2n
@@ -235,6 +264,10 @@ void proc_tlm_pkt(char* buffer) {
         // Close file:
         fclose(file_ptr);
     } else if (pkt_id_apid == APID_IMG) {
+        // Declarations and initializations:
+        char file_path[50];
+        char file_name[100];
+
         // If first segment, create new file:
         if (pkt_seq_cnt_grp_flg == 1) {
             // Set filepath:

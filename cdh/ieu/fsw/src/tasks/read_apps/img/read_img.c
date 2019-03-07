@@ -63,6 +63,8 @@
 #include <sems.h>                // Semaphore variable declarations
 #include <crt_tlm_pkt_xfr_frm.h> // Create telemetry packet transfer frame
                                  // function declaration
+#include <hk_tlm_var.h>          // Housekeeping telemetry variable
+                                 // declarations
 
 // Macro definitions:
 #define RAW_IMG_SIZE      2304000 // Imaging source data message queue
@@ -88,6 +90,8 @@ RT_SEM new_img_sem; // For run_cam_sgl and read_usb_img task
 
 // Global variable definitions:
 uint16_t tlm_pkt_xfr_frm_seq_cnt = 0; // Packet sequence count
+uint16_t img_accpt_cnt = 0;           // Accepted images (from IPS) count
+uint16_t img_rej_cnt = 0;             // Rejected images (from IPS) count
 
 void read_img(void) {
     // Print:
@@ -125,6 +129,19 @@ void read_img(void) {
     char* img_buf = (char*) malloc(RAW_IMG_SIZE); // Buffer for image
 
     uint32_t ips_ret; // IPS return value for passed raw image
+
+    // Print:
+    rt_printf("%d (READ_IMG_TASK) Waiting for IPS to be ready to receive"
+        " and process images\n",time(NULL));
+
+    // Synchronize with IPS:
+    // (Wait IPS to be ready to receive and process images. Wait for message
+    // indicating that IPS is ready to receive images via real-time message)
+    ret_val = rt_pipe_read(&ips_msg_pipe,&ips_ret,sizeof(ips_ret),\
+        TM_INFINITE);
+
+    // Print:
+    rt_printf("%d (READ_IMG_TASK) IPS is ready; continuing\n",time(NULL));
 
     // Print:
     rt_printf("%d (READ_IMG_TASK) Ready to process images, interface with"
@@ -176,6 +193,9 @@ void read_img(void) {
             // Print:
             rt_printf("%d (READ_IMG_TASK) Image classified to have an"
                 " aurora by IPS; waiting for processed image\n",time(NULL));
+
+            // Increment counter:
+            img_accpt_cnt++;
 
             // Read real-time pipe for processed image:
             ret_val = rt_pipe_read(&ips_msg_pipe,img_buf,ips_ret,\
@@ -274,6 +294,9 @@ void read_img(void) {
             // Print:
             rt_printf("%d (READ_IMG_TASK) Image classified to not have an"
                 " aurora by IPS; ignoring image\n",time(NULL));
+
+            // Increment counter:
+            img_rej_cnt++;
         }
     }
 

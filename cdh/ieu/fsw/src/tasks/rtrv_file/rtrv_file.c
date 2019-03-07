@@ -83,6 +83,8 @@
 // Header files:
 #include <msg_queues.h> // Message queue variable declarations
 #include <sems.h>       // Semaphore variable declarations
+#include <hk_tlm_var.h> // Housekeeping telemetry variable
+                        // declarations
 
 // Macro definitions:
 #define CMD_XFR_FRM_SIZE       15 // Command transfer frame size in bytes
@@ -111,6 +113,9 @@ RT_TASK_MCB cmd_xfr_frm_rtrv_mcb; // For command transfer frame message from
                                   // command executor task
 RT_TASK_MCB rply_rtrv_mcb;        // For command execution status reply message
                                   // to command executor task
+
+// Global variables:
+uint8_t pbk_prog_flg = 0; // Playback in progress flag
 
 void rtrv_file(void* arg) {
 	// Print:
@@ -199,6 +204,9 @@ void rtrv_file(void* arg) {
             rt_printf("%d (RTRV_FILE_TASK) Starting stored housekeeping"
                 " data playback\n",time(NULL));
 
+            // Set flag:
+            pbk_prog_flg = 1; // In progress
+
             // Open directory listing file:
             dir_ls_file_ptr = fopen("/home/xenomai/data/hk/hk_dir.ls", "r");
 
@@ -267,6 +275,9 @@ void rtrv_file(void* arg) {
             rt_printf("%d (RTRV_FILE_TASK) Starting stored magnetometer DAQ"
                 " playback\n",time(NULL));
 
+            // Set flag:
+            pbk_prog_flg = 1; // In progress
+
             // Open directory listing file:
             dir_ls_file_ptr = fopen("../raw_record_tlm/mdq/mdq_dir.ls", "r");
 
@@ -334,6 +345,9 @@ void rtrv_file(void* arg) {
             // Print:
             rt_printf("%d (RTRV_FILE_TASK) Starting stored imaging data"
                 " playback\n",time(NULL));
+
+            // Set flag:
+            pbk_prog_flg = 1; // In progress
 
             // Open directory:
             dir = opendir("../raw_record_tlm/img/");
@@ -410,6 +424,13 @@ void rtrv_file(void* arg) {
 
             // Close directory:
             closedir(dir);
+        } else {
+          // Print:
+            rt_printf("%d (RTRV_FILE_TASK) Command argument not recognized; "
+                " ignoring command transfer frame\n",time(NULL));
+
+            // Set file count:
+            file_cnt = 0;
         }
 
         // Check execution status:
@@ -420,6 +441,9 @@ void rtrv_file(void* arg) {
             // Set execution status to unsuccessful:
             cmd_exec_stat = 0;
         }
+
+        // Set flag:
+        pbk_prog_flg = 0; // Idle
 
         // Reply to command executor task with command execution status:
         ret_val = rt_task_reply(flw_id,&rply_rtrv_mcb);

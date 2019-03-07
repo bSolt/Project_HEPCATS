@@ -447,7 +447,7 @@ void proc_telecmd_pkt(void) {
             " invalid; packet ignored\n",time(NULL));
 
         // Increase counter:
-        ++inv_telecmd_pkt_cnt;
+        inv_telecmd_pkt_cnt++;
 
     }
 

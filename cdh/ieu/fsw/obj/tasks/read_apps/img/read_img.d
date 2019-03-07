@@ -29,7 +29,8 @@
  /usr/xenomai/include/alchemy/sem.h \
  /home/xenomai/fsw/include/msg_queues.h \
  /home/xenomai/fsw/include/msg_pipes.h /home/xenomai/fsw/include/sems.h \
- /home/xenomai/fsw/include/crt_tlm_pkt_xfr_frm.h
+ /home/xenomai/fsw/include/crt_tlm_pkt_xfr_frm.h \
+ /home/xenomai/fsw/include/hk_tlm_var.h
 /home/xenomai/fsw/src/tasks/read_apps/img/read_img.c:
 /usr/xenomai/include/cobalt/stdlib.h:
 /usr/xenomai/include/cobalt/stdio.h:
@@ -67,3 +68,4 @@
 /home/xenomai/fsw/include/msg_pipes.h:
 /home/xenomai/fsw/include/sems.h:
 /home/xenomai/fsw/include/crt_tlm_pkt_xfr_frm.h:
+/home/xenomai/fsw/include/hk_tlm_var.h:

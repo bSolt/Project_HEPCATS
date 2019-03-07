@@ -75,6 +75,7 @@ RT_SEM new_img_sem; // For run_cam_sgl and read_usb_img task
 uint8_t img_acq_prog_flag = 0; // Image acquisition in progress flag
 uint16_t acq_img_cnt = 0;      // Acquired images count
 uint8_t cmd_exec_suc_cnt;      // Commands executed successfully counter
+uint32_t next_img_acq_tm = 0;      // Next image acquisition time
 
 void cmd_img(void* arg) {
     // Print:
@@ -234,6 +235,9 @@ void cmd_img(void* arg) {
                         // Check if elapsed time is less then duration:
                         // (This is to check for the last loop)
                         if (elp_time < acq_dur) {
+                            // Set next image acquisition time:
+                            next_img_acq_tm = time(NULL) + acq_ivl;
+
                             // Receive command transfer frames from command
                             // executor task via synchronous message if message
                             // is waiting. Otherwise, wait for acquisition
@@ -286,6 +290,9 @@ void cmd_img(void* arg) {
 
                     // Set flag:
                     img_acq_prog_flag = 0; // Acquisition not in progress
+
+                    // Set next image acquisition time:
+                    next_img_acq_tm = 0;
 
                     // Set reply message data field to indicate command
                     // executed:
