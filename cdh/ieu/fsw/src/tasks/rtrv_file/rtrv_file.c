@@ -94,7 +94,7 @@
                                   // bytes
 
 #define ARG_SW  0x00 // Command argument: Housekeeping telemetry
-#define ARG_MDQ 0x01 // Command argument: Magnetometer DAQ
+#define ARG_MAG 0x01 // Command argument: Magnetometer
 #define ARG_IMG 0x02 // Command argument: Imaging
 
 // Message queue definitions:
@@ -270,7 +270,7 @@ void rtrv_file(void* arg) {
 
             // Close file:
             fclose(dir_ls_file_ptr);
-        } else if (cmd_arg == ARG_MDQ) {
+        } else if (cmd_arg == ARG_MAG) {
             // Print:
             rt_printf("%d (RTRV_FILE_TASK) Starting stored magnetometer DAQ"
                 " playback\n",time(NULL));
@@ -290,7 +290,7 @@ void rtrv_file(void* arg) {
                 if (strcmp(file_line,"mag_dir.ls") != 0) {
                     // Append directory to file name:
                     sprintf(file_path,"../raw_record_tlm/mdq/%s",file_line);
-
+                    rt_printf("%s\n",file_path);
                     // Open file to read
                     src_dat_file_ptr = fopen(file_path,"rb");
 

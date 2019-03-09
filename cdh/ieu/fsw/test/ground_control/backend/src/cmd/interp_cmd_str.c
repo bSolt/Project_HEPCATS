@@ -224,7 +224,7 @@ struct telecmd_pkt_inputs interp_cmd_str(char* cmd_str_arr[]) {
 
             // Print
             printf("(CMD_STR_INTERP) \"%s %s %s",cmd_str_arr[0],\
-            	cmd_str_arr[1],cmd_str_arr[2]);
+                cmd_str_arr[1],cmd_str_arr[2]);
 
             // Exit:
             break; 
@@ -255,8 +255,8 @@ struct telecmd_pkt_inputs interp_cmd_str(char* cmd_str_arr[]) {
                     telecmd_pkt_inputs.pkt_app_dat_cmd_arg = cmd_arg[row][j];
 
                     // Print
-		            printf(" %s %s",cmd_str_arr[3],\
-		            	cmd_str_arr[4]);
+                    printf(" %s %s",cmd_str_arr[3],\
+                        cmd_str_arr[4]);
 
                     // Exit:
                     break;
@@ -265,6 +265,7 @@ struct telecmd_pkt_inputs interp_cmd_str(char* cmd_str_arr[]) {
                 // Command parameter does not match what is in database:
                 if (j == 5) {
                     // Print error message
+                    printf(" with\"\n");
                     printf("(CMD_STR_INTERP) <ERROR> \"%s\" command"
                     " parameter not recognized\n",cmd_str_arr[i+1]);
 
@@ -300,8 +301,8 @@ struct telecmd_pkt_inputs interp_cmd_str(char* cmd_str_arr[]) {
             telecmd_pkt_inputs.pkt_app_dat_atc_flg = 1; // True
 
             // Print
-	        printf(" %s %s",cmd_str_arr[5],\
-	        	cmd_str_arr[6]);
+            printf(" %s %s",cmd_str_arr[5],\
+                cmd_str_arr[6]);
 
             // Exit loop:
             break;
@@ -321,8 +322,8 @@ struct telecmd_pkt_inputs interp_cmd_str(char* cmd_str_arr[]) {
     // Print:
     printf("\" recognized\n");
     printf("(INTERP_CMD_STR) APID=0x%x, PKT_NAME=0x%x, ARG=0x%x\n",\
-    	telecmd_pkt_inputs.pkt_apid,telecmd_pkt_inputs.pkt_name,\
-    	telecmd_pkt_inputs.pkt_app_dat_cmd_arg);
+        telecmd_pkt_inputs.pkt_apid,telecmd_pkt_inputs.pkt_name,\
+        telecmd_pkt_inputs.pkt_app_dat_cmd_arg);
 
     // Return:
     return telecmd_pkt_inputs;

@@ -82,7 +82,7 @@ void rx_telecmd_pkt(void* arg) {
     int8_t fd;      // File descriptor for port
     int8_t ret_val; // Function return value
 
-    char* port = "/dev/pts/22"; // Uplink serial port
+    char* port = "/dev/pts/3"; // Uplink serial port
 
     char telecmd_pkt_buf[TELECMD_PKT_SIZE]; // Buffer for telecommand packet
 

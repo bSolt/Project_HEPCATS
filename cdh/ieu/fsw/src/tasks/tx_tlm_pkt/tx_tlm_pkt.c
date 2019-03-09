@@ -73,7 +73,7 @@ void tx_tlm_pkt(void* arg) {
     int16_t ret_val; // Function return value
     int8_t  fd;      // File descriptor for port
 
-    char* port = "/dev/pts/12"; // Downlink
+    char* port = "/dev/pts/1"; // Downlink
 
     char tlm_pkt_buf[TLM_PKT_XFR_FRM_SIZE]; // Buffer for telemetry
                                             // packet transfer frame
