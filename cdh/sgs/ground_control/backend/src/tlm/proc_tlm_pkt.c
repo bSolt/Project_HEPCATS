@@ -205,7 +205,7 @@ void proc_tlm_pkt(char* buffer) {
             ers_rly_swtch_state ? "ON" : "OFF",\
             mdq_scan_state ? "SCANNING" : "IDLE",\
             flt_tbl_mode == 0 ? "NORM" : flt_tbl_mode == 1 ? \
-            "PBK" : flt_tbl_mode == 2 ? "IMG" : "MAG",\
+            "RT" : flt_tbl_mode == 2 ? "PBK" : flt_tbl_mode == 3 ? "IMG" : "MAG",\
             img_accpt_cnt,img_rej_cnt,next_img_acq_tm_str,next_atc_tm_str,\
             pbk_prog_flg ? "PBK" : "IDLE",sys_tm_str);
     } else if (pkt_id_apid == APID_MDQ) {
