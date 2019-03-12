@@ -151,12 +151,14 @@ void proc_tlm_pkt(char* buffer) {
         uint8_t  flt_tbl_mode = 0;            // Filter table mode
         uint16_t img_accpt_cnt = 0;           // Accepted images (from IPS) count
         uint16_t img_rej_cnt = 0;             // Rejected images (from IPS) count
-        time_t next_img_acq_tm = 0;         // Next image acquisition time
-        time_t next_atc_tm = 0;             // Next absolutely timed command time
+        time_t   next_img_acq_tm = 0;         // Next image acquisition time
+        time_t   next_atc_tm = 0;             // Next absolutely timed command time
         uint8_t  pbk_prog_flg = 0;            // Playback in progress flag
+        time_t   sys_tm = 0;                  // System time
 
         char next_img_acq_tm_str[200]; // Next image acquisition time string
         char next_atc_tm_str[200];     // Next absolutely timed command time string
+        char sys_tm_str[200];          // System time string
 
         struct tm* tm;
 
@@ -179,6 +181,7 @@ void proc_tlm_pkt(char* buffer) {
         memcpy(&next_img_acq_tm,pkt_dat_fld_usr_data+19,4);
         memcpy(&next_atc_tm,pkt_dat_fld_usr_data+23,4);
         memcpy(&pbk_prog_flg,pkt_dat_fld_usr_data+27,1);
+        memcpy(&sys_tm,pkt_dat_fld_usr_data+28,4);
 
         // Convert Unix timestamps to "YYYY/DOY-HH:MM:SS"
         tm = gmtime(&next_img_acq_tm);
@@ -189,18 +192,22 @@ void proc_tlm_pkt(char* buffer) {
         strftime(next_atc_tm_str,sizeof(next_atc_tm_str),\
             "%Y/%j-%H:%M:%S",tm);
 
+        tm = gmtime(&sys_tm);
+        strftime(sys_tm_str,sizeof(sys_tm_str),\
+            "%Y/%j-%H:%M:%S",tm);
+
         // Print:
-        printf("0x00:%u,%u,%u,%u,%u,%u,%u,%u,%u,%s,%s,%s,%s,%u,%u,%s,%s,%s\n",\
+        printf("0x00:%u,%u,%u,%u,%u,%u,%u,%u,%u,%s,%s,%s,%s,%u,%u,%s,%s,%s,%s\n",\
             rx_telecmd_pkt_cnt,val_telecmd_pkt_cnt,inv_telecmd_pkt_cnt,\
             val_cmd_cnt,inv_cmd_cnt,cmd_exec_suc_cnt,\
             cmd_exec_err_cnt,tlm_pkt_xfr_frm_seq_cnt,acq_img_cnt,\
-            img_acq_prog_flag ? "In progress" : "Idle",\
-            ers_rly_swtch_state ? "On" : "Off",\
-            mdq_scan_state ? "Scanning" : "Idle",\
-            flt_tbl_mode == 0 ? "Normal" : flt_tbl_mode == 1 ? \
-            "Playback" : flt_tbl_mode == 2 ? "IMG" : "MDQ",\
+            img_acq_prog_flag ? "IN PROGRESS" : "IDLE",\
+            ers_rly_swtch_state ? "ON" : "OFF",\
+            mdq_scan_state ? "SCANNING" : "IDLE",\
+            flt_tbl_mode == 0 ? "NORM" : flt_tbl_mode == 1 ? \
+            "PBK" : flt_tbl_mode == 2 ? "IMG" : "MAG",\
             img_accpt_cnt,img_rej_cnt,next_img_acq_tm_str,next_atc_tm_str,\
-            pbk_prog_flg ? "Playback" : "Idle");
+            pbk_prog_flg ? "PBK" : "IDLE",sys_tm_str);
     } else if (pkt_id_apid == APID_MDQ) {
         // Declarations and initializations:
         float mdq_conv_buf[MDQ_BUF_SIZE/2]; // Magnetometer DAQ converted data buffer
