@@ -93,7 +93,7 @@
 #define TLM_PKT_XFR_FRM_SIZE 1089 // Telemetry packet transfer frame size in
                                   // bytes
 
-#define ARG_HK  0x00 // Command argument: Housekeeping telemetry
+#define ARG_SW  0x00 // Command argument: Housekeeping telemetry
 #define ARG_MAG 0x01 // Command argument: Magnetometer
 #define ARG_IMG 0x02 // Command argument: Imaging
 
@@ -199,7 +199,7 @@ void rtrv_file(void* arg) {
         memcpy(&cmd_arg,cmd_xfr_frm_buf+11,4);
 
         // Check command argument to retrieve files:
-        if (cmd_arg == ARG_HK) { 
+        if (cmd_arg == ARG_SW) { 
             // Print:
             rt_printf("%d (RTRV_FILE_TASK) Starting stored housekeeping"
                 " data playback\n",time(NULL));
