@@ -18,7 +18,8 @@
  /usr/xenomai/include/copperplate/debug.h \
  /usr/xenomai/include/cobalt/ticks.h /usr/xenomai/include/alchemy/sem.h \
  /home/xenomai/fsw/include/msg_queues.h /home/xenomai/fsw/include/sems.h \
- /home/xenomai/fsw/include/hk_tlm_var.h
+ /home/xenomai/fsw/include/hk_tlm_var.h \
+ /home/xenomai/fsw/include/flt_tbl.h
 /home/xenomai/fsw/src/tasks/flt_tbl/flt_tbl.c:
 /usr/xenomai/include/cobalt/stdlib.h:
 /usr/xenomai/include/cobalt/unistd.h:
@@ -43,3 +44,4 @@
 /home/xenomai/fsw/include/msg_queues.h:
 /home/xenomai/fsw/include/sems.h:
 /home/xenomai/fsw/include/hk_tlm_var.h:
+/home/xenomai/fsw/include/flt_tbl.h:

@@ -93,7 +93,7 @@
 #define TLM_PKT_XFR_FRM_SIZE 1089 // Telemetry packet transfer frame size in
                                   // bytes
 
-#define ARG_SW  0x00 // Command argument: Housekeeping telemetry
+#define ARG_HK  0x00 // Command argument: Housekeeping telemetry
 #define ARG_MAG 0x01 // Command argument: Magnetometer
 #define ARG_IMG 0x02 // Command argument: Imaging
 
@@ -199,7 +199,7 @@ void rtrv_file(void* arg) {
         memcpy(&cmd_arg,cmd_xfr_frm_buf+11,4);
 
         // Check command argument to retrieve files:
-        if (cmd_arg == ARG_SW) { 
+        if (cmd_arg == ARG_HK) { 
             // Print:
             rt_printf("%d (RTRV_FILE_TASK) Starting stored housekeeping"
                 " data playback\n",time(NULL));
@@ -208,7 +208,7 @@ void rtrv_file(void* arg) {
             pbk_prog_flg = 1; // In progress
 
             // Open directory listing file:
-            dir_ls_file_ptr = fopen("/home/xenomai/data/hk/hk_dir.ls", "r");
+            dir_ls_file_ptr = fopen("../raw_record_tlm/hk/hk_dir.ls","r");
 
             // Loop to read directory listing file:
             while (fgets(file_line,sizeof(file_line),dir_ls_file_ptr) != NULL) {
@@ -287,10 +287,10 @@ void rtrv_file(void* arg) {
                 file_line[strcspn(file_line,"\n")] = 0;
 
                 // Ignore directory listing file:
-                if (strcmp(file_line,"mag_dir.ls") != 0) {
+                if (strcmp(file_line,"mdq_dir.ls") != 0) {
                     // Append directory to file name:
                     sprintf(file_path,"../raw_record_tlm/mdq/%s",file_line);
-                    rt_printf("%s\n",file_path);
+
                     // Open file to read
                     src_dat_file_ptr = fopen(file_path,"rb");
 

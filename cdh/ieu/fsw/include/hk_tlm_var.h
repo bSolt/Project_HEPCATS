@@ -33,3 +33,4 @@ extern uint16_t img_rej_cnt;             // Rejected images (from IPS) count
 extern uint32_t next_img_acq_tm;         // Next image acquisition time
 extern uint32_t next_atc_tm;             // Next absolutely timed command time
 extern uint8_t  pbk_prog_flg;            // Playback in progress flag
+extern uint32_t sys_tm;                  // System time

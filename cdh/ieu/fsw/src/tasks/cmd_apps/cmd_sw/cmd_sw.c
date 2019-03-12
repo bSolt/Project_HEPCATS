@@ -59,8 +59,15 @@
 #define RPLY_MSG_SIZE     1 // Command execution status reply message to
                             // command executor task size in bytes
 
-#define CMD_NOOP 0x00 // Command: Non-operationa
-#define CMD_PBK  0x01 // Command: Playback
+#define CMD_NOOP        0x00 // Command: Non-operationa
+#define CMD_BGNPBK      0x01 // Command: Begin playback
+#define CMD_SETFLTTBLMD 0x02 // Command: Set filter table mode
+
+#define ARG_FLTTBL_NORM 0x00 // Argument: Filter table normal (NORM)
+#define ARG_FLTTBL_RT   0x01 // Argument: Filter table realtime (RT)
+#define ARG_FLTTBL_PBK  0x02 // Argument: Filter table playback (PBK)
+#define ARG_FLTTBL_IMG  0x03 // Argument: Filter table imaging (IMG)
+#define ARG_FLTTBL_MAG  0x04 // Argument: Filter table magnetometer (MAG)
 
 // Task definitions:
 RT_TASK rtrv_file_task; // Retrieve file
@@ -69,6 +76,9 @@ RT_TASK rtrv_file_task; // Retrieve file
 RT_SEM cmd_sw_sem;    // For exec_cmd and cmd_sw task synchronization
 RT_SEM rtrv_file_sem; // For rtrv_file_task and cmd_sw_task
                       // synchronization 
+
+// Global variable definition:
+uint8_t flt_tbl_mode; // Filter table mode
 
 void cmd_sw(void* arg) {
     // Print:
@@ -188,10 +198,10 @@ void cmd_sw(void* arg) {
 
                 // Exit switch:
                 break;
-            case CMD_PBK :
+            case CMD_BGNPBK :
                 // Print:
-                rt_printf("%d (CMD_SW_TASK) Executing PBK command with"
-                    " arguments: %u\n",time(NULL),cmd_arg);
+                rt_printf("%d (CMD_SW_TASK) Executing BGNPBK command with"
+                    " arguments: 0x%X\n",time(NULL),cmd_arg);
 
                 ret_val = rt_task_send(&rtrv_file_task,&cmd_xfr_frm_mcb,\
                     &rply_mcb,TM_INFINITE);
@@ -208,10 +218,35 @@ void cmd_sw(void* arg) {
                 }
                 // Exit switch:
                 break;
+            case CMD_SETFLTTBLMD :
+                // Print:
+                rt_printf("%d (CMD_SW_TASK) Executing SETFLTTBLMD command with"
+                    " arguments: 0x%X\n",time(NULL),cmd_arg);
+
+                // Check if command argument matches known arguments:
+                if (cmd_arg > ARG_FLTTBL_MAG) {
+                    // Print:
+                    rt_printf("%d (CMD_SW_TASK) Command argument is invalid;"
+                        " command transfer frame ignored\n",time(NULL));
+
+                    // Set reply message data field to indicate command
+                    // did not execute:
+                    cmd_exec_stat = 0;
+                } else {
+                    // Set filter table mode to argument:
+                    flt_tbl_mode = cmd_arg;
+
+                    // Set reply message data field to indicate command
+                    // executed:
+                    cmd_exec_stat = 1; 
+                }
+
+                // Exit switch:
+                break;
             // If command packet name does not match:
             default :
                 // Print:
-                rt_printf("%d (CMD_SW_TASK) Command packet is invalid;" 
+                rt_printf("%d (CMD_SW_TASK) Command packet is invalid;"
                     " command transfer frame ignored\n",\
                     time(NULL));
 

@@ -14,6 +14,33 @@
 //       - Millisecond
 //     - Telemetry Packet
 //
+// Telemetry transfer frame direction is dictated by the filter table. The
+// filter table consists of a telemetry output (TO) and data storage (DS)
+// table defined in the filter table header (flt_tbl.h). These tables follo
+// this format:
+//
+//        |      Normal       |     Realtime      | 
+// |------|-------------------|-------------------|
+// | APID | Range | Frequency | Range | Frequency | ... 
+// |------|-------|-----------|-------|-----------|
+// | 0x## |   #   |     #     |   #   |     #     | ...
+//
+// The column order after the APId is: normal, realtime, playback, imaging,
+// magnetometer. The APIDs currently are SW (HK), IMG, and MDQ.
+//
+// The range is the number of telemetry packets to consider while the frequency
+// is how many of those telemetry packets will be downlinked or stored. For
+// example, if range = 2 and frequency = 1, then 1 out of every 2 telemetry
+// packets will be directed to either be downlinked or recorded.
+//
+// When selecting the filter table mode, use the filter table mode (number
+// itself) to find the column indicies to read to get range and frequency
+// values. This would be flt_tbl_mode*2+1 and flt_tbl_mode*2+2.
+//
+// The "Normal" filter table mode is set as the default when the filter table
+// task is started. This mode however can be changed by the command software
+// task.
+//
 // -------------------------------------------------------------------------- /
 //
 // Dependencies:
@@ -52,6 +79,7 @@
 #include <msg_queues.h> // Message queue variable declarations
 #include <sems.h>       // Semaphore variable declarations
 #include <hk_tlm_var.h> // Housekeeping telemetry variable declarations
+#include <flt_tbl.h>    // Filter table (TD & DS) declarations
 
 // Macro definitions:
 #define TLM_PKT_XFR_FRM_SIZE 1089 // Telemetry transfer frame size in bytes
@@ -77,7 +105,10 @@ RT_SEM tx_tlm_pkt_sem;  // For tx_tlm_pkt_task and flt_tbl_task
 RT_SEM crt_file_sem;    // For crt_file_task and flt_tbl_task synchronization 
 
 // Global variable definitions:
-uint8_t flt_tbl_mode = 0; // Filter table mode
+uint8_t flt_tbl_mode = 0;  // Filter table mode (set to normal by default)
+
+uint16_t flt_tbl_to[FLT_TBL_ROW][FLT_TBL_COL]; // Telemetry output table
+uint16_t flt_tbl_ds[FLT_TBL_ROW][FLT_TBL_COL]; // Data storage outtput table
 
 void flt_tbl(void* arg) {
     // Print:
@@ -120,6 +151,22 @@ void flt_tbl(void* arg) {
                                                     // packet transfer frame
                                                     // buffer
 
+    uint8_t flt_tbl_mode_prev = 255; // Previous filter table mode (set to 255
+                                     // to force initialization of xfr frame
+                                     // counts)
+
+    uint8_t flt_tbl_row; // Filter table row
+
+    uint8_t flt_tbl_to_rng;  // Filter table TO range
+    uint8_t flt_tbl_to_freq; // Filter table TO frequency
+    uint8_t flt_tbl_ds_rng;  // Filter table DS range
+    uint8_t flt_tbl_ds_freq; // Filter table DS frequency
+
+    uint8_t flt_tbl_xfr_frm_cnt_to[FLT_TBL_ROW]; // Current transfer frame
+                                                 // count for TO filter table
+    uint8_t flt_tbl_xfr_frm_cnt_ds[FLT_TBL_ROW]; // Current transfer frame
+                                                 // count for DS filter table
+
     // Task synchronize with read_usb and get_hk_tlm tasks:
     // (tell task that it is now ready to receive telemetry packet transfer
     // frames)
@@ -154,18 +201,96 @@ void flt_tbl(void* arg) {
         // Get APID from transfer frame:
         memcpy(&tlm_pkt_xfr_frm_apid,tlm_pkt_xfr_frm_buf+0,2);
 
-        // Direct transfer frame based on APID:
+        // Determine filter table row depending of transfer frame APID:
         if (tlm_pkt_xfr_frm_apid == APID_SW) {
-            // Set direction flags:
-            dl_tlm_pkt_flg = 1;   // Downlink packet
-            rcrd_tlm_pkt_flg = 0; // Do not record
-        } else if (tlm_pkt_xfr_frm_apid == APID_MDQ) {
-            // Set direction flags:
-            dl_tlm_pkt_flg = 1;   // Downlink packet
-            rcrd_tlm_pkt_flg = 0; // Do not record
+            // Set row:
+            flt_tbl_row = 0;
         } else if (tlm_pkt_xfr_frm_apid == APID_IMG) {
+            // Set row:
+            flt_tbl_row = 1;
+        } else if (tlm_pkt_xfr_frm_apid == APID_MDQ) {
+            // Set row:FLT_TBL_ROW
+            flt_tbl_row = 2;
+        }
+
+        // Set range and frequency:
+        flt_tbl_to_rng  = flt_tbl_to[flt_tbl_row][flt_tbl_mode*2+1];
+        flt_tbl_to_freq = flt_tbl_to[flt_tbl_row][flt_tbl_mode*2+2];
+        flt_tbl_ds_rng  = flt_tbl_ds[flt_tbl_row][flt_tbl_mode*2+1];
+        flt_tbl_ds_freq = flt_tbl_ds[flt_tbl_row][flt_tbl_mode*2+2];
+
+        // Check if filter table changed since last transfer frame:
+        if (flt_tbl_mode != flt_tbl_mode_prev) {
+            // Reset transfer frame counts to frequency:
+            // (This ensures that the first transfer frame after a mode change
+            // will either downlinked and/or recorded always if the frequency
+            // is non-zero.)
+            for (i = 0; i < FLT_TBL_ROW; ++i) {
+                // Set to value:
+                flt_tbl_xfr_frm_cnt_to[i] = flt_tbl_to[i][flt_tbl_mode*2+2];
+                flt_tbl_xfr_frm_cnt_ds[i] = flt_tbl_ds[i][flt_tbl_mode*2+2];
+            }
+        }
+
+        // Based on range, frequency, and current count, determine
+        // destination of transfer frame if frequency is non-zero:
+        if (flt_tbl_to_freq != 0) {
+            if (flt_tbl_xfr_frm_cnt_to[flt_tbl_row] == flt_tbl_to_freq) {
+                // Set direction flags:
+                dl_tlm_pkt_flg = 1; // Downlink packet
+
+                // Check for case range = frequency:
+                if (flt_tbl_xfr_frm_cnt_to[flt_tbl_row] != flt_tbl_to_rng) {
+                    // Increment:
+                    flt_tbl_xfr_frm_cnt_to[flt_tbl_row]++;
+                }
+            } else if (flt_tbl_xfr_frm_cnt_to[flt_tbl_row] == flt_tbl_to_rng) {
+                // Reset counter:
+                flt_tbl_xfr_frm_cnt_to[flt_tbl_row] = flt_tbl_to_freq;
+
+                // Set direction flags:
+                dl_tlm_pkt_flg = 0; // Do not downlink
+            } else {
+                // Increment:
+                flt_tbl_xfr_frm_cnt_to[flt_tbl_row]++;
+
+                // Set direction flags:
+                dl_tlm_pkt_flg = 0; // Do not downlink
+            }
+        // If frequency is zero, do not record:
+        } else {
             // Set direction flags:
-            dl_tlm_pkt_flg = 1;   // Downlink packet
+            dl_tlm_pkt_flg = 0; // Do not downlink
+        }
+
+        // Based on range, frequency, and current count, determine
+        // destination of transfer frame if frequency is non-zero:
+        if (flt_tbl_ds_freq != 0) {
+            if (flt_tbl_xfr_frm_cnt_ds[flt_tbl_row] == flt_tbl_ds_freq) {
+                // Set direction flags:
+                rcrd_tlm_pkt_flg = 1; // Record
+
+                // Check for case range = frequency:
+                if (flt_tbl_xfr_frm_cnt_ds[flt_tbl_row] != flt_tbl_ds_rng) {
+                    // Increment:
+                    flt_tbl_xfr_frm_cnt_ds[flt_tbl_row]++;
+                }
+            } else if (flt_tbl_xfr_frm_cnt_ds[flt_tbl_row] == flt_tbl_ds_rng) {
+                // Reset counter:
+                flt_tbl_xfr_frm_cnt_ds[flt_tbl_row] = flt_tbl_ds_freq;
+
+                // Set direction flags:
+                rcrd_tlm_pkt_flg = 0; // Do not record
+            } else {
+                // Increment:
+                flt_tbl_xfr_frm_cnt_ds[flt_tbl_row]++;
+
+                // Set direction flags:
+                rcrd_tlm_pkt_flg = 0; // Do not record
+            }
+        // If frequency is zero, do not record:
+        } else {
+            // Set direction flags:
             rcrd_tlm_pkt_flg = 0; // Do not record
         }
 
@@ -237,5 +362,7 @@ void flt_tbl(void* arg) {
             //    " recorded\n",time(NULL));
         }
 
+        // Update "previous" filter mode:
+        flt_tbl_mode_prev = flt_tbl_mode;
     }
 }

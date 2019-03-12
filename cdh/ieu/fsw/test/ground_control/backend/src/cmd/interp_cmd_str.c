@@ -40,6 +40,7 @@
 
 // Macro definitions:
 #define MAX_CMDS 100 // Max number of commands in database
+#define MAX_ARGS  12 // Max number of arguments in database
 
 struct telecmd_pkt_inputs interp_cmd_str(char* cmd_str_arr[]) {
    // Define structures:
@@ -48,17 +49,18 @@ struct telecmd_pkt_inputs interp_cmd_str(char* cmd_str_arr[]) {
     struct tm tm;           // Time structure
 
     // Definitions and initializations:
-    int i;
-    int j;
+    int i = 0;
+    int j = 0;
+    int k = 0;
     int row;
 
-    char cmd_mnem[MAX_CMDS][20];    // Command mnemonic database
-    int  cmd_apid[MAX_CMDS];        // Command APID database
-    int  cmd_pkt_nm[MAX_CMDS];      // Command packet name database
-    char prm_mnem[MAX_CMDS][6][20]; // Command parameter mnemonic database
-    int  cmd_arg[MAX_CMDS][6];      // Command argument database
+    char cmd_mnem[MAX_CMDS][20];           // Command mnemonic database
+    int  cmd_apid[MAX_CMDS];               // Command APID database
+    int  cmd_pkt_nm[MAX_CMDS];             // Command packet name database
+    char prm_mnem[MAX_CMDS][MAX_ARGS][20]; // Command parameter mnemonic database
+    int  cmd_arg[MAX_CMDS][MAX_ARGS];      // Command argument database
 
-    char line[50]; // Line from file
+    char line[100]; // Line from file
     FILE* fd; // File descriptor
 
     int cmd_time_str_ind; // Location of execution time
@@ -77,113 +79,32 @@ struct telecmd_pkt_inputs interp_cmd_str(char* cmd_str_arr[]) {
 
         // Parse by comma:
         while (token != NULL) {
-            // Switch case to split line into... 
-            switch (i) {
-                // Command mnemonic (string)
-                case 0 :
-                    // Copy string:
-                    strcpy(cmd_mnem[j],token);
+            // If to split into tables based on iteration
+            // Command mnemonic:
+            if (i == 0) {
+                // Copy string:
+                strcpy(cmd_mnem[j],token);
+            // APID
+            } else if (i == 1) {
+                // Scan to get APID:
+               sscanf(token,"%x",&cmd_apid[j]);
+            // Packet name:
+            } else if (i == 2) {
+                // Scan to packet name:
+                sscanf(token,"%x",&cmd_pkt_nm[j]);\
+            // Parameter mnemonic:
+            } else if ((i % 2) != 0) {
+                // Copy string:
+                strcpy(prm_mnem[j][k],token);
+            // Command argument:
+            } else {
+                // Interpret as string as hex:
+                sscanf(token,"%x",&cmd_arg[j][k]);
 
-                    // Exit:
-                    break;
-                // Command APID (integer):
-                case 1 :
-                    // Scan to get APID:
-                    sscanf(token,"%x",&cmd_apid[j]);
-
-                    // Exit:
-                    break;
-                // Command packet name (integer):
-                case 2 :
-                    // Scan to packet name:
-                    sscanf(token,"%x",&cmd_pkt_nm[j]);
-
-                    // Exit:
-                    break;
-                // Command parameter mnemonic (string):
-                case 3 :
-                    // Copy string:
-                    strcpy(prm_mnem[j][0],token);
-
-                    // Exit:
-                    break;
-                // Command argument (integer):
-                case 4 :
-                    // Scan to get argument:
-                    sscanf(token,"%x",&cmd_arg[j][0]);
-
-                    // Exit:
-                    break;
-                // Command parameter mnemonic (string):
-                case 5 :
-                    // Copy string:
-                    strcpy(prm_mnem[j][1],token);
-
-                    // Exit:
-                    break;
-                // Command argument (integer):
-                case 6 :
-                    // Scan to get argument:
-                    sscanf(token,"%x",&cmd_arg[j][1]);
-
-                    // Exit:
-                    break;
-                // Command parameter mnemonic (string):
-                case 7 :
-                    // Copy string:
-                    strcpy(prm_mnem[j][2],token);
-
-                    // Exit:
-                    break;
-                // Command argument (integer):
-                case 8 :
-                    // Scan to get argument:
-                    sscanf(token,"%x",&cmd_arg[j][2]);
-
-                    // Exit:
-                    break;
-                // Command parameter mnemonic (string):
-                case 9 :
-                    // Copy string:
-                    strcpy(prm_mnem[j][3],token);
-
-                    // Exit:
-                    break;
-                // Command argument (integer):
-                case 10 :
-                    // Copy string:
-                    sscanf(token,"%x",&cmd_arg[j][3]);
-
-                    // Exit:
-                    break;
-                // Command parameter mnemonic (string):
-                case 11 :
-                    // Copy string:
-                    strcpy(prm_mnem[j][4],token);
-
-                    // Exit:
-                    break;
-                // Command argument (integer):
-                case 12 :
-                    // Copy string:
-                    sscanf(token,"%x",&cmd_arg[j][4]);
-
-                    // Exit:
-                    break;
-                // Command parameter mnemonic (string):
-                case 13 :
-                    strcpy(prm_mnem[j][5],token);
-
-                    // Exit:
-                    break;
-                // Command argument (integer):
-                case 14 :
-                    // Copy string:
-                    sscanf(token,"%x",&cmd_arg[j][5]);
-
-                    // Exit:
-                    break;
+                // Increment counter:
+                k++;
             }
+
             // Increment counter:
             i++;
 
@@ -195,7 +116,7 @@ struct telecmd_pkt_inputs interp_cmd_str(char* cmd_str_arr[]) {
         j++;
 
         // Reset counter:
-        i = 0;
+        i = 0; k = 0;
     }
 
     // Close file:
@@ -301,8 +222,8 @@ struct telecmd_pkt_inputs interp_cmd_str(char* cmd_str_arr[]) {
             telecmd_pkt_inputs.pkt_app_dat_atc_flg = 1; // True
 
             // Print
-            printf(" %s %s",cmd_str_arr[5],\
-                cmd_str_arr[6]);
+            printf(" %s %s",cmd_str_arr[i],\
+                cmd_str_arr[cmd_time_str_ind]);
 
             // Exit loop:
             break;
@@ -320,7 +241,7 @@ struct telecmd_pkt_inputs interp_cmd_str(char* cmd_str_arr[]) {
     }
 
     // Print:
-    printf("\" recognized\n");
+    printf("\"\n");
     printf("(INTERP_CMD_STR) APID=0x%x, PKT_NAME=0x%x, ARG=0x%x\n",\
         telecmd_pkt_inputs.pkt_apid,telecmd_pkt_inputs.pkt_name,\
         telecmd_pkt_inputs.pkt_app_dat_cmd_arg);

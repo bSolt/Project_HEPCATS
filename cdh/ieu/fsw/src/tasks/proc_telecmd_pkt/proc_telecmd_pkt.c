@@ -306,7 +306,8 @@ void proc_telecmd_pkt(void) {
         if ((pkt_t_fld_sec - time(NULL)) < CMD_EXEC_TM_TOL) {
             // Print:
             rt_printf("%d (PROC_TELECMD_PKT_TASK) Command execution time is" 
-                " in the past by %d seconds \n",time(NULL),(pkt_t_fld_sec - time(NULL)));
+                " in the past by %d seconds \n",time(NULL),\
+                (time(NULL) - pkt_t_fld_sec));
 
             // Goto invalid packet:
             goto inv_pkt;
