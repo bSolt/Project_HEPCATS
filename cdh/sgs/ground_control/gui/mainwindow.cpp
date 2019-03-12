@@ -6,10 +6,7 @@
  * Command and Telemetry GUI
  *
  * TODO:
- * Setup cmd_return_pressed cases to reflect actual conditions.
- * Setup start_listeners cases to accept sim connections
- * Setup start_lsiteners cases to send and listen for actual telemetry
- *
+ * Fix crash when adding custom command mnemonic if no selection has been made in tree_active_cmds
  *
  */
 
@@ -39,8 +36,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->btn_enter, SIGNAL(clicked(bool)),this,SLOT(cmd_return_pressed()));
     connect(ui->txt_prompt,SIGNAL(returnPressed()),this, SLOT(cmd_return_pressed()));
     connect(ui->btn_start_listen,SIGNAL(clicked(bool)),this,SLOT(start_listeners()));
-    connect(ui->rad_btn_Master,SIGNAL(clicked(bool)),this,SLOT(link_master_checked()));
-    connect(ui->rad_btn_Monitor,SIGNAL(clicked(bool)),this,SLOT(link_monitor_checked()));
     connect(ui->btn_stop_listeners,SIGNAL(clicked(bool)),this,SLOT(stop_listeners()));
     connect(ui->btn_tab_cmd_add_cmd,SIGNAL(clicked(bool)),this,SLOT(add_custom_to_active()));
     connect(ui->btn_add_all,SIGNAL(clicked(bool)),this,SLOT(add_all_to_inactive()));
@@ -50,11 +45,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->btn_add_cmd,SIGNAL(clicked(bool)),this,SLOT(add_custom_to_inactive()));
 
 
-}
+}//END MAINWINDOW
+
 MainWindow::~MainWindow()
 {
     delete ui;
-}
+}//END DESTROY MAINWINDOW
 
 //SLOTS SLOTS SLOTS
 
@@ -68,11 +64,10 @@ void MainWindow::cmd_return_pressed() //Sends cmd_prompt string to command inter
  *      ACTUAL connection to SC
  * Case 2 Monitor
  *      ACTUAL connection to SC
- * Case 3 sim
- *      Sim connection, use sim telemetry from sim_ieu_send_tlm_packet in testing folder
  */
 
     int cmd_case;
+    QString cmd_time=QTime::currentTime().toString();
     //Figure out what state is checked:
     if (ui->rad_btn_Master->isChecked())
     {
@@ -82,10 +77,6 @@ void MainWindow::cmd_return_pressed() //Sends cmd_prompt string to command inter
     {
         cmd_case=2;
     }
-    if (ui->rad_btn_Sim->isChecked())
-    {
-        cmd_case=3;
-    }
 
     switch(cmd_case)
     {
@@ -93,16 +84,12 @@ void MainWindow::cmd_return_pressed() //Sends cmd_prompt string to command inter
     case (1): //MASTER CASE
     {
     //Takes input from prompt, displays it in the prompt window and sends it to the command interpreter
-    //Get current sent command count
-    QString cc_senttxt=ui->lbl_cmd_sent_count->text();
-    int cc_sent=cc_senttxt.toInt();
-
     //Get the user's command
     ui->cmd_txt_messages->setTextColor(Qt::black);
     QString command=ui->txt_prompt->text();
 
     //Call ben's command interpreter
-    QString command_to_send="./../../../../testing/sgs_sim_ieu_test/sgs/gc_prompt " + command;
+    QString command_to_send="./../../../../ground_control/backend/bin/gc_prompt " + command;
     QProcess commanding;
             commanding.start(command_to_send);
             commanding.waitForFinished(-1);
@@ -110,7 +97,7 @@ void MainWindow::cmd_return_pressed() //Sends cmd_prompt string to command inter
             QString stderr=commanding.readAllStandardError();
 
     //Display the command in the prompt window.
-    QString cmd_time=QTime::currentTime().toString();
+
     QString prompt_out=cmd_time+" PROMPT: "+command;
     ui->cmd_txt_messages->append(prompt_out);
 
@@ -131,9 +118,6 @@ void MainWindow::cmd_return_pressed() //Sends cmd_prompt string to command inter
     {
         //if the command is valid or the interpreter returned no error
         ui->cmd_txt_messages->append(stdout); //update prompt with black text
-        //Update command sent count
-        cc_sent=cc_sent++;
-        ui->lbl_cmd_sent_count->setText(QString::number(cc_sent));
     }
 
     //Clear the input line:
@@ -145,164 +129,80 @@ void MainWindow::cmd_return_pressed() //Sends cmd_prompt string to command inter
         QString current_time=QTime::currentTime().toString();
         //Print error in messages window
         ui->txt_messages_out->setTextColor(Qt::red);
-        ui->txt_messages_out->append(current_time+": "+"COMMAND NOT SENT: LINK NOT MASTER");
+        ui->txt_messages_out->append(current_time+": "+"<ERROR> COMMAND NOT SENT: CONTACT NOT MASTER");
         ui->txt_messages_out->setTextColor(Qt::black);
 
         //Print error in prompt window too
         ui->cmd_txt_messages->setTextColor(Qt::red);
-        ui->cmd_txt_messages->append(current_time+": "+"<ERROR> LINK NOT MASTER: COMMAND NOT SENT"); //update prompt with red text
+        ui->cmd_txt_messages->append(current_time+": "+"<ERROR> CONTACT NOT MASTER: COMMAND NOT SENT"); //update prompt with red text
         ui->cmd_txt_messages->setTextColor(Qt::black);
 
     break;
 } //END CASE 2 MONITOR
-    case (3): //SIM selected
-    {
-
-        //COMMENTED OUT FOR WIP SIM CONNECTIONS
-        QString current_time=QTime::currentTime().toString();
-        //Print error in messages window
-        ui->txt_messages_out->setTextColor(Qt::red);
-        ui->txt_messages_out->append(current_time+": "+"COMMAND NOT SENT: LINK SIM");
-        ui->txt_messages_out->setTextColor(Qt::black);
-
-        //Print error in prompt window too
-        ui->cmd_txt_messages->setTextColor(Qt::red);
-        ui->cmd_txt_messages->append(current_time+": "+"<ERROR> LINK SIM: COMMAND NOT SENT"); //update prompt with red text
-        ui->cmd_txt_messages->setTextColor(Qt::black);
-
-
-        //WIP SIM CONNECTIONS
-
-
-        break;
-}//END CASE 3 SIM CONNECTION
     default:
     {
         QString current_time=QTime::currentTime().toString();
         //Print error in messages window
         ui->txt_messages_out->setTextColor(Qt::red);
-        ui->txt_messages_out->append(current_time+": "+"COMMAND NOT SENT: NO LINK");
+        ui->txt_messages_out->append(current_time+": "+"<ERROR> COMMAND NOT SENT: NO CONTACT");
         ui->txt_messages_out->setTextColor(Qt::black);
 
         //Print error in prompt window too
         ui->cmd_txt_messages->setTextColor(Qt::red);
-        ui->cmd_txt_messages->append(current_time+": "+"<ERROR> NO LINK"); //update prompt with red text
+        ui->cmd_txt_messages->append(current_time+": "+"<ERROR> NO CONTACT"); //update prompt with red text
         ui->cmd_txt_messages->setTextColor(Qt::black);
 } //END CASE DEFAULT
 
     } //END SWTICH CASE
  ui->txt_prompt->clear();
-
-
-
-}
+}// END OF SLOT CMD_RETURN_PRESSED
 
 
 void MainWindow::on_btn_quit_clicked() //Closes main window
 {
     close();
-}
+}//END OF SLOT ON_BTN_QUIT_CLICKED
 
 void MainWindow::start_listeners() //Spawns telemetry listeners
 {
 
-    /*
-     * //Commented out for WIP SWITCH CASES
-    //Set the process path
-    QString commandtosend="./../../../../testing/sgs_sim_ieu_test/sgs/placeHoldTelem.sh"; //placeholder function, generates random telemetry packets to figure out updating GUI
-    //Define listeners as a QProcess
-    listeners=new QProcess(this);
-    connect(listeners,SIGNAL(readyReadStandardOutput()),this,SLOT(print_to_telem())); //connect the data ready signal to the telem processor.
-    listeners->start(commandtosend); //initiate the process asynchronously
-    */
-
-    //WIP SWTICH CASES
-    /*
-     * TODO
-     * Fix case 3 so sim_ieu_tlm_loop.sh does not return an error when called
-     *error reads "./../../../../testing/sgs_sim_ieu_test/sim_ieu/sim_ieu_tlm_loop.sh: line 6: ./sim_ieu_send_tlm_pkt: No such file or directory"
-     * May need to change path in sim_ieu_tlm_loop.sh to be more global or non-environment specific.
-     */
-
-
-    int cmd_case;
+    int cmd_case=0;
     //Figure out what state is checked:
-    if (ui->rad_btn_Master->isChecked())
+    if (ui->rad_btn_Master->isChecked() || ui->rad_btn_Monitor->isChecked())
     {
         cmd_case=1;
     }
-    if (ui->rad_btn_Monitor->isChecked())
-    {
-        cmd_case=2;
-    }
-    if (ui->rad_btn_Sim->isChecked())
-    {
-        cmd_case=3;
-    }
-
     switch (cmd_case)
     {
-    case 1: //WIP MASTER
+    case 1: //Master or Monitor
     {
 
         QString current_time=QTime::currentTime().toString();
-        //Print error in messages window
-        ui->txt_messages_out->setTextColor(Qt::red);
-        ui->txt_messages_out->append(current_time+": "+"COMMAND NOT SENT: MASTER LINKS NOT ENABLED WIP");
-        ui->txt_messages_out->setTextColor(Qt::black);
-
-        //Print error in prompt window too
-        ui->cmd_txt_messages->setTextColor(Qt::red);
-        ui->cmd_txt_messages->append(current_time+": "+"<ERROR> MASTER LINKS NOT ENABLED WIP"); //update prompt with red text
-        ui->cmd_txt_messages->setTextColor(Qt::black);
+        //Start the gc_listener
+       QString gc_listen_cmd="./../backend/bin/rcv_tlm";
+       tlm_reader=new QProcess(this);
+       connect(tlm_reader,SIGNAL(readyReadStandardOutput()),this,SLOT(print_to_telem()));
+       connect(tlm_reader,SIGNAL(readyReadStandardError()),this,SLOT(print_to_telem()));
+       tlm_reader->start(gc_listen_cmd);
+       ui->txt_messages_out->append(current_time+": Listeners started.");
+       if (ui->rad_btn_Master->isChecked())
+       ui->lbl_link_state->setText("MASTER");
+       else
+       ui->lbl_link_state->setText("MONITOR");
+       break;
     }//END CASE MASTER
 
-    case 2: //WIP MONITOR ONLY
+    default:
     {
+        //Set default case for if no link type has been selected
         QString current_time=QTime::currentTime().toString();
-        //Print error in messages window
         ui->txt_messages_out->setTextColor(Qt::red);
-        ui->txt_messages_out->append(current_time+": "+"COMMAND NOT SENT: MONITOR LINKS NOT ENABLED WIP");
+        ui->txt_messages_out->append(current_time+": Could not start listeners, link type not specified");
         ui->txt_messages_out->setTextColor(Qt::black);
-
-        //Print error in prompt window too
-        ui->cmd_txt_messages->setTextColor(Qt::red);
-        ui->cmd_txt_messages->append(current_time+": "+"<ERROR> MONITOR LINKS NOT ENABLED WIP"); //update prompt with red text
-        ui->cmd_txt_messages->setTextColor(Qt::black);
-    } //END MONITOR ONLY
-
-    case 3://WIP SIM CONNECTION
-    {
-        //Configure ports for sim IEU to use
-//Setup virtual serial ports.
-        QString port_command="./../../../../testing/sgs_sim_ieu_test/sim_ieu/sim_ieu_port_setup.sh"; //Writes to STDERR for some reason
-            //Define listeners as a QProcess
-            sim_port_setup_listener=new QProcess(this);
-            connect(sim_port_setup_listener,SIGNAL(readyReadStandardOutput()),this,SLOT(print_to_msgs())); //connect the data ready signal to the telem processor.
-            connect(sim_port_setup_listener,SIGNAL(readyReadStandardError()),this,SLOT(print_to_msgs()));
-            sim_port_setup_listener->start(port_command); //initiate the process asynchronously
-//Start the gc_listener
-       QString gc_listen_cmd="./../../../../testing/sgs_sim_ieu_test/sgs/gc_rcv_tlm";
-       sim_reader=new QProcess(this);
-       connect(sim_reader,SIGNAL(readyReadStandardOutput()),this,SLOT(print_to_telem()));
-       connect(sim_reader,SIGNAL(readyReadStandardError()),this,SLOT(print_to_telem()));
-       sim_reader->start(gc_listen_cmd);
-
-//Start the telemetry loop
-       QString sim_send_tlm_cmd="./../../../../testing/sgs_sim_ieu_test/sim_ieu/sim_ieu_tlm_loop.sh";
-            sim_tlm_loop=new QProcess(this);
-            connect(sim_tlm_loop,SIGNAL(readyReadStandardError()),this,SLOT(print_to_msgs())); //Connect listeners to STDOUT and ERR
-            connect(sim_tlm_loop,SIGNAL(readyReadStandardOutput()),this,SLOT(print_to_msgs()));
-            sim_tlm_loop->start(sim_send_tlm_cmd);
-
-
-
+        break;
     }
-
-
     } //END switch(cmd_case)
-
-    } //END SLOT start_listeners()
+} //END SLOT start_listeners()
 
 
 //SLOT
@@ -316,79 +216,70 @@ QString Erroutput;
 //Get STDOUT and STDERR output from telemetry process
 output=listeners->readAllStandardOutput();
 Erroutput=listeners->readAllStandardError();
-//Initialize telemetry holders
-QString IEU_temp;
-QString IEU_volt;
-QString IMG_rate;
-QString HAS_img;
-QString MAG_rate;
-QString MAG_packets;
-QString cc_exetxt;
-QString cc_acktxt;
-QString cc_errtxt;
 
-
-
+////Initialize telemetry holders
+QString rx_telecmd_pkt_cnt;
+QString val_telecmd_pkt_cnt;
+QString inv_telecmd_pkt_cnt;
+QString val_cmd_cnt;
+QString inv_cmd_cnt;
+QString cmd_exec_suc_cnt;
+QString cmd_exec_err_cnt;
+QString tlm_pkt_xfr_frm_swq_cnt;
+QString acq_img_cnt;
+QString img_acq_prog_flag;
+QString ers_rly_swtch_state;
+QString mdq_scan_state;
+QString flt_tbl_mode;
+QString img_accpt_cnt;
+QString img_rej_cnt;
+QString next_img_acq_tm_str;
+QString next_atc_tm_str;
+QString pbk_prog_flag;
 
 
 
 //
-////Take the telemetry and seperate the values, comma delimited using QString Section
-//IEU_temp=output.section(',',0,0);
-//IEU_volt=output.section(',',1,1);
-//IMG_rate=output.section(',',2,2);
-//HAS_img=output.section(',',3,3);
-//MAG_rate=output.section(',',4,4);
-//MAG_packets=output.section(',',5,5);
-//cc_exetxt=output.section(',',6,6);
-//cc_acktxt=output.section(',',7,7);
-//cc_errtxt=output.section(',',8,8);
-
-////Update the GUI's appropriate feilds
-//ui->lbl_IEU_temp->setText(IEU_temp);
-//ui->lbl_IEU_volt->setText(IEU_volt);
-//ui->lbl_IMG_rate->setText(IMG_rate);
-//ui->lbl_mag_rate->setText(MAG_rate);
-
-////Check to see if there is a mag packet or Imaging packet
-
-
-////Update telemetry counters
-////Get the current telemetry packet count from GUI, this is a really bad way to do this, need to make a pointer or something
-//QString currentCount=ui->lbl_telem_rx->text();
-//int currentCountint=currentCount.toInt()+1;
-//ui->lbl_telem_rx->setText(QString::number(currentCountint));
-
-////Update imaging counters
-//if (HAS_img.toInt()==1)
-//{
-//    QString currentCountImg=ui->lbl_IMG_rx->text();
-//int currentImg=currentCountImg.toInt()+1;
-//ui->lbl_IMG_rx->setText(QString::number(currentImg));
-//}
-
-////Update MAG counter
-//if (MAG_packets.toInt()!=0)
-//{
-//    QString currentCountMag=ui->lbl_mag_rx->text();
-//int currentMag=currentCountMag.toInt()+MAG_packets.toInt();
-//ui->lbl_mag_rx->setText(QString::number(currentMag));
-//}
-
-////Update Command Counts
-//ui->lbl_cmd_ack_count->setText(cc_acktxt);
-//ui->lbl_cmd_error_count->setText(cc_errtxt);
-//ui->lbl_cmd_exec_count->setText(cc_exetxt);
-
-////Get command count descrepency (cc sent- cc ack) and update gui
-//QString cc_senttxt=ui->lbl_cmd_sent_count->text();
-//int cc_sent=cc_senttxt.toInt();
-//int cc_ack=cc_acktxt.toInt();
-//int cc_disc=cc_sent-cc_ack;
-
-//ui->lbl_disc->setText(QString::number(cc_disc));
+////Get telemetry values from output
+rx_telecmd_pkt_cnt=output.section(',',0,0);
+val_telecmd_pkt_cnt=output.section(',',1,1);
+inv_telecmd_pkt_cnt=output.section(',',2,2);
+val_cmd_cnt=output.section(',',3,3);
+inv_cmd_cnt=output.section(',',4,4);
+cmd_exec_suc_cnt=output.section(',',5,5);
+cmd_exec_err_cnt=output.section(',',6,6);
+tlm_pkt_xfr_frm_swq_cnt=output.section(',',7,7);
+acq_img_cnt=output.section(',',8,8);
+img_acq_prog_flag=output.section(',',9,9);
+ers_rly_swtch_state=output.section(',',10,10);
+mdq_scan_state=output.section(',',11,11);
+flt_tbl_mode=output.section(',',12,12);
+img_accpt_cnt=output.section(',',13,13);
+img_rej_cnt=output.section(',',14,14);
+next_img_acq_tm_str=output.section(',',15,15);
+next_atc_tm_str=output.section(',',16,16);
+pbk_prog_flag=output.section(',',17,17);
 
 
+////Update the GUI's appropriate fields
+ui->lbl_rx_cmd_pkt_cnt->setText(rx_telecmd_pkt_cnt);
+ui->lbl_val_telecmd_pkt_cnt->setText(val_telecmd_pkt_cnt);
+ui->lbl_inv_telecmd_pkt_cnt->setText(inv_telecmd_pkt_cnt);
+ui->lbl_val_cmd_cnt->setText(val_cmd_cnt);
+ui->lbl_inv_cmd_cnt->setText(inv_cmd_cnt);
+ui->lbl_cmd_exec_suc_cnt->setText(cmd_exec_suc_cnt);
+ui->lbl_cmd_exec_err_cnt->setText(cmd_exec_err_cnt);
+ui->lbl_tlm_pkt_xfr_frm_seq_cnt->setText(tlm_pkt_xfr_frm_swq_cnt);
+ui->lbl_acq_img_cnt->setText(acq_img_cnt);
+ui->lbl_img_acq_prog_flag->setText(img_acq_prog_flag);
+ui->lbl_ers_rly_swtch_state->setText(ers_rly_swtch_state);
+ui->lbl_mdq_scan_state->setText(mdq_scan_state);
+ui->lbl_flt_tbl_mode->setText(flt_tbl_mode);
+ui->lbl_img_accpt_cnt->setText(img_accpt_cnt);
+ui->lbl_img_rej_cnt->setText(img_rej_cnt);
+ui->lbl_next_img_acq_tm_str->setText(next_img_acq_tm_str);
+ui->lbl_next_atc_tm_str->setText(next_atc_tm_str);
+ui->lbl_pbk_prog_flg->setText(pbk_prog_flag);
 
 
 }//END OF SLOT print_to_telem
@@ -396,35 +287,21 @@ QString cc_errtxt;
 void MainWindow::stop_listeners()
 {
     //Placeholder function to kill telemetry listener
-    sim_reader->terminate();
-    sim_tlm_loop->terminate();
-    sim_port_setup_listener->terminate();
+    QString current_time=QTime::currentTime().toString();
+    tlm_reader->terminate();
+    ui->txt_messages_out->append(current_time+": "+"Signal to kill listeners sent");
+    //Need to turn off auto exclusive due to Qt bug
+    ui->rad_btn_Master->setAutoExclusive(false);
+    ui->rad_btn_Monitor->setAutoExclusive(false);
+    //Uncheck radiobuttons
+    ui->rad_btn_Master->setChecked(false);
+    ui->rad_btn_Monitor->setChecked(false);
+    //Turn autoexclusive back on
+    ui->rad_btn_Master->setAutoExclusive(true);
+    ui->rad_btn_Monitor->setAutoExclusive(true);
+    ui->lbl_link_state->setText("NO LINK");
+}//END OF SLOT STOP LISTENERS
 
-}
-
-void MainWindow::link_master_checked() //Sets link state to active when link master is checked
-{
-   if (ui->rad_btn_Master->isChecked())
-   {
-    ui->lbl_link_state->setText("Active: Master");
-   }
-   else
-   {
-       ui->lbl_link_state->setText("NO LINK");
-   }
-}
-
-void MainWindow::link_monitor_checked()
-{
-    if (ui->rad_btn_Monitor->isChecked())
-    {
-        ui->lbl_link_state->setText("Active: Monitor");
-    }
-    else
-    {
-        ui->lbl_link_state->setText("NO LINK");
-    }
-}
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 /// Command Browser Tab SLOTS
@@ -542,28 +419,10 @@ void MainWindow::active_to_inactive_list() //Takes current active command list, 
 
 }
 
-void MainWindow::sim_port_open_error() //Outputs errors when opening ports for sim connection, notifies user unsucessful sim setup
-{
-
-}
 
 void MainWindow::print_to_msgs()
 {
-   QString stdout=sim_port_setup_listener->readAllStandardOutput();
-   ui->txt_messages_out->append(stdout);
-   QString stderr=sim_port_setup_listener->readAllStandardError();
-   ui->txt_messages_out->setTextColor(Qt::red);
-   ui->txt_messages_out->append(stderr);
-   ui->txt_messages_out->setTextColor(Qt::black);
-
-   stdout=sim_tlm_loop->readAllStandardOutput();
-   ui->txt_messages_out->append(stdout);
-    stderr=sim_tlm_loop->readAllStandardError();
-   ui->txt_messages_out->setTextColor(Qt::red);
-   ui->txt_messages_out->append(stderr);
-   ui->txt_messages_out->setTextColor(Qt::black);
-
-
+//Placeholder slot
 
 
 }

@@ -20,11 +20,11 @@
       <x>10</x>
       <y>10</y>
       <width>1241</width>
-      <height>701</height>
+      <height>741</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab">
      <property name="palette">
@@ -210,7 +210,7 @@ p, li { white-space: pre-wrap; }
          <item row="0" column="0">
           <widget class="QLabel" name="label_23">
            <property name="text">
-            <string>Link Type:</string>
+            <string>Contact Type:</string>
            </property>
           </widget>
          </item>
@@ -225,13 +225,6 @@ p, li { white-space: pre-wrap; }
           <widget class="QRadioButton" name="rad_btn_Monitor">
            <property name="text">
             <string>Monitor</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QRadioButton" name="rad_btn_Sim">
-           <property name="text">
-            <string>Sim</string>
            </property>
           </widget>
          </item>
@@ -363,7 +356,7 @@ p, li { white-space: pre-wrap; }
         <x>490</x>
         <y>390</y>
         <width>521</width>
-        <height>261</height>
+        <height>311</height>
        </rect>
       </property>
       <property name="title">
@@ -375,7 +368,7 @@ p, li { white-space: pre-wrap; }
          <x>9</x>
          <y>29</y>
          <width>238</width>
-         <height>224</height>
+         <height>308</height>
         </rect>
        </property>
        <layout class="QGridLayout" name="gridLayout_2">
@@ -385,78 +378,159 @@ p, li { white-space: pre-wrap; }
            <string>Command Counts</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_3">
-           <item row="0" column="0" colspan="2">
+           <item row="0" column="0">
             <layout class="QFormLayout" name="formLayout">
-             <property name="verticalSpacing">
-              <number>10</number>
-             </property>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label">
-               <property name="text">
-                <string>Sent:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QLabel" name="lbl_cmd_sent_count">
-               <property name="text">
-                <string>0</string>
-               </property>
-              </widget>
-             </item>
              <item row="1" column="0">
               <widget class="QLabel" name="label_3">
                <property name="text">
-                <string>Ack:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QLabel" name="lbl_cmd_ack_count">
-               <property name="text">
-                <string>0</string>
+                <string>Valid CMD PKT:</string>
                </property>
               </widget>
              </item>
              <item row="2" column="0">
-              <widget class="QLabel" name="label_5">
+              <widget class="QLabel" name="label">
                <property name="text">
-                <string>Exec:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QLabel" name="lbl_cmd_exec_count">
-               <property name="text">
-                <string>0</string>
+                <string>Invalid CMD PKT:</string>
                </property>
               </widget>
              </item>
              <item row="3" column="0">
-              <widget class="QLabel" name="label_7">
+              <widget class="QLabel" name="label_4">
                <property name="text">
-                <string>Errors:</string>
+                <string>Valid Commands:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="11" column="0">
+              <widget class="QLabel" name="label_6">
+               <property name="text">
+                <string/>
                </property>
               </widget>
              </item>
              <item row="4" column="0">
-              <widget class="QLabel" name="label_4">
+              <widget class="QLabel" name="label_5">
                <property name="text">
-                <string>Discrepancy:</string>
+                <string>Invalid Commands:</string>
                </property>
               </widget>
              </item>
-             <item row="4" column="1">
-              <widget class="QLabel" name="lbl_disc">
+             <item row="5" column="0">
+              <widget class="QLabel" name="label_7">
                <property name="text">
-                <string>0</string>
+                <string>OK Execution</string>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="0">
+              <widget class="QLabel" name="label_8">
+               <property name="text">
+                <string>ERR Execution</string>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="0">
+              <widget class="QLabel" name="label_15">
+               <property name="text">
+                <string>TLM Seq Control:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="10" column="0">
+              <widget class="QLabel" name="label_16">
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item row="8" column="0">
+              <widget class="QLabel" name="label_18">
+               <property name="text">
+                <string>Next ATC Time:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="9" column="0">
+              <widget class="QLabel" name="label_19">
+               <property name="text">
+                <string>Playback State:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLabel" name="lbl_val_telecmd_pkt_cnt">
+               <property name="text">
+                <string>NO TLM</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QLabel" name="lbl_inv_telecmd_pkt_cnt">
+               <property name="text">
+                <string>NO TLM</string>
                </property>
               </widget>
              </item>
              <item row="3" column="1">
-              <widget class="QLabel" name="lbl_cmd_error_count">
+              <widget class="QLabel" name="lbl_val_cmd_cnt">
                <property name="text">
-                <string>0</string>
+                <string>NO TLM</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QLabel" name="lbl_inv_cmd_cnt">
+               <property name="text">
+                <string>NO TLM </string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="1">
+              <widget class="QLabel" name="lbl_cmd_exec_suc_cnt">
+               <property name="text">
+                <string>NO TLM</string>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="1">
+              <widget class="QLabel" name="lbl_cmd_exec_err_cnt">
+               <property name="text">
+                <string>NO TLM</string>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="1">
+              <widget class="QLabel" name="lbl_tlm_pkt_xfr_frm_seq_cnt">
+               <property name="text">
+                <string>NO TLM </string>
+               </property>
+              </widget>
+             </item>
+             <item row="8" column="1">
+              <widget class="QLabel" name="lbl_next_atc_tm_str">
+               <property name="text">
+                <string>NO TLM</string>
+               </property>
+              </widget>
+             </item>
+             <item row="9" column="1">
+              <widget class="QLabel" name="lbl_pbk_prog_flg">
+               <property name="text">
+                <string>NO TLM</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_20">
+               <property name="text">
+                <string>Rx CMD PKT Count</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLabel" name="lbl_rx_cmd_pkt_cnt">
+               <property name="text">
+                <string>NO TLM</string>
                </property>
               </widget>
              </item>
@@ -892,7 +966,7 @@ p, li { white-space: pre-wrap; }
         </palette>
        </property>
        <property name="text">
-        <string>INOP</string>
+        <string>NO LINK</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_25">
@@ -926,119 +1000,126 @@ p, li { white-space: pre-wrap; }
           <x>0</x>
           <y>20</y>
           <width>241</width>
-          <height>211</height>
+          <height>251</height>
          </rect>
         </property>
         <layout class="QFormLayout" name="formLayout_2">
          <item row="1" column="0">
           <widget class="QLabel" name="label_9">
            <property name="text">
-            <string>IEU Temp:</string>
+            <string>Camera State:</string>
            </property>
           </widget>
          </item>
          <item row="2" column="0">
           <widget class="QLabel" name="label_10">
            <property name="text">
-            <string>IEU Voltage:</string>
+            <string>ERS Relay State</string>
            </property>
           </widget>
          </item>
          <item row="3" column="0">
           <widget class="QLabel" name="label_11">
            <property name="text">
-            <string>IMG Rate:</string>
+            <string>Mag State:</string>
            </property>
           </widget>
          </item>
          <item row="5" column="0">
           <widget class="QLabel" name="label_12">
            <property name="text">
-            <string>MAG Rate:</string>
+            <string>Accepted Image Count</string>
            </property>
           </widget>
          </item>
          <item row="4" column="0">
           <widget class="QLabel" name="label_13">
            <property name="text">
-            <string>IMG Rx</string>
+            <string>Flight Mode:</string>
            </property>
           </widget>
          </item>
          <item row="6" column="0">
           <widget class="QLabel" name="label_14">
            <property name="text">
-            <string>MAG Rx:</string>
+            <string>Rejected Image Count</string>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QLabel" name="lbl_IEU_temp">
+          <widget class="QLabel" name="lbl_img_acq_prog_flag">
            <property name="text">
-            <string>0</string>
+            <string>NO TLM</string>
            </property>
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="QLabel" name="lbl_IEU_volt">
+          <widget class="QLabel" name="lbl_ers_rly_swtch_state">
            <property name="text">
-            <string>0</string>
+            <string>NO TLM</string>
            </property>
           </widget>
          </item>
          <item row="3" column="1">
-          <widget class="QLabel" name="lbl_IMG_rate">
+          <widget class="QLabel" name="lbl_mdq_scan_state">
            <property name="text">
-            <string>0</string>
+            <string>NO TLM</string>
            </property>
           </widget>
          </item>
          <item row="4" column="1">
-          <widget class="QLabel" name="lbl_IMG_rx">
+          <widget class="QLabel" name="lbl_flt_tbl_mode">
            <property name="text">
-            <string>0</string>
+            <string>NO TLM</string>
            </property>
           </widget>
          </item>
          <item row="5" column="1">
-          <widget class="QLabel" name="lbl_mag_rate">
+          <widget class="QLabel" name="lbl_img_accpt_cnt">
            <property name="text">
-            <string>0</string>
+            <string>NO TLM</string>
            </property>
           </widget>
          </item>
          <item row="6" column="1">
-          <widget class="QLabel" name="lbl_mag_rx">
+          <widget class="QLabel" name="lbl_img_rej_cnt">
            <property name="text">
-            <string>0</string>
+            <string>NO TLM</string>
            </property>
           </widget>
          </item>
          <item row="0" column="0">
           <widget class="QLabel" name="label_21">
            <property name="text">
-            <string>Telem Rx:</string>
+            <string>Image Acquisition Count:</string>
            </property>
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QLabel" name="lbl_telem_rx">
+          <widget class="QLabel" name="lbl_acq_img_cnt">
            <property name="text">
-            <string>0</string>
+            <string>NO TLM</string>
            </property>
           </widget>
          </item>
          <item row="7" column="0">
           <widget class="QLabel" name="label_2">
            <property name="text">
-            <string>Telem Age:</string>
+            <string>Next Image Acq Time:</string>
            </property>
           </widget>
          </item>
          <item row="7" column="1">
-          <widget class="QLabel" name="lbl_telem_age">
+          <widget class="QLabel" name="lbl_next_img_acq_tm_str">
            <property name="text">
-            <string>INOP</string>
+            <string>NO TLM</string>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="0">
+          <widget class="QLabel" name="label_17">
+           <property name="text">
+            <string/>
            </property>
           </widget>
          </item>

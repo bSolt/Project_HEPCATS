@@ -26,8 +26,6 @@ private slots:
     void start_listeners();
     void print_to_telem();
     void stop_listeners();
-    void link_master_checked();
-    void link_monitor_checked();
     void load_command_list();
     void remove_cmd_item();
     void set_cmd_list_active();
@@ -35,7 +33,6 @@ private slots:
     void add_custom_to_active();
     void add_all_to_inactive();
     void active_to_inactive_list();
-    void sim_port_open_error();
     void print_to_msgs();
 
 
@@ -44,9 +41,7 @@ private:
     //Make pointer for telemetry listener
     QProcess *listeners;
         //Pointers for sim connection processes
-    QProcess *sim_port_setup_listener; //listener for sim port setup
-    QProcess *sim_reader;
-    QProcess *sim_tlm_loop;
+    QProcess *tlm_reader;
 
 
 };
