@@ -102,12 +102,6 @@ RT_SEM cmd_img_sem;          // For exec_cmd and cmd_img task synchronization
 RT_SEM cmd_mdq_sem;          // For exec_cmd and cmd_mdq task synchronization
 RT_SEM cmd_ers_sem;          // For exec_cmd and cmd_ers task synchronization
 
-// Message control blocks definitions:
-RT_TASK_MCB cmd_xfr_frm_mcb; // For command transfer frame to command
-                             // application tasks
-RT_TASK_MCB rply_mcb;        // For command execution status reply message
-                             // command applications
-
 // Housekeeping telemetry variable definitions:
 uint8_t val_cmd_cnt = 0;      // Valid command counter
 uint8_t inv_cmd_cnt = 0;      // Invalid command counter
@@ -160,6 +154,12 @@ void exec_cmd(void* arg) {
     uint32_t cmd_exec_time_sec;  // Command execution time (seconds)
     uint16_t cmd_exec_time_msec; // Command execution time (milliseconds)
     uint32_t cmd_arg;            // Command arguments
+
+    // Message control blocks definitions:
+    RT_TASK_MCB cmd_xfr_frm_mcb; // For command transfer frame to command
+                                 // application tasks
+    RT_TASK_MCB rply_mcb;        // For command execution status reply message
+                                 // command applications
 
     cmd_xfr_frm_mcb.data = cmd_xfr_frm_buf;  // Command transfer frame message
                                              // buffer

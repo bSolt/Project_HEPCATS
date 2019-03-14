@@ -119,20 +119,6 @@ void cmd_img(void* arg) {
     // Initialize camera:
     ret_val = init_cam();
 
-    // Check success:
-    // (If unsuccessful, then re-attempt until initialize is successful)
-    while (ret_val < 0) {
-        // Print:
-        rt_printf("%d (CMD_IMG_TASK) Camera initialization unsuccessful;"
-            " retrying in 5 seconds\n",time(NULL));
-
-        // Wait:
-        sleep(5); // 5 second retry
-
-        // Initialize camera:
-        ret_val = init_cam();
-    }
-
     // Print:
     rt_printf("%d (CMD_IMG_TASK) Camera initialization complete\n",time(NULL));
 

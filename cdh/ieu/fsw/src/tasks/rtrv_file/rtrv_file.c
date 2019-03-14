@@ -106,16 +106,12 @@ RT_QUEUE tx_tlm_pkt_msg_queue; // For telemetry packets
 RT_SEM tx_tlm_pkt_sem;   // For tx_tlm_pkt_task and flt_tbl_task
                          // synchronization
 RT_SEM rtrv_file_sem;    // For rtrv_file_task and cmd_sw_task
-                         // synchronization 
-
-// Message control blocks definitions:
-RT_TASK_MCB cmd_xfr_frm_rtrv_mcb; // For command transfer frame message from
-                                  // command executor task
-RT_TASK_MCB rply_rtrv_mcb;        // For command execution status reply message
-                                  // to command executor task
+                         // synchronization
 
 // Global variables:
 uint8_t pbk_prog_flg = 0; // Playback in progress flag
+uint8_t cmd_exec_suc_cnt; // Commands executed successfully counter
+uint8_t cmd_exec_err_cnt; // Commands not executed (error) counter
 
 void rtrv_file(void* arg) {
 	// Print:
@@ -158,12 +154,18 @@ void rtrv_file(void* arg) {
 
     uint8_t cmd_exec_stat; // Buffer for command execution status reply message
 
-    cmd_xfr_frm_rtrv_mcb.data = cmd_xfr_frm_buf;  // Set message block buffer
-    cmd_xfr_frm_rtrv_mcb.size = CMD_XFR_FRM_SIZE; // Set message block buffer
-                                                  // size
+    // Message control blocks definitions:
+    RT_TASK_MCB cmd_xfr_frm_mcb; // For command transfer frame message from
+                                 // command executor task
+    RT_TASK_MCB rply_mcb;        // For command execution status reply message
+                                 // to command executor task
 
-    rply_rtrv_mcb.data = &cmd_exec_stat; // Set reply message buffer
-    rply_rtrv_mcb.size = RPLY_MSG_SIZE;  // Set reply message size
+    cmd_xfr_frm_mcb.data = cmd_xfr_frm_buf;  // Set message block buffer
+    cmd_xfr_frm_mcb.size = CMD_XFR_FRM_SIZE; // Set message block buffer
+                                             // size
+
+    rply_mcb.data = &cmd_exec_stat; // Set reply message buffer
+    rply_mcb.size = RPLY_MSG_SIZE;  // Set reply message size
 
     // Task synchronize with command software task
     // (tell task that it is now ready receive command transfer frames)
@@ -180,7 +182,7 @@ void rtrv_file(void* arg) {
     while (1) {
         // Receive command transfer frames from command software task via
         // synchronous messaging:
-        flw_id = rt_task_receive(&cmd_xfr_frm_rtrv_mcb,\
+        flw_id = rt_task_receive(&cmd_xfr_frm_mcb,\
             TM_INFINITE); // Will wait infinite amount of time for message 
 
         // Check success:
@@ -206,6 +208,23 @@ void rtrv_file(void* arg) {
 
             // Set flag:
             pbk_prog_flg = 1; // In progress
+
+            // Set execution status to successful:
+            cmd_exec_stat = -1;
+
+            // Reply to command executor task with command execution status:
+            ret_val = rt_task_reply(flw_id,&rply_mcb);
+
+            // Check for success:
+            if (ret_val == 0) {
+                // Print:
+                rt_printf("%d (RTRV_FILE_TASK) Reply message sent to command"
+                    " software task\n",time(NULL));
+            } else {
+                // Print:
+                rt_printf("%d (RTRV_FILE_TASK) Error sending reply message to"
+                    " execute command task\n",time(NULL));
+            }
 
             // Open directory listing file:
             dir_ls_file_ptr = fopen("../raw_record_tlm/hk/hk_dir.ls","r");
@@ -264,9 +283,16 @@ void rtrv_file(void* arg) {
                 }
             }
 
-            // Print:
-            rt_printf("%d (RTRV_FILE_TASK) Housekeeping data playback"
-                " complete\n",time(NULL));
+            // Check if any files were playedback:
+            if (file_cnt > 0) {
+                // Print:
+                rt_printf("%d (RTRV_FILE_TASK) Housekeeping data playback"
+                    " complete\n",time(NULL));
+            } else {
+                // Print:
+                rt_printf("%d (RTRV_FILE_TASK) No housekeeping data"
+                    " recorded to playback\n",time(NULL));
+            }
 
             // Close file:
             fclose(dir_ls_file_ptr);
@@ -277,6 +303,23 @@ void rtrv_file(void* arg) {
 
             // Set flag:
             pbk_prog_flg = 1; // In progress
+
+            // Set execution status to successful:
+            cmd_exec_stat = -1;
+
+            // Reply to command executor task with command execution status:
+            ret_val = rt_task_reply(flw_id,&rply_mcb);
+
+            // Check for success:
+            if (ret_val == 0) {
+                // Print:
+                rt_printf("%d (RTRV_FILE_TASK) Reply message sent to command"
+                    " software task\n",time(NULL));
+            } else {
+                // Print:
+                rt_printf("%d (RTRV_FILE_TASK) Error sending reply message to"
+                    " execute command task\n",time(NULL));
+            }
 
             // Open directory listing file:
             dir_ls_file_ptr = fopen("../raw_record_tlm/mdq/mdq_dir.ls", "r");
@@ -335,9 +378,16 @@ void rtrv_file(void* arg) {
                 }
             }
 
-            // Print:
-            rt_printf("%d (RTRV_FILE_TASK) Magnetometer DAQ data playback"
-                " complete\n",time(NULL));
+            // Check if any files were playedback:
+            if (file_cnt > 0) {
+                // Print:
+                rt_printf("%d (RTRV_FILE_TASK) Magnetometer DAQ data playback"
+                    " complete\n",time(NULL));
+            } else {
+                // Print:
+                rt_printf("%d (RTRV_FILE_TASK) No magnetometer DAQ data"
+                    " recorded to playback\n",time(NULL));
+            }
 
             // Close file:
             fclose(dir_ls_file_ptr);
@@ -348,6 +398,23 @@ void rtrv_file(void* arg) {
 
             // Set flag:
             pbk_prog_flg = 1; // In progress
+
+            // Set execution status to successful:
+            cmd_exec_stat = -1;
+
+            // Reply to command executor task with command execution status:
+            ret_val = rt_task_reply(flw_id,&rply_mcb);
+
+            // Check for success:
+            if (ret_val == 0) {
+                // Print:
+                rt_printf("%d (RTRV_FILE_TASK) Reply message sent to command"
+                    " software task\n",time(NULL));
+            } else {
+                // Print:
+                rt_printf("%d (RTRV_FILE_TASK) Error sending reply message to"
+                    " execute command task\n",time(NULL));
+            }
 
             // Open directory:
             dir = opendir("../raw_record_tlm/img/");
@@ -418,9 +485,17 @@ void rtrv_file(void* arg) {
                     fclose(dir_ls_file_ptr);
                 }
             }
-            // Print:
-            rt_printf("%d (RTRV_FILE_TASK) Image data playback"
-                " complete\n",time(NULL));
+
+            // Check if any files were playedback:
+            if (file_cnt > 0) {
+                // Print:
+                rt_printf("%d (RTRV_FILE_TASK) Image data playback"
+                    " complete\n",time(NULL));
+            } else {
+                // Print:
+                rt_printf("%d (RTRV_FILE_TASK) No image data"
+                    " recorded to playback\n",time(NULL));
+            }
 
             // Close directory:
             closedir(dir);
@@ -429,37 +504,40 @@ void rtrv_file(void* arg) {
             rt_printf("%d (RTRV_FILE_TASK) Command argument not recognized; "
                 " ignoring command transfer frame\n",time(NULL));
 
-            // Set file count:
-            file_cnt = 0;
+            // Set execution status to successful:
+            cmd_exec_stat = 0;
+
+            // Reply to command executor task with command execution status:
+            ret_val = rt_task_reply(flw_id,&rply_mcb);
+
+            // Check for success:
+            if (ret_val == 0) {
+                // Print:
+                rt_printf("%d (RTRV_FILE_TASK) Reply message sent to command"
+                    " software task\n",time(NULL));
+            } else {
+                // Print:
+                rt_printf("%d (RTRV_FILE_TASK) Error sending reply message to"
+                    " execute command task\n",time(NULL));
+            }
         }
 
-        // Check execution status:
-        if (file_cnt != 0) {
-            // Set execution status to successful:
-            cmd_exec_stat = 1;
+        // Check if data was played back:
+        if (file_cnt > 0) {
+            // Increment counter:
+            ++cmd_exec_suc_cnt;
         } else {
-            // Set execution status to unsuccessful:
-            cmd_exec_stat = 0;
+            // Increment counter:
+            ++cmd_exec_err_cnt;
         }
 
         // Set flag:
         pbk_prog_flg = 0; // Idle
 
-        // Reply to command executor task with command execution status:
-        ret_val = rt_task_reply(flw_id,&rply_rtrv_mcb);
-
-        // Check for success:
-        if (ret_val == 0) {
-            // Print:
-            rt_printf("%d (RTRV_FILE_TASK) Reply message sent to command"
-                " software task\n",time(NULL));
-        } else {
-            // Print:
-            rt_printf("%d (RTRV_FILE_TASK) Error sending reply message to"
-                " execute command task\n",time(NULL));
-        }
-
         // Reset file retrieval count:
         file_cnt = 0;
     }
+
+    // Will never reach this:
+    return;
 }

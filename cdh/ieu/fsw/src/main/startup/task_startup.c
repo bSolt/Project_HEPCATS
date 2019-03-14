@@ -77,7 +77,7 @@ void crt_tasks(void) {
     rt_task_create(&cmd_ers_task,"cmd_ers_task",0,90,0);
     rt_task_create(&read_mdq_task,"read_mdq_task",0,40,0);
     rt_task_create(&read_img_task,"read_img_task",0,40,0);
-    rt_task_create(&get_hk_tlm_task,"get_hk_tlm_task",0,90,0);
+    rt_task_create(&get_hk_tlm_task,"get_hk_tlm_task",0,95,0);
     rt_task_create(&flt_tbl_task,"flt_tbl_task",0,85,0);
     rt_task_create(&tx_tlm_pkt_task,"tx_tlm_pkt_task",0,90,0);
     rt_task_create(&crt_file_task,"crt_file_task",0,70,0);
@@ -89,6 +89,7 @@ void crt_tasks(void) {
     // Print:
     rt_printf("%d (STARTUP/CRT_TASKS) All tasks created\n",time(NULL));
 
+    // Exit:
     return;
 }
 
@@ -117,5 +118,6 @@ void str_tasks(void){
     // Print:
     rt_printf("%d (STARTUP/STR_TASKS) All tasks started\n",time(NULL));
 
+    // Exit:
     return;
 }

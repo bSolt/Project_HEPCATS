@@ -79,6 +79,7 @@ RT_SEM rtrv_file_sem; // For rtrv_file_task and cmd_sw_task
 
 // Global variable definition:
 uint8_t flt_tbl_mode; // Filter table mode
+uint8_t pbk_prog_flg; // Playback in progress flag
 
 void cmd_sw(void* arg) {
     // Print:
@@ -199,23 +200,36 @@ void cmd_sw(void* arg) {
                 // Exit switch:
                 break;
             case CMD_BGNPBK :
-                // Print:
-                rt_printf("%d (CMD_SW_TASK) Executing BGNPBK command with"
-                    " arguments: 0x%X\n",time(NULL),cmd_arg);
-
-                ret_val = rt_task_send(&rtrv_file_task,&cmd_xfr_frm_mcb,\
-                    &rply_mcb,TM_INFINITE);
-
-                if (ret_val > 0) {
+                // Check if playback is not in progress:
+                if (pbk_prog_flg != 1) {
                     // Print:
-                    rt_printf("%d (CMD_SW_TASK) Reply message received"
-                        " from retrieve file\n",time(NULL));
-                } else { 
+                    rt_printf("%d (CMD_SW_TASK) Executing BGNPBK command with"
+                        " arguments: 0x%X\n",time(NULL),cmd_arg);
+
+                    ret_val = rt_task_send(&rtrv_file_task,&cmd_xfr_frm_mcb,\
+                        &rply_mcb,TM_INFINITE);
+
+                    if (ret_val > 0) {
+                        // Print:
+                        rt_printf("%d (CMD_SW_TASK) Reply message received"
+                            " from retrieve file\n",time(NULL));
+                    } else { 
+                        // Print:
+                        rt_printf("%d (CMD_SW_TASK) Error sending command"
+                            " transfer frame to retrieve file task\n",time(NULL));
+                        // NEED ERROR HANDLING
+                    }
+                } else {
                     // Print:
-                    rt_printf("%d (CMD_SW_TASK) Error sending command"
-                        " transfer frame to retrieve file task\n",time(NULL));
-                    // NEED ERROR HANDLING
+                    rt_printf("%d (CMD_SW_TASK) Recorded telemetry playback"
+                        " already in progress; ignoring command transfer"
+                        " frame\n",time(NULL));
+
+                    // Set reply message data field to indicate command
+                    // did not execute:
+                    cmd_exec_stat = 0;
                 }
+
                 // Exit switch:
                 break;
             case CMD_SETFLTTBLMD :
