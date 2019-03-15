@@ -173,9 +173,11 @@ def plot_history(history,title=None,save=None,
 	if color == 'black':
 		text_color='white'
 		face_color='xkcd:charcoal'
+		legend_color = 'grey'
 	elif color=='white':
 		text_color='black'
 		face_color='white'
+		legend_color='light grey'
 
 	epochs = len(history['acc'])
 	eax = np.arange(epochs)+1

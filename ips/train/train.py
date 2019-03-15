@@ -71,37 +71,49 @@ This model will implement the combined model which detects image features
 and classifies the images in one pass. This will be the model which is actually
 used for the aurora identification
 """
-def build_full_model(feature_detector, classifier, fine_tune_layers=0):
+def build_full_model(feature_detector, classifier):
   model = tf.keras.models.Sequential()
   #First get the features from ptdnn
   model.add(feature_detector)
   #Then classify
-  model.add(classifier)
-  # Enable fine tuning if specified
-  if fine_tune_layers:
-    # Make the layers of the feature_detector frozen up until the last n layers
-    #  where n = fine_tune_layers
-    #  and these layers will be trainable (by default)
-    print(f'[INFO] Fine-Tuning last {fine_tune_layers} of the Feature Detector')
-    for layer in feature_detector.layers[0:-fine_tune_layers]:
-      layer.trainable = False
-  else:
-    #feature_detector should not be trainable if fine_tuning_layers==0
-    feature_detector.trainable=False
+  model.add(classifier)  
+  #feature_detector should not be trainable if fine_tuning_layers==0
+  feature_detector.trainable=False
 
   # Display layer information for reference
-  print('[INFO] Full Model Architecture:')
+  print('[ASSEMBLE] Full Model Architecture:')
   model.summary()
 
   # classifier options including metrics and loss function
   classifier.compile(optimizer=tf.keras.optimizers.RMSprop(lr=2e-4),
                 loss='binary_crossentropy',
                 metrics=['acc',recall,f1])
-  model.compile(optimizer=tf.keras.optimizers.RMSprop(lr=2e-4),
+  model.compile(optimizer=tf.keras.optimizers.RMSprop(lr=2e-5),
                 loss='binary_crossentropy')
 
-  print('[INFO] Models compiled successfully')
+  print('[ASSEMBLE] Models compiled successfully')
   return model
+
+"""
+This function will enable fine tuning on the ptdnn
+"""
+def enable_fine_tuning(ptdnn,fine_layer):
+  # make the base network trainable
+  ptdnn.trainable = True
+
+  set_trainable = False
+  for layer in ptdnn.layers:
+      if layer.name == fine_layer:
+          set_trainable = True
+      if set_trainable:
+          layer.trainable = True
+      else:
+          layer.trainable = False
+  # function does not need to return an object b/c the model is mutable
+
+# valid fine tuning layers for now
+valid_x_fine = ['block14_sepconv2','block14_sepconv1']
+
 """This fucntion  will load in the data and organize it into batches
 The next block generates batches of training data. The feature array output by the 
 feature detector network is of size 8 by 8 by 2048 for each image as an example. 
@@ -116,26 +128,22 @@ def compute_features_from_dir(directory,feature_detector,
   # Define total number of images
   N_im = sum([len(files) for r, d, files in os.walk(directory)])
   # Get shape of feature vector from feature_detector network
-  feature_shape = feature_detector.output_shape
 
-  #define the settings for loading in images including value rescale, 
-  #  and random alterations such as scaling, zooming, and flipping
-  datagen = ImageDataGenerator(
-    rescale=1./255,
-    # zoom_range=0.1,
-    # horizontal_flip=True,
-    # vertical_flip = True,
-    # brightness_range=[1/2,2.0]
-    )
+  datagen = ImageDataGenerator(rescale=1./255)
   # Define the settings for assembling the batches
   #  including image size, directory,  and batch size
+  if save_to_dir and not os.path.isdir(save_to_dir):
+    os.mkdir(save_to_dir)
+
   image_generator = datagen.flow_from_directory(
     directory,
     target_size=(256, 256),
     batch_size=batch_size,
     class_mode='binary',
     save_to_dir=save_to_dir)
-  # pre-allocate features array 
+  # pre-allocate features array
+
+  feature_shape = feature_detector.output_shape 
   featrs = np.zeros(
     shape=np.concatenate(([N_im], feature_shape[1:]))
     )
@@ -145,7 +153,7 @@ def compute_features_from_dir(directory,feature_detector,
   i=0 # batch index
   total_batch = N_im//batch_size 
   for images_batch, labels_batch in image_generator:
-    print(f"[INFO] Computing Features and Labels for image batch {i}/{total_batch}",end='\r')
+    print(f"[COMPUTE_FEATURES] Computing Features and Labels for image batch {i}/{total_batch}",end='\r')
     # This is the line that finds the features using the ptdnn
     features_batch = feature_detector.predict(images_batch)
     #Case for most batches
@@ -166,7 +174,7 @@ def compute_features_from_dir(directory,feature_detector,
 def train_repeatedly(M, classifier, epochs, features, labels, v_split = 0.3):
   results = {}
   for i in range(M):
-    print(f'[INFO] Randomizing Model and Data {i+1}/{M}', end='\r')
+    print(f'[TRAIN] Randomizing Model and Data {i+1}/{M}', end='\r')
     # Reset the weights
     randomize_weights(classifier)
     # Shuffle the features
@@ -174,7 +182,7 @@ def train_repeatedly(M, classifier, epochs, features, labels, v_split = 0.3):
     features = features[order]
     labels   = labels[order]
     # print statement
-    print(f'[INFO] Training Model Simulation  {i+1}/{M}',end='\r')
+    print(f'[TRAIN] Training Model Simulation  {i+1}/{M}',end='\r')
     # Train
     history = classifier.fit(
       features, labels,
@@ -203,8 +211,8 @@ def main():
   help="nuber of epochs to train the classifier network on")
   ap.add_argument("-m", "--simulationnumber", type=int, default=1,
   help="number of simulations to use for training the classifier")
-  ap.add_argument("-ft", "--finetuning", type=int, default=0,
-  help="number of layers to fine-tune in feature detector network")
+  ap.add_argument("-f", "--finetuning", type=int, default=0,
+  help="An optional argument for how much fine-tuning to apply")
   ap.add_argument("-s", "--saveas", type=str, default=None,
   help="Name to pass for saving the trained model to an h5 file")
   ap.add_argument("-id", "--imagedir", type=str, default=default_dir,
@@ -224,8 +232,40 @@ def main():
   ptdnn = get_xception(inshape)
   # Build the classifier
   classifier = build_classifier(ptdnn.output_shape)
+  # This should be 1 or 2
+  ft_option = args['finetuning']
+
+  # If it's allowed, remake models to account for fine-tuning
+  possible = (3,19,22,29)
+
+  # Pretty sure this is the wrong approach...
+  # if ft_layers:
+  #   if ft_layers in possible:
+  #     ft_layer = ptdnn.layers[-1-ft_layers]
+  #     # next_layer = ptdnn.layers[-ft_layers]
+  #     new_ptdnn = tf.keras.Model(
+  #       name = 'frozen_ptdnn',
+  #       inputs=ptdnn.input,
+  #       outputs=ft_layer.output)
+
+  #     new_classifier = tf.keras.models.Sequential(name='extended_classifier')
+  #     new_classifier.add(tf.keras.layers.InputLayer(input_shape=ft_layer.output_shape[1:]))
+  #     for l in ptdnn.layers[-ft_layers:]:
+  #       new_classifier.add(l)
+  #     new_classifier.add(classifier)
+  #     new_classifier.build(new_ptdnn.output_shape)
+
+  #     ptdnn = new_ptdnn
+  #     # ptdnn.summary()
+  #     print('[MAIN] Classifier + Fine-Tuning Layers')
+  #     classifier = new_classifier
+  #     classifier.summary()
+  #   else:
+  #     print('Invalid fine-tuning option!')
+  #     exit -1
+
   # Build and compile the full model
-  model = build_full_model(ptdnn, classifier,args['finetuning'])
+  model = build_full_model(ptdnn, classifier)
 
   # Get the features if necessary
   #  Define the directory where this is stored
@@ -233,59 +273,104 @@ def main():
     feature_dir = args['featureset']
   else:
     feature_dir = args['featureset'] + '/'
-  print(f'[INFO] Using directory ./{feature_dir} for feature set')
+  print(f'[MAIN] Using directory ./{feature_dir} for feature set')
   # Define the path of files containing features and labels
+  if not os.path.isdir(feature_dir):
+    os.mkdir(feature_dir)
   feature_file = feature_dir + 'featrs.npy'
   label_file   = feature_dir + 'labels.npy'
   # Check if computation of features is needed
   if not os.path.isfile(feature_file):
     # Compute the features
-    print(f'[INFO] Computing new feature set in {feature_dir}')
+    print(f'[MAIN] Computing new feature set in {feature_dir}')
     featrs, labels = compute_features_from_dir(image_dir,ptdnn,
-      save_to_dir=args['cache'])
-    # Save the arrays to the files
-    print(f'[INFO] Saving feature set')
+      save_to_dir=feature_dir+args['cache'] if args['cache'] else None)
+    # Save the arrays to the file
+    print(f'[MAIN] Saving feature set')
     np.save(feature_file, featrs)
     np.save(label_file, labels)
   else:
-    print('[INFO] Loading in feature set')
+    print('[MAIN] Loading in feature set')
     # Load the arrays from the files
     featrs = np.load(feature_file)
     labels = np.load(label_file)
 
-  # Train the network
-
   M =  args['simulationnumber']
   #define number of epochs
-  epochs = args['epochs']
+  epochs_0 = 30
+  epochs_1 = args['epochs']
   #Determine name for figure image
   psname = f'plot_e{epochs}_m{M}.png'
   fi=0
   while os.path.isfile(psname):
     psname = f'plot_e{epochs}_m{M}_{fi}.png'
     fi+=1
+  print(f'[MAIN] Using {psname} for plot save location')
 
-  # Case for training a single time
-  if M==1:
-    print(f'[INFO] Training Model Once')
-    history = classifier.fit(
-            featrs, labels,
-            validation_split = 0.3,
-            epochs=epochs)
-    pres_plot.plot_history(history.history,
-      save=psname,color='white',
-      title='Accuracy metrics on training and validation data')
-    # pres_plot.plot_errors(classifier,labels,)
-  # Case for training multiple times
+  ### Training Phase 1 ###
+  #  In this phase of training the randomly initialized classifier net will be trained 
+  #  on 30 epochs of unaltered features
+
+  print('[MAIN] Training classifier once on saved features')
+  h0 = classifier.fit(
+    featrs, labels,
+    validation_split=0.3,
+    epochs=epochs_0
+    )
+  pres_plot.plot_history(h0.history,
+    color='white',
+    title='Initial Classifier Training')
+
+  ### Training Phase 2 ###
+  # In this phase of training, the network will be trained on augmented data
+  # Optionally, fine-tuning may be applied
+
+  # anonymous function for rotating 90 degrees randomly
+  random_90 = lambda im: np.rot90(im,k=np.random.choice(4))
+  #define the settings for loading in images including value rescale, 
+  #  and random alterations such as scaling, zooming, and flipping
+  gen = ImageDataGenerator(
+    rescale=1./255,
+    zoom_range=0.1,
+    cval=0,
+    horizontal_flip=True,
+    vertical_flip = True,
+    preprocessing_function=random_90
+    )
+  # Tell the generator where to find the data and what size to load it as
+  augmented_gen = gen.flow_from_directory(
+    image_dir,
+    target_size=(256, 256),
+    batch_size=32,
+    class_mode='binary'
+    )
+
+  ### Training Phase 3 ###
+  # In this phase, fine tuning is done if necesary
+  if ft_option:
+    print(f'[MAIN] Training full model with fine-tuning option {ft_option}')
+    # enable fine-tuning of ptdnn
+    enable_fine_tuning(ptdnn,valid_x_fine[ft_option-1])
+    # Fit once more on augmented data
+    h2 = model.fit_generatory(
+      augmented_gen,
+      validation_split=0.3,
+      epochs=epochs_2
+      )
+    pres_plot.plot_history(h2.history,
+      color='white',
+      title='Training on Augmented Data with augmentation')
   else:
-    print(f'[INFO] Training Model {M} times')
-    # Call function which trains model multiple times
-    results = train_repeatedly(M, classifier, epochs, featrs, labels)
-    # Call function which plots results from this test
-    pres_plot.f1_plot(results,
-      title=f'Validation for Training {M} Times',
-      save =psname,
-      color='white')
+    print('[MAIN] Training classifier on augmented data w/o fine-tuning')
+    h1 = model.fit_generatory(
+      augmented_gen,
+      validation_split=0.3,
+      epochs=epochs_1
+      )
+    pres_plot.plot_history(h1.history,
+      color='white',
+      title='Training on Augmented Data without Adaptation')
+
   # Save the model if applicable    
   if args['saveas']:
     model.save('../models/' + args['saveas'] + '.h5')
@@ -295,3 +380,28 @@ def main():
 
 if __name__ == '__main__':
   v = main()
+  globals().update(v)
+
+
+  ### Old training code
+  # if M==1:
+  #   print(f'[MAIN] Training Model Once...')
+  #   history = classifier.fit(
+  #           featrs, labels,
+  #           validation_split = 0.3,
+  #           epochs=epochs)
+  #   pres_plot.plot_history(history.history,
+  #     save=psname,color='white',
+  #     title=f'Accuracy metrics for training on {feature_dir} feature set')
+  #   # pres_plot.plot_errors(classifier,labels,)
+  # # Case for training multiple times
+  # else:
+  #   print(f'[MAIN] Training Model {M} times...')
+  #   # Call function which trains model multiple times
+  #   results = train_repeatedly(M, classifier, epochs, featrs, labels)
+  #   # Call function which plots results from this test
+  #   pres_plot.f1_plot(results,
+  #     title=f"Validation for training {M} times on {feature_dir.replace('_',' ')[0:-1]}",
+  #     save =psname,
+  #     color='white')
+  
