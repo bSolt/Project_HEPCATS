@@ -344,13 +344,11 @@ def main():
     horizontal_flip=True,
     vertical_flip = True,
     preprocessing_function=random_90,
-    shuffle=false,
     validation_split=0.3
     )
   # A generator without augmentation
   unaltered_gen = ImageDataGenerator(
     rescale=1./255,
-    shuffle=false,
     validation_split=0.3
     )
   # Tell the generator where to find the data and what size to load it as
@@ -359,6 +357,7 @@ def main():
     target_size=(256, 256),
     batch_size=32,
     class_mode='binary',
+    shuffle=False,
     subset='training'
     )
 
@@ -367,6 +366,7 @@ def main():
     target_size=(256,256),
     batch_size=32,
     class_mode='binary',
+    shuffle=False,
     subset='validation')
 
   ### Training Phase 3 ###
