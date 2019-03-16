@@ -165,11 +165,11 @@ int8_t init_mdq() {
     // (Decimation value of 1 with CIC mode means that one sample is used
     // for calculation. Four stages of 2-sample moving window averages are
     // applied and all filtered values of returned)
-    ret_val = send_mdq_cmd("dec 1");
+    ret_val = send_mdq_cmd("dec 100");
 
     // Define scan rate such that sample rate per channel is 240 Hz for
     // for this decimation value:
-    ret_val = send_mdq_cmd("srate 250000");
+    ret_val = send_mdq_cmd("srate 2500");
 
     // Define acquisition mode to be CIC (cascaded integrator–comb filter):
     ret_val = send_mdq_cmd("filter * 1");
