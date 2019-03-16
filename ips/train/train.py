@@ -19,7 +19,7 @@ os.environ['TF_CPP_MIN_VLOG_LEVEL'] = '3'
 # Check gpu setting
 if tf.test.is_gpu_available():
   print(f'[TF] Running on GPU {tf.test.gpu_device_name()}')
-else
+else:
   print('[TF] Running on CPU')
 
 ## Set up the feature detector
@@ -304,7 +304,7 @@ def main():
   M =  args['simulationnumber']
   #define number of epochs
   epochs_0 = 30
-  epochs_1 = args['epochs']
+  epochs = args['epochs']
   #Determine name for figure image
   psname = f'plot_e{epochs}_m{M}.png'
   fi=0
@@ -325,7 +325,8 @@ def main():
     )
   pres_plot.plot_history(h0.history,
     color='white',
-    title='Initial Classifier Training')
+    title='Initial Classifier Training',
+    save='phase0.png')
 
   ### Training Phase 2 ###
   # In this phase of training, the network will be trained on augmented data
@@ -358,24 +359,26 @@ def main():
     # enable fine-tuning of ptdnn
     enable_fine_tuning(ptdnn,valid_x_fine[ft_option-1])
     # Fit once more on augmented data
-    h2 = model.fit_generatory(
+    h2 = model.fit_generator(
       augmented_gen,
-      validation_split=0.3,
-      epochs=epochs_2
+      epochs=epochs
       )
+    return vars()
     pres_plot.plot_history(h2.history,
       color='white',
-      title='Training on Augmented Data with augmentation')
+      title='Training on Augmented Data with augmentation',
+      save='phase1.png')
   else:
     print('[MAIN] Training classifier on augmented data w/o fine-tuning')
-    h1 = model.fit_generatory(
+    h1 = model.fit_generator(
       augmented_gen,
-      validation_split=0.3,
-      epochs=epochs_1
+      epochs=epochs
       )
+    return vars()
     pres_plot.plot_history(h1.history,
       color='white',
-      title='Training on Augmented Data without Adaptation')
+      title='Training on Augmented Data without Adaptation',
+      save='phase2.png')
 
   # Save the model if applicable    
   if args['saveas']:
