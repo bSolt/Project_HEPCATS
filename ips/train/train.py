@@ -337,21 +337,37 @@ def main():
   random_90 = lambda im: np.rot90(im,k=np.random.choice(4))
   #define the settings for loading in images including value rescale, 
   #  and random alterations such as scaling, zooming, and flipping
-  gen = ImageDataGenerator(
+  augmented_gen = ImageDataGenerator(
     rescale=1./255,
     zoom_range=0.1,
     cval=0,
     horizontal_flip=True,
     vertical_flip = True,
-    preprocessing_function=random_90
+    preprocessing_function=random_90,
+    shuffle=false,
+    validation_split=0.3
+    )
+  # A generator without augmentation
+  unaltered_gen = ImageDataGenerator(
+    rescale=1./255,
+    shuffle=false,
+    validation_split=0.3
     )
   # Tell the generator where to find the data and what size to load it as
-  augmented_gen = gen.flow_from_directory(
+  training_gen = augmented_gen.flow_from_directory(
     image_dir,
     target_size=(256, 256),
     batch_size=32,
-    class_mode='binary'
+    class_mode='binary',
+    subset='training'
     )
+
+  validation_gen = unaltered_gen.flow_from_directory(
+    image_dir,
+    target_size=(256,256),
+    batch_size=32,
+    class_mode='binary',
+    subset='validation')
 
   ### Training Phase 3 ###
   # In this phase, fine tuning is done if necesary
@@ -362,6 +378,7 @@ def main():
     # Fit once more on augmented data
     h2 = model.fit_generator(
       augmented_gen,
+      validation_data=validation_gen,
       epochs=epochs
       )
     return vars()
@@ -373,6 +390,7 @@ def main():
     print('[MAIN] Training classifier on augmented data w/o fine-tuning')
     h1 = model.fit_generator(
       augmented_gen,
+      validation_data=validation_gen,
       epochs=epochs
       )
     return vars()
