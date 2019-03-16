@@ -16,6 +16,12 @@ from ips_helper import *
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 os.environ['TF_CPP_MIN_VLOG_LEVEL'] = '3'
 
+# Check gpu setting
+if tf.test.is_gpu_available():
+  print(f'[TF] Running on GPU {tf.test.gpu_device_name()}')
+else
+  print('[TF] Running on CPU')
+
 ## Set up the feature detector
 """
 # Pre-Trained Network Setup & Feature Extraction
