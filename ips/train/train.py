@@ -95,7 +95,8 @@ def build_full_model(feature_detector, classifier):
                 loss='binary_crossentropy',
                 metrics=['acc',recall,f1])
   model.compile(optimizer=tf.keras.optimizers.RMSprop(lr=2e-5),
-                loss='binary_crossentropy')
+                loss='binary_crossentropy',
+                metrics=['acc',recall,f1])
 
   print('[ASSEMBLE] Models compiled successfully')
   return model
