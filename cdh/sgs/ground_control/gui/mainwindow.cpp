@@ -155,7 +155,6 @@ void MainWindow::cmd_return_pressed() //Sends cmd_prompt string to command inter
  ui->txt_prompt->clear();
 }// END OF SLOT CMD_RETURN_PRESSED
 
-
 void MainWindow::on_btn_quit_clicked() //Closes main window
 {
     close();
@@ -174,10 +173,9 @@ void MainWindow::start_listeners() //Spawns telemetry listeners
     {
     case 1: //Master or Monitor
     {
-
         QString current_time=QTime::currentTime().toString();
         //Start the gc_listener
-       QString gc_listen_cmd="./../../../../ground_control/backend/bin/test_tlm.sh";
+       QString gc_listen_cmd="./../../../../ground_control/backend/bin/rcv_tlm";
        tlm_reader=new QProcess(this);
        tlm_reader->setProcessChannelMode(QProcess::MergedChannels);
        connect(tlm_reader,SIGNAL(readyReadStandardOutput()),this,SLOT(print_to_telem()));
@@ -307,10 +305,7 @@ void MainWindow::stop_listeners()
 void MainWindow::print_to_msgs()
 {
 //Debug slot
-    QString output=tlm_reader->readAllStandardOutput();
-    QString errout=tlm_reader->readAllStandardError();
-ui->txt_messages_out->append(output);
-ui->txt_messages_out->append(errout);
+
 
 }
 

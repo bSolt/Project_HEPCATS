@@ -39,7 +39,7 @@
 
 void main(int argc, char const *argv[]) {
     // Open port:
-    int fd = open_port("/dev/ttyUSB1");
+    int fd = open_port("/dev/ttyUSB0");
 
     // Allocate buffer for telemetry packet:
     char* buf = malloc(1080*sizeof(char));
