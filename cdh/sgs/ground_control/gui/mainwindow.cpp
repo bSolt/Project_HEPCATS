@@ -27,7 +27,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     //SIGNALS HERE
 
-
     ui->setupUi(this);
     //Setup the window destroy
     connect(ui->btn_quit,SIGNAL(clicked(bool)),this,SLOT(on_btn_quit_clicked()));
@@ -39,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->btn_stop_listeners,SIGNAL(clicked(bool)),this,SLOT(stop_listeners()));
     connect(ui->btn_tab_cmd_add_cmd,SIGNAL(clicked(bool)),this,SLOT(add_custom_to_active()));
     connect(ui->btn_add_all,SIGNAL(clicked(bool)),this,SLOT(add_all_to_inactive()));
+
     //Command List Tab Signals
     connect(ui->btn_load_commands,SIGNAL(clicked(bool)),this,SLOT(load_command_list()));
     connect(ui->btn_cmd_list_remove, SIGNAL(clicked(bool)),this,SLOT(remove_cmd_item()));
@@ -100,8 +100,6 @@ void MainWindow::cmd_return_pressed() //Sends cmd_prompt string to command inter
 
     QString prompt_out=cmd_time+" PROMPT: "+command;
     ui->cmd_txt_messages->append(prompt_out);
-
-    //Get execution status from interpreter
     QString rtn_time=QTime::currentTime().toString();
 
     //Check for commanding error
@@ -179,10 +177,12 @@ void MainWindow::start_listeners() //Spawns telemetry listeners
 
         QString current_time=QTime::currentTime().toString();
         //Start the gc_listener
-       QString gc_listen_cmd="./../backend/bin/rcv_tlm";
+       QString gc_listen_cmd="./../../../../ground_control/backend/bin/test_tlm.sh";
        tlm_reader=new QProcess(this);
+       tlm_reader->setProcessChannelMode(QProcess::MergedChannels);
        connect(tlm_reader,SIGNAL(readyReadStandardOutput()),this,SLOT(print_to_telem()));
        connect(tlm_reader,SIGNAL(readyReadStandardError()),this,SLOT(print_to_telem()));
+       connect(tlm_reader,SIGNAL(readyRead()),this,SLOT(print_to_msgs()));
        tlm_reader->start(gc_listen_cmd);
        ui->txt_messages_out->append(current_time+": Listeners started.");
        if (ui->rad_btn_Master->isChecked())
@@ -214,8 +214,8 @@ QString output;
 QString Erroutput;
 
 //Get STDOUT and STDERR output from telemetry process
-output=listeners->readAllStandardOutput();
-Erroutput=listeners->readAllStandardError();
+output=tlm_reader->readAllStandardOutput();
+Erroutput=tlm_reader->readAllStandardError();
 
 ////Initialize telemetry holders
 QString rx_telecmd_pkt_cnt;
@@ -225,7 +225,7 @@ QString val_cmd_cnt;
 QString inv_cmd_cnt;
 QString cmd_exec_suc_cnt;
 QString cmd_exec_err_cnt;
-QString tlm_pkt_xfr_frm_swq_cnt;
+QString tlm_pkt_xfr_frm_seq_cnt;
 QString acq_img_cnt;
 QString img_acq_prog_flag;
 QString ers_rly_swtch_state;
@@ -236,8 +236,9 @@ QString img_rej_cnt;
 QString next_img_acq_tm_str;
 QString next_atc_tm_str;
 QString pbk_prog_flag;
+QString sys_tm_str;
 
-
+ui->txt_messages_out->append("Received Telemety");
 
 //
 ////Get telemetry values from output
@@ -248,7 +249,7 @@ val_cmd_cnt=output.section(',',3,3);
 inv_cmd_cnt=output.section(',',4,4);
 cmd_exec_suc_cnt=output.section(',',5,5);
 cmd_exec_err_cnt=output.section(',',6,6);
-tlm_pkt_xfr_frm_swq_cnt=output.section(',',7,7);
+tlm_pkt_xfr_frm_seq_cnt=output.section(',',7,7);
 acq_img_cnt=output.section(',',8,8);
 img_acq_prog_flag=output.section(',',9,9);
 ers_rly_swtch_state=output.section(',',10,10);
@@ -259,6 +260,7 @@ img_rej_cnt=output.section(',',14,14);
 next_img_acq_tm_str=output.section(',',15,15);
 next_atc_tm_str=output.section(',',16,16);
 pbk_prog_flag=output.section(',',17,17);
+sys_tm_str=output.section(',',18,18);
 
 
 ////Update the GUI's appropriate fields
@@ -269,7 +271,7 @@ ui->lbl_val_cmd_cnt->setText(val_cmd_cnt);
 ui->lbl_inv_cmd_cnt->setText(inv_cmd_cnt);
 ui->lbl_cmd_exec_suc_cnt->setText(cmd_exec_suc_cnt);
 ui->lbl_cmd_exec_err_cnt->setText(cmd_exec_err_cnt);
-ui->lbl_tlm_pkt_xfr_frm_seq_cnt->setText(tlm_pkt_xfr_frm_swq_cnt);
+ui->lbl_tlm_pkt_xfr_frm_seq_cnt->setText(tlm_pkt_xfr_frm_seq_cnt);
 ui->lbl_acq_img_cnt->setText(acq_img_cnt);
 ui->lbl_img_acq_prog_flag->setText(img_acq_prog_flag);
 ui->lbl_ers_rly_swtch_state->setText(ers_rly_swtch_state);
@@ -301,6 +303,17 @@ void MainWindow::stop_listeners()
     ui->rad_btn_Monitor->setAutoExclusive(true);
     ui->lbl_link_state->setText("NO LINK");
 }//END OF SLOT STOP LISTENERS
+
+void MainWindow::print_to_msgs()
+{
+//Debug slot
+    QString output=tlm_reader->readAllStandardOutput();
+    QString errout=tlm_reader->readAllStandardError();
+ui->txt_messages_out->append(output);
+ui->txt_messages_out->append(errout);
+
+}
+
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -420,12 +433,8 @@ void MainWindow::active_to_inactive_list() //Takes current active command list, 
 }
 
 
-void MainWindow::print_to_msgs()
-{
-//Placeholder slot
 
 
-}
 
 
 

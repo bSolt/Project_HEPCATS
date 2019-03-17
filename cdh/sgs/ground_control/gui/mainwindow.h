@@ -16,7 +16,6 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = 0);
-
     ~MainWindow();
 private slots:
     //Delare all slots to be used in mainwindow.cpp
