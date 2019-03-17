@@ -208,6 +208,7 @@ void proc_tlm_pkt(char* buffer) {
             "RT" : flt_tbl_mode == 2 ? "PBK" : flt_tbl_mode == 3 ? "IMG" : "MAG",\
             img_accpt_cnt,img_rej_cnt,next_img_acq_tm_str,next_atc_tm_str,\
             pbk_prog_flg ? "PBK" : "IDLE",sys_tm_str);
+	    fflush(stdout); //flush output stream
     } else if (pkt_id_apid == APID_MDQ) {
         // Declarations and initializations:
         float mdq_conv_buf[MDQ_BUF_SIZE/2]; // Magnetometer DAQ converted data buffer
