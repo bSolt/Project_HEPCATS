@@ -73,6 +73,8 @@ def main():
 
 	# Create Buffer writier object for output
 	p_out = open(COMM_PIPE, 'wb')
+	# Send the message that ips is ready to begin processing
+	p_out.write(np.uint8(21))
 
 	#The program will loop while run is True
 	# It is not designed to stop in its current state
