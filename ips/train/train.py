@@ -316,7 +316,7 @@ def main():
   #Determine name for figure image
   psname = f'plot_e{epochs}_m{M}'
   fi=0
-  while os.path.isfile(psname):
+  while os.path.isfile(psname+'_phase0.png'):
     psname = f'plot_e{epochs}_m{M}_{fi}'
     fi+=1
   print(f'[MAIN] Using {psname} for plot save location')
@@ -334,7 +334,7 @@ def main():
   pres_plot.plot_history(h0.history,
     color='white',
     title='Initial Classifier Training',
-    save='phase0.png')
+    save=psname+'_phase0.png')
 
   ### Training Phase 2 ###
   # In this phase of training, the network will be trained on augmented data
