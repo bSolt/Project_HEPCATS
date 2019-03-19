@@ -252,32 +252,6 @@ def main():
   # If it's allowed, remake models to account for fine-tuning
   possible = (3,19,22,29)
 
-  # Pretty sure this is the wrong approach...
-  # if ft_layers:
-  #   if ft_layers in possible:
-  #     ft_layer = ptdnn.layers[-1-ft_layers]
-  #     # next_layer = ptdnn.layers[-ft_layers]
-  #     new_ptdnn = tf.keras.Model(
-  #       name = 'frozen_ptdnn',
-  #       inputs=ptdnn.input,
-  #       outputs=ft_layer.output)
-
-  #     new_classifier = tf.keras.models.Sequential(name='extended_classifier')
-  #     new_classifier.add(tf.keras.layers.InputLayer(input_shape=ft_layer.output_shape[1:]))
-  #     for l in ptdnn.layers[-ft_layers:]:
-  #       new_classifier.add(l)
-  #     new_classifier.add(classifier)
-  #     new_classifier.build(new_ptdnn.output_shape)
-
-  #     ptdnn = new_ptdnn
-  #     # ptdnn.summary()
-  #     print('[MAIN] Classifier + Fine-Tuning Layers')
-  #     classifier = new_classifier
-  #     classifier.summary()
-  #   else:
-  #     print('Invalid fine-tuning option!')
-  #     exit -1
-
   # Build and compile the full model
   model = build_full_model(ptdnn, classifier)
 
@@ -342,6 +316,7 @@ def main():
 
   # anonymous function for rotating 90 degrees randomly
   random_90 = lambda im: np.rot90(im,k=np.random.choice(4))
+  return vars()
   #define the settings for loading in images including value rescale, 
   #  and random alterations such as scaling, zooming, and flipping
   augmented_gen = ImageDataGenerator(
@@ -410,7 +385,7 @@ def main():
       title='Training on Augmented Data without Adaptation',
       save=psname+'_aug.png')
 
-  # Save the model if applicable    
+  # Save the model if applicable
   if args['saveas']:
     model.save('../models/' + args['saveas'] + '.h5')
     # save the training history
@@ -423,7 +398,7 @@ def main():
       name = os.path.join('histories',args['saveas'] + f'_{fi}.p')
       fi+=1
     # save the history
-    with open(,'wb') as hist_file:
+    with open(name,'wb') as hist_file:
       if ft_option:
         pickle.dump(h2,hist_file)
       else:
@@ -435,6 +410,33 @@ def main():
 if __name__ == '__main__':
   v = main()
   globals().update(v)
+
+
+  ### Old fine-tuning code
+  # if ft_layers:
+  #   if ft_layers in possible:
+  #     ft_layer = ptdnn.layers[-1-ft_layers]
+  #     # next_layer = ptdnn.layers[-ft_layers]
+  #     new_ptdnn = tf.keras.Model(
+  #       name = 'frozen_ptdnn',
+  #       inputs=ptdnn.input,
+  #       outputs=ft_layer.output)
+
+  #     new_classifier = tf.keras.models.Sequential(name='extended_classifier')
+  #     new_classifier.add(tf.keras.layers.InputLayer(input_shape=ft_layer.output_shape[1:]))
+  #     for l in ptdnn.layers[-ft_layers:]:
+  #       new_classifier.add(l)
+  #     new_classifier.add(classifier)
+  #     new_classifier.build(new_ptdnn.output_shape)
+
+  #     ptdnn = new_ptdnn
+  #     # ptdnn.summary()
+  #     print('[MAIN] Classifier + Fine-Tuning Layers')
+  #     classifier = new_classifier
+  #     classifier.summary()
+  #   else:
+  #     print('Invalid fine-tuning option!')
+  #     exit -1
 
 
   ### Old training code
