@@ -14,15 +14,14 @@
 import numpy as np
 import cv2
 
-def read_raw(pipe, row=1920, col=1200, chan=1):
+def read_raw(pipe, read_size):
+	row = 1920; col = 1200;
 	raw_arr = np.frombuffer(
-		os.read(pipe,read_size),np.uint8)
-		.reshape((col,row,chan))
+		os.read(pipe, read_size)
+		,np.uint8).reshape((col,row))
 	# blk_arr = cv2.cvtColor(raw_arr, cv2.COLOR_BayerBG2GRAY)
-	if (chan==1):
-		rgb_arr = cv2.cvtColor(raw_arr, cv2.COLOR_BayerBG2RGB)
-	else:
-		rgb_arr = raw_arr
+	rgb_arr = cv2.cvtColor(raw_arr, cv2.COLOR_BayerBG2RGB)
+
 	return rgb_arr
 
 def main():
@@ -94,9 +93,9 @@ def main():
 			# Convert the raw image to a uint8 numpy array
 			rgb_arr = raw.postprocess(gamma=(1,1))
 		elif ( IMAGE_FORMAT=='ieu'):
-			rgb_arr = read_raw(p_in)
+			rgb_arr = read_raw(p_in,BYTES)
 		elif ( IMAGE_FORMAT=='ieu2'):
-			rgb_arr = read_raw(p_in,chan=3)
+			rgb_arr = read_raw(p_in,BYTES)
 
 		# from matplotlib import pyplot as plts
 		# plt.imshow(rgb_arr); plt.show()
