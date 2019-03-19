@@ -316,7 +316,6 @@ def main():
 
   # anonymous function for rotating 90 degrees randomly
   random_90 = lambda im: np.rot90(im,k=np.random.choice(4))
-  return vars()
   #define the settings for loading in images including value rescale, 
   #  and random alterations such as scaling, zooming, and flipping
   augmented_gen = ImageDataGenerator(
