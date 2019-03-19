@@ -309,7 +309,7 @@ def main():
     featrs = np.load(feature_file)
     labels = np.load(label_file)
 
-  # M =  args['simulationnumber']
+  M =  args['simulationnumber']
   #define number of epochs
   epochs_0 = args['epochs_initial']
   epochs = args['epochs']
@@ -384,6 +384,10 @@ def main():
     print(f'[MAIN] Training full model with fine-tuning option {ft_option}')
     # enable fine-tuning of ptdnn
     enable_fine_tuning(ptdnn,valid_x_fine[ft_option-1])
+    # need to recompile model here
+    model.compile(optimizer=tf.keras.optimizers.RMSprop(lr=2e-5),
+                loss='binary_crossentropy',
+                metrics=['acc',recall,f1])
     # Fit once more on augmented data
     h2 = model.fit_generator(
       training_gen,
