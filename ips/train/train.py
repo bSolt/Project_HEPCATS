@@ -219,8 +219,10 @@ def main():
   default_dir = '../winter_data/png_v3/'
   # Options for parsing the command line arguments
   ap = argparse.ArgumentParser()
-  ap.add_argument("-e", "--epochs", type=int, default=30,
-  help="nuber of epochs to train the classifier network on")
+  ap.add_argument("-e", "--epochs", type=int, default=50,
+  help="nuber of epochs to use in the main training loop")
+  ap.add_argument("-e0","--epochs_initial", type=int, default=20,
+  help="number of epochs to use in the initial training phase")
   ap.add_argument("-m", "--simulationnumber", type=int, default=1,
   help="number of simulations to use for training the classifier")
   ap.add_argument("-f", "--finetuning", type=int, default=0,
@@ -307,15 +309,15 @@ def main():
     featrs = np.load(feature_file)
     labels = np.load(label_file)
 
-  M =  args['simulationnumber']
+  # M =  args['simulationnumber']
   #define number of epochs
-  epochs_0 = 30
+  epochs_0 = args['epochs_initial']
   epochs = args['epochs']
   #Determine name for figure image
-  psname = f'plot_e{epochs}_m{M}.png'
+  psname = f'plot_e{epochs}_m{M}'
   fi=0
   while os.path.isfile(psname):
-    psname = f'plot_e{epochs}_m{M}_{fi}.png'
+    psname = f'plot_e{epochs}_m{M}_{fi}'
     fi+=1
   print(f'[MAIN] Using {psname} for plot save location')
 
