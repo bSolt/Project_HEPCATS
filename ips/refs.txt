@@ -1,0 +1,15 @@
+Possible contants for discussion of improving accuracy:
+
+The guy who is teaching the graduate deep learning class is
+Nisar Ahmed
+Nicholas Dronen (Machine Learning)
+Back Here at 2:30 (ECEE 1B14)
+
+Tyler Scott's Paper "Adapted Deep imbeddings" w/ Ridgeway & Moser
+
+Camden:
+camden.elliottwilliams@colorado.edu
+
+Should apply more augmentation probably
+
+Maybe normalize by brightness
