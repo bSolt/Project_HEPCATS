@@ -3,7 +3,7 @@
 
 ## Imports
 
-import os, argparse
+import os, argparse, pickle
 import numpy as np
 import pres_plot
 import tensorflow as tf
@@ -413,6 +413,12 @@ def main():
   # Save the model if applicable    
   if args['saveas']:
     model.save('../models/' + args['saveas'] + '.h5')
+    # save the training history
+    with open(os.path.join('histories',args['saveas'] + '.p'),'wb') as hist_file:
+      if ft_option:
+        pickle.dump(h2,hist_file)
+      else:
+        pickle.dump(h1,hist_file)
   # return vars() s/t you can use the local variables here in interactive mode
   return vars()
 
