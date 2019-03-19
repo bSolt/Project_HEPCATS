@@ -414,7 +414,14 @@ def main():
   if args['saveas']:
     model.save('../models/' + args['saveas'] + '.h5')
     # save the training history
-    with open(os.path.join('histories',args['saveas'] + '.p'),'wb') as hist_file:
+    name = os.path.join('histories',args['saveas'] + '.p')
+    # ensure file name is unique
+    fi=0
+    while os.path.isfile(name):
+      name = os.path.join('histories',args['saveas'] + f'_{fi}.p')
+      fi+=1
+    # save the history
+    with open(,'wb') as hist_file:
       if ft_option:
         pickle.dump(h2,hist_file)
       else:
