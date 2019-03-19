@@ -81,8 +81,13 @@ def build_full_model(feature_detector, classifier):
   model = tf.keras.models.Sequential()
   #First get the features from ptdnn
   model.add(feature_detector)
+  # for layer in feature_detector.layers:
+  #   layer.trainable=False
+  #   model.add(layer)
   #Then classify
   model.add(classifier)  
+  # for layer in classifier.layers:
+  #   model.add(layer)
   #feature_detector should not be trainable if fine_tuning_layers==0
   feature_detector.trainable=False
 
@@ -287,20 +292,21 @@ def main():
   feature_file = feature_dir + 'featrs.npy'
   label_file   = feature_dir + 'labels.npy'
   # Check if computation of features is needed
-  if not os.path.isfile(feature_file):
-    # Compute the features
-    print(f'[MAIN] Computing new feature set in {feature_dir}')
-    featrs, labels = compute_features_from_dir(image_dir,ptdnn,
-      save_to_dir=feature_dir+args['cache'] if args['cache'] else None)
-    # Save the arrays to the file
-    print(f'[MAIN] Saving feature set')
-    np.save(feature_file, featrs)
-    np.save(label_file, labels)
-  else:
-    print('[MAIN] Loading in feature set')
-    # Load the arrays from the files
-    featrs = np.load(feature_file)
-    labels = np.load(label_file)
+  ## Temp
+  # if not os.path.isfile(feature_file):
+  #   # Compute the features
+  #   print(f'[MAIN] Computing new feature set in {feature_dir}')
+  #   featrs, labels = compute_features_from_dir(image_dir,ptdnn,
+  #     save_to_dir=feature_dir+args['cache'] if args['cache'] else None)
+  #   # Save the arrays to the file
+  #   print(f'[MAIN] Saving feature set')
+  #   np.save(feature_file, featrs)
+  #   np.save(label_file, labels)
+  # else:
+  #   print('[MAIN] Loading in feature set')
+  #   # Load the arrays from the files
+  #   featrs = np.load(feature_file)
+  #   labels = np.load(label_file)
 
   M =  args['simulationnumber']
   #define number of epochs
@@ -318,16 +324,17 @@ def main():
   #  In this phase of training the randomly initialized classifier net will be trained 
   #  on 30 epochs of unaltered features
 
-  print('[MAIN] Training classifier once on saved features')
-  h0 = classifier.fit(
-    featrs, labels,
-    validation_split=0.3,
-    epochs=epochs_0
-    )
-  pres_plot.plot_history(h0.history,
-    color='white',
-    title='Initial Classifier Training',
-    save='phase0.png')
+  ## TEMP
+  # print('[MAIN] Training classifier once on saved features')
+  # h0 = classifier.fit(
+  #   featrs, labels,
+  #   validation_split=0.3,
+  #   epochs=epochs_0
+  #   )
+  # pres_plot.plot_history(h0.history,
+  #   color='white',
+  #   title='Initial Classifier Training',
+  #   save='phase0.png')
 
   ### Training Phase 2 ###
   # In this phase of training, the network will be trained on augmented data
@@ -344,29 +351,34 @@ def main():
     horizontal_flip=True,
     vertical_flip = True,
     preprocessing_function=random_90,
-    validation_split=0.3
     )
   # A generator without augmentation
   unaltered_gen = ImageDataGenerator(
     rescale=1./255,
-    validation_split=0.3
     )
   # Tell the generator where to find the data and what size to load it as
+
+  # Source of images
+  train_dir = os.path.join(image_dir,'training')
+  valid_dir = os.path.join(image_dir,'validation')
+  # Check that the directories exist
+  if not os.path.isdir(train_dir) or not os.path.isdir(valid_dir):
+    print('[MAIN] Training or Validation directory not found')
+    return  -1
+
   training_gen = augmented_gen.flow_from_directory(
-    image_dir,
+    train_dir,
     target_size=(256, 256),
     batch_size=32,
     class_mode='binary',
-    shuffle=False,
     subset='training'
     )
 
   validation_gen = unaltered_gen.flow_from_directory(
-    image_dir,
+    valid_dir
     target_size=(256,256),
     batch_size=32,
     class_mode='binary',
-    shuffle=False,
     subset='validation')
 
   ### Training Phase 3 ###
@@ -377,7 +389,7 @@ def main():
     enable_fine_tuning(ptdnn,valid_x_fine[ft_option-1])
     # Fit once more on augmented data
     h2 = model.fit_generator(
-      augmented_gen,
+      training_gen,
       validation_data=validation_gen,
       epochs=epochs
       )
@@ -389,7 +401,7 @@ def main():
   else:
     print('[MAIN] Training classifier on augmented data w/o fine-tuning')
     h1 = model.fit_generator(
-      augmented_gen,
+      training_gen,
       validation_data=validation_gen,
       epochs=epochs
       )
