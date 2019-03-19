@@ -393,7 +393,7 @@ def main():
     pres_plot.plot_history(h2.history,
       color='white',
       title='Training on Augmented Data with augmentation',
-      save='phase1.png')
+      save=psname+'_fine.png')
   else:
     print('[MAIN] Training classifier on augmented data w/o fine-tuning')
     h1 = model.fit_generator(
@@ -404,7 +404,7 @@ def main():
     pres_plot.plot_history(h1.history,
       color='white',
       title='Training on Augmented Data without Adaptation',
-      save='phase2.png')
+      save=psname+'_aug.png')
 
   # Save the model if applicable    
   if args['saveas']:
