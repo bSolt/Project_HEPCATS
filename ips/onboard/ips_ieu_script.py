@@ -14,13 +14,14 @@
 import numpy as np
 import cv2
 
-def read_raw(pipe, row=1920, col=1200, chan=1):
-	raw_arr = np.frombuffer(pipe.read(),np.uint8).reshape((col,row,chan))
+def read_raw(pipe, read_size):
+	row = 1920; col = 1200;
+	raw_arr = np.frombuffer(
+		os.read(pipe, read_size)
+		,np.uint8).reshape((col,row))
 	# blk_arr = cv2.cvtColor(raw_arr, cv2.COLOR_BayerBG2GRAY)
-	if (chan==1):
-		rgb_arr = cv2.cvtColor(raw_arr, cv2.COLOR_BayerBG2RGB)
-	else:
-		rgb_arr = raw_arr
+	rgb_arr = cv2.cvtColor(raw_arr, cv2.COLOR_BayerBG2RGB)
+
 	return rgb_arr
 
 def main():
@@ -68,13 +69,9 @@ def main():
 		BYTES = 2304000*3 #This is expected image size with three channels
 
 	# Create buffer reader object for input
-	p0 =  open(COMM_PIPE, 'rb')
-	p_in = FixedBufferReader(p0.raw, read_size=BYTES)
-
-	# Create Buffer writier object for output
-	p_out = open(COMM_PIPE, 'wb')
+	pipe = os.open(COMM_PIPE, os.O_RDWR)
 	# Send the message that ips is ready to begin processing
-	p_out.write(np.uint8(21))
+	os.write(np.uint8(21))
 
 	#The program will loop while run is True
 	# It is not designed to stop in its current state
@@ -96,9 +93,9 @@ def main():
 			# Convert the raw image to a uint8 numpy array
 			rgb_arr = raw.postprocess(gamma=(1,1))
 		elif ( IMAGE_FORMAT=='ieu'):
-			rgb_arr = read_raw(p_in)
+			rgb_arr = read_raw(p_in,BYTES)
 		elif ( IMAGE_FORMAT=='ieu2'):
-			rgb_arr = read_raw(p_in,chan=3)
+			rgb_arr = read_raw(p_in,BYTES)
 
 		# from matplotlib import pyplot as plts
 		# plt.imshow(rgb_arr); plt.show()
@@ -146,18 +143,18 @@ def main():
 				# Write to pipe part
 				print("[P] Attempting to write to {}".format(COMM_PIPE))
 			# First we write the size of the compressed buffer as a 32 bit unsigned integer
-			p_out.write(
+			os.write(pipe,
 				np.uint32(
 					len(compr_stream)
 					)
 				)
 			# Then we write the compressed buffer
-			p_out.write(compr_stream)
+			os.write(pipe,compr_stream)
 			if args['debug']:
 				print('[P] rgb array written, size = {} bytes'.format(len(compr_stream)))
 		else:
 			# If no aurora is detected, we simply write EOF (0x00) to the pipe instead
-			p_out.write(np.uint32(0))
+			os.write(pipe,np.uint32(0))
 			if args['debug']:
 				print('[P] EOF written to pipe')
 
