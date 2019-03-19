@@ -235,7 +235,7 @@ def plot_history(history,title=None,save=None,
 	# ax.set_xticks(np.arange(0,epochs+1,2))
 	
 	plt.grid(True,color='grey')
-	leg = plt.legend(facecolor='grey',fontsize=14)
+	leg = plt.legend(facecolor=legend_color,fontsize=14)
 	plt.setp(leg.get_texts(),color=text_color)
 	# save the fig is we want to
 	if save:
