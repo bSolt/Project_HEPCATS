@@ -388,7 +388,6 @@ def main():
       validation_data=validation_gen,
       epochs=epochs
       )
-    return vars()
     pres_plot.plot_history(h2.history,
       color='white',
       title='Training on Augmented Data with augmentation',
@@ -401,7 +400,6 @@ def main():
       validation_data=validation_gen,
       epochs=epochs
       )
-    return vars()
     pres_plot.plot_history(h1.history,
       color='white',
       title='Training on Augmented Data without Adaptation',
