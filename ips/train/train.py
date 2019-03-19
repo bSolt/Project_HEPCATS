@@ -414,6 +414,8 @@ def main():
   if args['saveas']:
     model.save('../models/' + args['saveas'] + '.h5')
     # save the training history
+    if not os.path.isdir('histories'):
+      os.mkdir('histories')
     name = os.path.join('histories',args['saveas'] + '.p')
     # ensure file name is unique
     fi=0
