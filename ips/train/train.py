@@ -216,7 +216,7 @@ def train_repeatedly(M, classifier, epochs, features, labels, v_split = 0.3):
 
 def main():
   # defined directory for images
-  default_dir = '../winter_data/png_v2/'
+  default_dir = '../winter_data/png_v3/'
   # Options for parsing the command line arguments
   ap = argparse.ArgumentParser()
   ap.add_argument("-e", "--epochs", type=int, default=30,
@@ -370,19 +370,16 @@ def main():
     train_dir,
     target_size=(256, 256),
     batch_size=32,
-    class_mode='binary',
-    subset='training'
-    )
+    class_mode='binary')
 
   validation_gen = unaltered_gen.flow_from_directory(
-    valid_dir
+    valid_dir,
     target_size=(256,256),
     batch_size=32,
-    class_mode='binary',
-    subset='validation')
+    class_mode='binary')
 
   ### Training Phase 3 ###
-  # In this phase, fine tuning is done if necesary
+  # In this phase, (fine tuning and) data augmentation is done
   if ft_option:
     print(f'[MAIN] Training full model with fine-tuning option {ft_option}')
     # enable fine-tuning of ptdnn
@@ -400,6 +397,7 @@ def main():
       save='phase1.png')
   else:
     print('[MAIN] Training classifier on augmented data w/o fine-tuning')
+    return vars()
     h1 = model.fit_generator(
       training_gen,
       validation_data=validation_gen,
