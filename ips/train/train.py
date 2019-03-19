@@ -394,7 +394,6 @@ def main():
       save='phase1.png')
   else:
     print('[MAIN] Training classifier on augmented data w/o fine-tuning')
-    return vars()
     h1 = model.fit_generator(
       training_gen,
       validation_data=validation_gen,
