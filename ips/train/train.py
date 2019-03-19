@@ -85,9 +85,9 @@ def build_full_model(feature_detector, classifier):
   #   layer.trainable=False
   #   model.add(layer)
   #Then classify
-  model.add(classifier)  
-  # for layer in classifier.layers:
-  #   model.add(layer)
+  #model.add(classifier)  
+  for layer in classifier.layers:
+    model.add(layer)
   #feature_detector should not be trainable if fine_tuning_layers==0
   feature_detector.trainable=False
 
@@ -292,21 +292,20 @@ def main():
   feature_file = feature_dir + 'featrs.npy'
   label_file   = feature_dir + 'labels.npy'
   # Check if computation of features is needed
-  ## Temp
-  # if not os.path.isfile(feature_file):
-  #   # Compute the features
-  #   print(f'[MAIN] Computing new feature set in {feature_dir}')
-  #   featrs, labels = compute_features_from_dir(image_dir,ptdnn,
-  #     save_to_dir=feature_dir+args['cache'] if args['cache'] else None)
-  #   # Save the arrays to the file
-  #   print(f'[MAIN] Saving feature set')
-  #   np.save(feature_file, featrs)
-  #   np.save(label_file, labels)
-  # else:
-  #   print('[MAIN] Loading in feature set')
-  #   # Load the arrays from the files
-  #   featrs = np.load(feature_file)
-  #   labels = np.load(label_file)
+  if not os.path.isfile(feature_file):
+    # Compute the features
+    print(f'[MAIN] Computing new feature set in {feature_dir}')
+    featrs, labels = compute_features_from_dir(image_dir,ptdnn,
+      save_to_dir=feature_dir+args['cache'] if args['cache'] else None)
+    # Save the arrays to the file
+    print(f'[MAIN] Saving feature set')
+    np.save(feature_file, featrs)
+    np.save(label_file, labels)
+  else:
+    print('[MAIN] Loading in feature set')
+    # Load the arrays from the files
+    featrs = np.load(feature_file)
+    labels = np.load(label_file)
 
   M =  args['simulationnumber']
   #define number of epochs
@@ -324,17 +323,16 @@ def main():
   #  In this phase of training the randomly initialized classifier net will be trained 
   #  on 30 epochs of unaltered features
 
-  ## TEMP
-  # print('[MAIN] Training classifier once on saved features')
-  # h0 = classifier.fit(
-  #   featrs, labels,
-  #   validation_split=0.3,
-  #   epochs=epochs_0
-  #   )
-  # pres_plot.plot_history(h0.history,
-  #   color='white',
-  #   title='Initial Classifier Training',
-  #   save='phase0.png')
+  print('[MAIN] Training classifier once on saved features')
+  h0 = classifier.fit(
+    featrs, labels,
+    validation_split=0.3,
+    epochs=epochs_0
+    )
+  pres_plot.plot_history(h0.history,
+    color='white',
+    title='Initial Classifier Training',
+    save='phase0.png')
 
   ### Training Phase 2 ###
   # In this phase of training, the network will be trained on augmented data
