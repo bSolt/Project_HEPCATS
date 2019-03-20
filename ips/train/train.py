@@ -399,9 +399,9 @@ def main():
     # save the history
     with open(name,'wb') as hist_file:
       if ft_option:
-        pickle.dump(h2,hist_file)
+        pickle.dump(h2.history,hist_file)
       else:
-        pickle.dump(h1,hist_file)
+        pickle.dump(h1.history,hist_file)
   # return vars() s/t you can use the local variables here in interactive mode
   return vars()
 
