@@ -214,7 +214,7 @@ def train_repeatedly(M, classifier, epochs, features, labels, v_split = 0.3):
   return results
 
 
-def train_repeatedly_finely(M, model, epochs, training_gen, validation_gen):
+def train_repeatedly_finely(M, model, epochs, training_gen, validation_gen, validation_freq):
   results = {}
   # store inital model weights for later
   initial_weights = model.get_weights()
@@ -226,12 +226,13 @@ def train_repeatedly_finely(M, model, epochs, training_gen, validation_gen):
               loss='binary_crossentropy',
               metrics=['acc',recall,f1])
     # print statement
-    print(f'[TRAIN] Training Model Simulation  {i+1}/{M}',end='\r')
+    print(f'[TRAIN] Training Model Simulation  {i+1}/{M}')
     # Train
     history = model.fit_generator(
       training_gen,
       validation_data=validation_gen,
-      epochs=epochs
+      epochs=epochs,
+      validation_freq=validation_freq
       )
     # store each result
     # First iterate on the keys present
@@ -252,21 +253,23 @@ def main():
   # Options for parsing the command line arguments
   ap = argparse.ArgumentParser()
   ap.add_argument("-e", "--epochs", type=int, default=50,
-  help="nuber of epochs to use in the main training loop")
+    help="nuber of epochs to use in the main training loop")
   ap.add_argument("-e0","--epochs_initial", type=int, default=20,
-  help="number of epochs to use in the initial training phase")
+    help="number of epochs to use in the initial training phase")
   ap.add_argument("-m", "--simulationnumber", type=int, default=1,
-  help="number of simulations to use for training the classifier")
+    help="number of simulations to use for training the classifier")
   ap.add_argument("-f", "--finetuning", type=int, default=0,
-  help="An optional argument for how much fine-tuning to apply")
+    help="An optional argument for how much fine-tuning to apply")
   ap.add_argument("-s", "--saveas", type=str, default=None,
-  help="Name to pass for saving the trained model to an h5 file")
+    help="Name to pass for saving the trained model to an h5 file")
   ap.add_argument("-id", "--imagedir", type=str, default=default_dir,
-  help="Directory where training images are located")
+    help="Directory where training images are located")
   ap.add_argument("-fs", "--featureset", type=str, default='feature_set/',
-  help="Directory where the feature set files should be saved and loaded from")
+    help="Directory where the feature set files should be saved and loaded from")
+  ap.add_argument("-vf","--validation_freq",type=int,default=5,
+    help="Evaluate the validation set every n epochs during training")
   ap.add_argument("-c", "--cache", type=str, default=None,
-  help="Name to pass for saving the images which the network uses")
+    help="Name to pass for saving the images which the network uses")
   # ap.add_argument("-p", "--plotting", action='store_const',
   # const=True,default=False,
   # help="flag for generating the stats plots, altrernative to pres_plot.f1_plot()")
@@ -402,7 +405,8 @@ def main():
       h2 = model.fit_generator(
         training_gen,
         validation_data=validation_gen,
-        epochs=epochs
+        epochs=epochs,
+        validation_freq=args["validation_freq"]
         )
       pres_plot.plot_history(h2.history,
         color='white',
@@ -410,7 +414,7 @@ def main():
         save=psname+'_fine.png')
     else:
       # Train multiple times with fine-tuning/ adaptation
-      results = train_repeatedly_finely(M, model, epochs, training_gen, validation_gen)
+      results = train_repeatedly_finely(M, model, epochs, training_gen, validation_gen, args["validation_freq"])
       pres_plot.f1_plot(results,
         title=f"Validation for training {M} times on with Adaptation (Option {ft_option})",
         save =psname+'_multifine.png',
@@ -420,7 +424,8 @@ def main():
     h1 = model.fit_generator(
       training_gen,
       validation_data=validation_gen,
-      epochs=epochs
+      epochs=epochs,
+      validation_freq=args["validation_freq"]
       )
     pres_plot.plot_history(h1.history,
       color='white',
