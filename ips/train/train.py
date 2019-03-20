@@ -214,6 +214,38 @@ def train_repeatedly(M, classifier, epochs, features, labels, v_split = 0.3):
   return results
 
 
+  def train_repeatedly_finely(M, model, epochs, training_gen, validation_gen):
+    results = {}
+    # store inital model weights for later
+    initial_weights = model.get_weights()
+    for i in range(M):
+      # reset weights
+      model.set_weights(initial_weights)
+      # recompile to reset learning rate
+      model.compile(optimizer=tf.keras.optimizers.RMSprop(lr=2e-5),
+                loss='binary_crossentropy',
+                metrics=['acc',recall,f1])
+    # print statement
+    print(f'[TRAIN] Training Model Simulation  {i+1}/{M}',end='\r')
+    # Train
+    history = model.fit_generator(
+      training_gen,
+      validation_data=validation_gen,
+      epochs=epochs
+      )
+    # store each result
+    # First iterate on the keys present
+    for key in history.history.keys():
+      # We will have to initialize each key as an empty list in order to get
+      # A list of lists as the object which is stored by the dict.
+      if key not in results.keys():
+        results[key] = []
+      # add the current history into results as an item of a list with .append()
+      results[key].append(history.history[key])
+  print() #newline
+  return results
+
+
 def main():
   # defined directory for images
   default_dir = '../winter_data/png_v3/'
@@ -365,16 +397,24 @@ def main():
     model.compile(optimizer=tf.keras.optimizers.RMSprop(lr=2e-5),
                 loss='binary_crossentropy',
                 metrics=['acc',recall,f1])
-    # Fit once more on augmented data
-    h2 = model.fit_generator(
-      training_gen,
-      validation_data=validation_gen,
-      epochs=epochs
-      )
-    pres_plot.plot_history(h2.history,
-      color='white',
-      title=f'Training on Augmented Data with Adaptation (Option {ft_option})',
-      save=psname+'_fine.png')
+    if M==1:
+      # Fit once more on augmented data
+      h2 = model.fit_generator(
+        training_gen,
+        validation_data=validation_gen,
+        epochs=epochs
+        )
+      pres_plot.plot_history(h2.history,
+        color='white',
+        title=f'Training on Augmented Data with Adaptation (Option {ft_option})',
+        save=psname+'_fine.png')
+    else:
+      # Train multiple times with fine-tuning/ adaptation
+      results = train_repeatedly_finely(M, model, epochs, training_gen, validation_gen)
+      pres_plot.f1_plot(results,
+        title=f"Validation for training {M} times on with Adaptation (Option {ft_option})",
+        save =psname+'_multifine.png',
+        color='white')
   else:
     print('[MAIN] Training classifier on augmented data w/o fine-tuning')
     h1 = model.fit_generator(

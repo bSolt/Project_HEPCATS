@@ -1,4 +1,4 @@
-
+# Short for presentable plots
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as stats
@@ -25,10 +25,12 @@ def f1_plot(results,title=None,save=None,
 		text_color='white'
 		face_color='xkcd:charcoal'
 		line_color='xkcd:cyan'
+		legend_color = 'grey'
 	elif color=='white':
 		text_color='black'
 		face_color='white'
 		line_color='xkcd:teal'
+		legend_color = 'xkcd:light grey'
 
 	M, epochs = np.array(results[metric]).shape
 	mean_f1 = np.mean(results[metric],axis=0)
@@ -83,7 +85,10 @@ def f1_plot(results,title=None,save=None,
 		color='xkcd:light green',
 		label=f'Region for Requirement F1 >= {req:.2f}')
 	plt.grid(True,color='grey')
-	leg = plt.legend(facecolor='grey',fontsize=14)
+	leg = plt.legend(facecolor=legend_color,fontsize=14)
+	h,l = plt.gca().get_legend_handles_labels()
+	h.append(meas[0])
+	l.append('F1 Score Measuremets')
 	plt.setp(leg.get_texts(),color=text_color)
 	# save the fig is we want to
 	if save:
