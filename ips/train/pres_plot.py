@@ -182,7 +182,7 @@ def plot_history(history,title=None,save=None,
 	elif color=='white':
 		text_color='black'
 		face_color='white'
-		legend_color='light grey'
+		legend_color='xkcd:light grey'
 
 	epochs = len(history['acc'])
 	eax = np.arange(epochs)+1
