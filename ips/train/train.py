@@ -248,8 +248,8 @@ def main():
   classifier = build_classifier(ptdnn.output_shape)
   # This should be 1 or 2
   ft_option = args['finetuning']
-  if ft_option < 0 or ft_option>=len(valid_x_fine):
-    print(f'[MAIN] Error: Invalid fine tuning option please input an option from 0--{len(valid_x_fine)-1}')
+  if ft_option < 0 or ft_option>len(valid_x_fine):
+    print(f'[MAIN] Error: Invalid fine tuning option please input an option from 0--{len(valid_x_fine)}')
     return -1
 
   # If it's allowed, remake models to account for fine-tuning
