@@ -124,7 +124,7 @@ def enable_fine_tuning(ptdnn,fine_layer):
   # function does not need to return an object b/c the model is mutable
 
 # valid fine tuning layers for now
-valid_x_fine = ['block14_sepconv2','block14_sepconv1']
+valid_x_fine = ['block14_sepconv2','block14_sepconv1','block13_sepconv1_act']
 
 """This fucntion  will load in the data and organize it into batches
 The next block generates batches of training data. The feature array output by the 
@@ -248,6 +248,9 @@ def main():
   classifier = build_classifier(ptdnn.output_shape)
   # This should be 1 or 2
   ft_option = args['finetuning']
+  if ft_option < 0 or ft_option>=len(valid_x_fine):
+    print(f'[MAIN] Error: Invalid fine tuning option please input an option from 0--{len(valid_x_fine)-1}')
+    return -1
 
   # If it's allowed, remake models to account for fine-tuning
   possible = (3,19,22,29)
