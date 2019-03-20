@@ -373,7 +373,7 @@ def main():
       )
     pres_plot.plot_history(h2.history,
       color='white',
-      title=f'Training on Augmented Data with Augmentation ({ft_option})',
+      title=f'Training on Augmented Data with Adaptation (Option {ft_option})',
       save=psname+'_fine.png')
   else:
     print('[MAIN] Training classifier on augmented data w/o fine-tuning')
