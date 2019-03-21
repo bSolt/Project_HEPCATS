@@ -4,6 +4,21 @@ import matplotlib.pyplot as plt
 import scipy.stats as stats
 
 
+def combine_epochs(metric_arr,interval=5):
+	if type(metric_arr) is not np.ndarray:
+		metric_arr = np.array(metric_arr)
+	M, epochs = metric_arr.shape
+	new_len = epochs//interval
+	mean = np.zeros(new_len)
+	std  = np.zeros(new_len)
+	epoch_range = interval*(np.arange(new_len)+1/2)
+	for ind in range(new_len):
+		mean[ind] = metric_arr[:,interval*ind:interval*(ind+1)].mean()
+		std[ind]  = metric_arr[:,interval*ind:interval*(ind+1)].std()
+	return epoch_range,mean,std
+
+
+
 def f1_plot(results,title=None,save=None,
 	req=0.95,level=0.95,metric='val_f1',
 	color='black',figsize=(12,8)):
@@ -33,12 +48,18 @@ def f1_plot(results,title=None,save=None,
 		legend_color = 'xkcd:light grey'
 
 	M, epochs = np.array(results[metric]).shape
-	mean_f1 = np.mean(results[metric],axis=0)
-
-	# Amount of uncertainty based on confidence level
-	std_f1 = np.std(results[metric],axis=0)
+	all_epochs = range(epochs)
+	# Get mean and std for each epoch
+	if epochs<100:
+		mean_f1 = np.mean(results[metric],axis=0)
+		std_f1 = np.std(results[metric],axis=0)
+		eax = all_epochs
+	elif epochs>=100 and epochs<200:
+		eax,mean_f1,std_f1 = combine_epochs(results[metric],interval=2)
+	else:
+		eax,mean_f1,std_f1 = combine_epochs(results[metric],interval=5)
 	unc_f1 = stats.t.ppf(1/2+level/2,df=M-1) * std_f1/np.sqrt(M)
-	eax = np.arange(epochs)+1
+	
 
 
 	fig,ax = plt.subplots(1,1,figsize=figsize,facecolor=color)
@@ -52,9 +73,9 @@ def f1_plot(results,title=None,save=None,
 	ax.yaxis.label.set_color(text_color)
 	ax.tick_params(colors=text_color)
 	ax.set_facecolor(face_color)
-	meas = plt.plot(eax,np.transpose(results[metric]),'o',
+	meas = plt.plot(all_epochs,np.transpose(results[metric]),'o',
 	  markersize=8,
-	  alpha=3/M,
+	  alpha=3/(M*epochs**0.2),
 	  color=text_color)
 	# Line for the mean
 	# plt.plot(eax,mean_f1,
@@ -76,9 +97,9 @@ def f1_plot(results,title=None,save=None,
 	  linewidth=2,
 	  label='F1 Score Requirement')
 	if metric.find('f1')>1 or metric.find('acc')>1 :
-		plt.axis((0,epochs+1,0.8,1))
-	ax.set_xticks(np.arange(0,epochs+1,2))
-	xbox = [0,epochs+1,epochs+1,0]
+		plt.axis((1,epochs+1,0.8,1))
+	# ax.set_xticks(np.arange(0,epochs+1,2))
+	xbox = [1,epochs+1,epochs+1,1]
 	ybox = [1,1,req,req]
 	plt.fill(xbox,ybox,
 		alpha = 0.15,
