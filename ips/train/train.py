@@ -214,7 +214,7 @@ def train_repeatedly(M, classifier, epochs, features, labels, v_split = 0.3):
   return results
 
 
-def train_repeatedly_finely(M, model, epochs, training_gen, validation_gen, validation_freq):
+def train_repeatedly_finely(M, model, epochs, training_gen, validation_gen):
   results = {}
   # store inital model weights for later
   initial_weights = model.get_weights()
@@ -231,8 +231,7 @@ def train_repeatedly_finely(M, model, epochs, training_gen, validation_gen, vali
     history = model.fit_generator(
       training_gen,
       validation_data=validation_gen,
-      epochs=epochs,
-      validation_freq=validation_freq
+      epochs=epochs
       )
     # store each result
     # First iterate on the keys present
@@ -266,8 +265,8 @@ def main():
     help="Directory where training images are located")
   ap.add_argument("-fs", "--featureset", type=str, default='feature_set/',
     help="Directory where the feature set files should be saved and loaded from")
-  ap.add_argument("-vf","--validation_freq",type=int,default=5,
-    help="Evaluate the validation set every n epochs during training")
+  # ap.add_argument("-vf","--validation_freq",type=int,default=5,
+  #   help="Evaluate the validation set every n epochs during training")
   ap.add_argument("-c", "--cache", type=str, default=None,
     help="Name to pass for saving the images which the network uses")
   # ap.add_argument("-p", "--plotting", action='store_const',
@@ -405,8 +404,8 @@ def main():
       h2 = model.fit_generator(
         training_gen,
         validation_data=validation_gen,
-        epochs=epochs,
-        validation_freq=args["validation_freq"]
+        epochs=epochs
+        # validation_freq=args["validation_freq"]
         )
       pres_plot.plot_history(h2.history,
         color='white',
@@ -414,7 +413,7 @@ def main():
         save=psname+'_fine.png')
     else:
       # Train multiple times with fine-tuning/ adaptation
-      results = train_repeatedly_finely(M, model, epochs, training_gen, validation_gen, args["validation_freq"])
+      results = train_repeatedly_finely(M, model, epochs, training_gen, validation_gen)
       pres_plot.f1_plot(results,
         title=f"Validation for training {M} times on with Adaptation (Option {ft_option})",
         save =psname+'_multifine.png',
@@ -424,8 +423,8 @@ def main():
     h1 = model.fit_generator(
       training_gen,
       validation_data=validation_gen,
-      epochs=epochs,
-      validation_freq=args["validation_freq"]
+      epochs=epochs
+      # validation_freq=args["validation_freq"]
       )
     pres_plot.plot_history(h1.history,
       color='white',
