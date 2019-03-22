@@ -52,7 +52,7 @@ def main():
 		import time, datetime
 
 	# This will be the file containing the full neural network model
-	MODEL_FILE = "../models/winter_model_1.h5"
+	MODEL_FILE = "../models/fine3_500.h5"
 
 	# Threshold for Aurora Detection
 	THRESHOLD = 0.5
