@@ -448,7 +448,7 @@ def main():
       fi+=1
     # save the history
     with open(name,'wb') as hist_file:
-      if args["simulationnumber"]:
+      if args["simulationnumber"]>1:
         pickle.dump(results,hist_file)
       elif ft_option:
         pickle.dump(h2.history,hist_file)
