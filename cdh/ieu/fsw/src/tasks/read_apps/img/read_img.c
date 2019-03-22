@@ -137,7 +137,7 @@ void read_img(void) {
     // Synchronize with IPS:
     // (Wait IPS to be ready to receive and process images. Wait for message
     // indicating that IPS is ready to receive images via real-time message)
-    ret_val = rt_pipe_read(&ips_msg_pipe,&ips_ret,sizeof(ips_ret),\
+    ret_val = rt_pipe_read(&ips_msg_pipe,&ips_ret,1,\
         TM_INFINITE);
 
     // Print:
