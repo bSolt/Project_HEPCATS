@@ -61,6 +61,8 @@ def main():
 	model = tf.keras.models.load_model(MODEL_FILE,
 		custom_objects={'recall':recall,'f1':f1})
 
+	if args['debug']:
+		print('[P] Model file loaded successfully!')
 	# Expected RAW image size
 	if ( IMAGE_FORMAT=='test' ):
 		BYTES = 9861950; #This is for the testing image
