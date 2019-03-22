@@ -86,7 +86,7 @@ def main():
 		if args['debug']:
 			print("[P] Reading from {}".format(COMM_PIPE))
 		ibuf = os.read(pipe,10)
-		print("Initial message read from pipe: {}".format(ibuf.encode()))
+		print("Initial message read from pipe: {}".format(ibuf.decode()))
 		# Peek at the file to cause a block and wait for image data to be input
 		#pipe.peek();
 		# interpret the pipe content as a rawpy object
