@@ -105,7 +105,7 @@ RT_SEM tx_tlm_pkt_sem;  // For tx_tlm_pkt_task and flt_tbl_task
 RT_SEM crt_file_sem;    // For crt_file_task and flt_tbl_task synchronization 
 
 // Global variable definitions:
-uint8_t flt_tbl_mode = 0;  // Filter table mode (set to normal by default)
+uint8_t flt_tbl_mode = 1;  // Filter table mode (set to normal by default)
 
 uint16_t flt_tbl_to[FLT_TBL_ROW][FLT_TBL_COL]; // Telemetry output table
 uint16_t flt_tbl_ds[FLT_TBL_ROW][FLT_TBL_COL]; // Data storage outtput table
