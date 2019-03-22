@@ -344,10 +344,10 @@ def main():
     )
   pres_plot.plot_history(h0.history,
     color='white',
-    title='Accuracy Metrics on Training and Validation Data Over {epochs_0} Epochs',
+    title=f'Accuracy Metrics on Training and Validation Data Over {epochs_0} Epochs',
     save=psname+'_phase0.png')
   pres_plot.plot_history(h0.history,color='white',loss=True,
-    title='Loss on Training and Validation Data Over {epochs_0} Epochs',
+    title=f'Loss on Training and Validation Data Over {epochs_0} Epochs',
     save=psname+'_loss0.png')
 
   ### Training Phase 2 ###
