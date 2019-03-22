@@ -109,7 +109,7 @@ def main():
 				iname = 'image{}.png'.format(ii)
 			print('Saving Image to {}'.format(iname))
 			with open(iname,'wb') as file:
-				result, buf = cv2.imencode('.png', rgb_crop)
+				result, buf = cv2.imencode('.png', rgb_arr)
 				file.write(buf)
 		# KIAN'S FUNCTION
 		# Run time is lacking, needs optimization
