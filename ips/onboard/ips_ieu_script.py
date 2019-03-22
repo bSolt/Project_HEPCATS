@@ -99,6 +99,16 @@ def main():
 
 		# from matplotlib import pyplot as plts
 		# plt.imshow(rgb_arr); plt.show()
+		if args['debug']:
+			ii = 0
+			iname = 'image{}.png'.format(ii)
+			while os.path.isfile(iname):
+				ii+=1
+				iname = 'image{}.png'.format(ii)
+			print('Saving Image to {}'.format(iname))
+			with open(iname,'wb') as file:
+				result, buf = cv2.imencode('.png', rgb_crop)
+				file.write(buf)
 		# KIAN'S FUNCTION
 		# Run time is lacking, needs optimization
 		if args['debug']:
