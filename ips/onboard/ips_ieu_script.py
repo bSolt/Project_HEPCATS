@@ -12,7 +12,7 @@
 
 # python dependencies
 import numpy as np
-import cv2
+import cv2, os
 
 def read_raw(pipe, read_size):
 	row = 1920; col = 1200;
@@ -26,7 +26,7 @@ def read_raw(pipe, read_size):
 
 def main():
 	import tensorflow as tf
-	import os, zlib, argparse
+	import zlib, argparse
 	# This one is a custom buffer reading object
 	from FixedBufferReader import FixedBufferReader
 	# This one is the cropping function based on circle segmentation
