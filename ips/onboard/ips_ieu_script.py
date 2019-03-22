@@ -31,6 +31,7 @@ def main():
 	from FixedBufferReader import FixedBufferReader
 	# This one is the cropping function based on circle segmentation
 	from croppingScript import auto_crop
+	from ips_helper import recall, f1
 
 	ap = argparse.ArgumentParser()
 	ap.add_argument("pipe", type=str, default="/dev/rtp0",
@@ -57,7 +58,8 @@ def main():
 	THRESHOLD = 0.5
 
 	# Read the neural network model from a file
-	model = tf.keras.models.load_model(MODEL_FILE)
+	model = tf.keras.models.load_model(MODEL_FILE,
+		custom_objects={'recall':recall,'f1':f1})
 
 	# Expected RAW image size
 	if ( IMAGE_FORMAT=='test' ):
@@ -71,7 +73,7 @@ def main():
 	# Create buffer reader object for input
 	pipe = os.open(COMM_PIPE, os.O_RDWR)
 	# Send the message that ips is ready to begin processing
-	os.write(np.uint8(21))
+	os.write(pipe, np.uint8(21))
 
 	#The program will loop while run is True
 	# It is not designed to stop in its current state
@@ -83,19 +85,17 @@ def main():
 			print("[P] Reading from {}".format(COMM_PIPE))
 		
 		# Peek at the file to cause a block and wait for image data to be input
-		p_in.peek();
+		#pipe.peek();
 		# interpret the pipe content as a rawpy object
-		if args['debug']:
-			print("[P] Now processing raw image!")
 
 		if ( IMAGE_FORMAT=='test' ):
-			raw = rawpy.imread(p_in)
+			raw = rawpy.imread(pipe)
 			# Convert the raw image to a uint8 numpy array
 			rgb_arr = raw.postprocess(gamma=(1,1))
 		elif ( IMAGE_FORMAT=='ieu'):
-			rgb_arr = read_raw(p_in,BYTES)
+			rgb_arr = read_raw(pipe,BYTES)
 		elif ( IMAGE_FORMAT=='ieu2'):
-			rgb_arr = read_raw(p_in,BYTES)
+			rgb_arr = read_raw(pipe,BYTES)
 
 		# from matplotlib import pyplot as plts
 		# plt.imshow(rgb_arr); plt.show()
