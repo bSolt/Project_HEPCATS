@@ -344,8 +344,11 @@ def main():
     )
   pres_plot.plot_history(h0.history,
     color='white',
-    title='Initial Classifier Training',
+    title='Accuracy Metrics on Training and Validation Data Over {epochs_0} Epochs',
     save=psname+'_phase0.png')
+  pres_plot.plot_history(h0.history,color='white',loss=True,
+    title='Loss on Training and Validation Data Over {epochs_0} Epochs',
+    save=psname+'_loss0.png')
 
   ### Training Phase 2 ###
   # In this phase of training, the network will be trained on augmented data
