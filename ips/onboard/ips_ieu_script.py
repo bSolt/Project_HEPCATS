@@ -58,8 +58,8 @@ def main():
 	THRESHOLD = 0.5
 
 	# Read the neural network model from a file
-	model = tf.keras.models.load_model(MODEL_FILE,
-		custom_objects={'recall':recall,'f1':f1})
+	# model = tf.keras.models.load_model(MODEL_FILE,
+	# 	custom_objects={'recall':recall,'f1':f1})
 
 	if args['debug']:
 		print('[P] Model file loaded successfully!')
@@ -85,7 +85,8 @@ def main():
 	while(run):
 		if args['debug']:
 			print("[P] Reading from {}".format(COMM_PIPE))
-		
+		ibuf = os.read(pipe,10)
+		print("Initial message read from pipe: {}".format(ibuf.encode()))
 		# Peek at the file to cause a block and wait for image data to be input
 		#pipe.peek();
 		# interpret the pipe content as a rawpy object
