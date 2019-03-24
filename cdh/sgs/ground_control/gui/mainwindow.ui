@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1265</width>
+    <width>1516</width>
     <height>808</height>
    </rect>
   </property>
@@ -19,7 +19,7 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>1241</width>
+      <width>1491</width>
       <height>741</height>
      </rect>
     </property>
@@ -197,8 +197,8 @@ p, li { white-space: pre-wrap; }
        <rect>
         <x>1020</x>
         <y>50</y>
-        <width>211</width>
-        <height>191</height>
+        <width>351</width>
+        <height>341</height>
        </rect>
       </property>
       <property name="title">
@@ -236,6 +236,20 @@ p, li { white-space: pre-wrap; }
           <widget class="QPushButton" name="btn_start_listen">
            <property name="text">
             <string>Start Listeners</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_start_program">
+           <property name="text">
+            <string>Start Onboard FSW</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_start_ips">
+           <property name="text">
+            <string>Start IPS</string>
            </property>
           </widget>
          </item>
@@ -355,12 +369,12 @@ p, li { white-space: pre-wrap; }
        <rect>
         <x>490</x>
         <y>390</y>
-        <width>521</width>
+        <width>891</width>
         <height>311</height>
        </rect>
       </property>
       <property name="title">
-       <string>Telemetry: INOP</string>
+       <string>Telemetry: </string>
       </property>
       <widget class="QWidget" name="gridLayoutWidget">
        <property name="geometry">
@@ -432,7 +446,7 @@ p, li { white-space: pre-wrap; }
              <item row="7" column="0">
               <widget class="QLabel" name="label_15">
                <property name="text">
-                <string>TLM Seq Control:</string>
+                <string>Packet Seq Count:</string>
                </property>
               </widget>
              </item>
@@ -985,9 +999,9 @@ p, li { white-space: pre-wrap; }
       <widget class="QGroupBox" name="grp_box_housekeeping">
        <property name="geometry">
         <rect>
-         <x>260</x>
-         <y>20</y>
-         <width>246</width>
+         <x>270</x>
+         <y>30</y>
+         <width>311</width>
          <height>249</height>
         </rect>
        </property>
@@ -999,7 +1013,7 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>0</x>
           <y>20</y>
-          <width>241</width>
+          <width>291</width>
           <height>251</height>
          </rect>
         </property>
@@ -1116,16 +1130,110 @@ p, li { white-space: pre-wrap; }
            </property>
           </widget>
          </item>
-         <item row="8" column="0">
+         <item row="9" column="0">
           <widget class="QLabel" name="label_17">
            <property name="text">
             <string/>
            </property>
           </widget>
          </item>
+         <item row="8" column="0">
+          <widget class="QLabel" name="label_22">
+           <property name="text">
+            <string>System Time</string>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="1">
+          <widget class="QLabel" name="lbl_sys_tm_str">
+           <property name="text">
+            <string>NO TLM</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </widget>
+      <widget class="QGroupBox" name="groupBox">
+       <property name="geometry">
+        <rect>
+         <x>580</x>
+         <y>30</y>
+         <width>301</width>
+         <height>231</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>Magnetometer</string>
+       </property>
+       <widget class="QWidget" name="formLayoutWidget">
+        <property name="geometry">
+         <rect>
+          <x>9</x>
+          <y>29</y>
+          <width>281</width>
+          <height>191</height>
+         </rect>
+        </property>
+        <layout class="QFormLayout" name="formLayout_4">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_24">
+           <property name="text">
+            <string>X Magnitude:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_26">
+           <property name="text">
+            <string>Y Magnitude:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_27">
+           <property name="text">
+            <string>Z Magnitude:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLabel" name="lbl_magx">
+           <property name="text">
+            <string>NO TLM</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLabel" name="lbl_magy">
+           <property name="text">
+            <string>NO TLM</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLabel" name="lbl_magz">
+           <property name="text">
+            <string>NO TLM</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </widget>
+     <widget class="QPushButton" name="btn_quit">
+      <property name="geometry">
+       <rect>
+        <x>1390</x>
+        <y>670</y>
+        <width>87</width>
+        <height>29</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Quit</string>
+      </property>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_2">
@@ -1320,26 +1428,13 @@ p, li { white-space: pre-wrap; }
      </widget>
     </widget>
    </widget>
-   <widget class="QPushButton" name="btn_quit">
-    <property name="geometry">
-     <rect>
-      <x>1160</x>
-      <y>720</y>
-      <width>87</width>
-      <height>29</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Quit</string>
-    </property>
-   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1265</width>
+     <width>1516</width>
      <height>22</height>
     </rect>
    </property>

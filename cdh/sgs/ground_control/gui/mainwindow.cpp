@@ -14,11 +14,12 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "stdlib.h"
+#include "stdio.h" //needed for writing telemetry to files
 #include "QTime"
-#include "QProcess"
+#include "QProcess" //Needed for telemetry listener and commanding
 #include "iostream"
 #include "QDebug"
-#include "QFileDialog"
+#include "QFileDialog" //Load command lists from file
 #include "QTextStream"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -116,6 +117,7 @@ void MainWindow::cmd_return_pressed() //Sends cmd_prompt string to command inter
     {
         //if the command is valid or the interpreter returned no error
         ui->cmd_txt_messages->append(stdout); //update prompt with black text
+        ui->cmd_txt_messages->append(stderr);
     }
 
     //Clear the input line:
@@ -210,11 +212,30 @@ void MainWindow::print_to_telem()
 //Setup strings to hold telemetry output
 QString output;
 QString Erroutput;
+int tlm_type=0;
+
 
 //Get STDOUT and STDERR output from telemetry process
 output=tlm_reader->readAllStandardOutput();
-Erroutput=tlm_reader->readAllStandardError();
 
+//Determine if the telemetry is mag data or not, 1 for HK, 2 for Mag, 3 for bad packet.
+if (output.contains("0x00"))
+{
+    tlm_type=1; //Packet is housekeeping
+}
+else if (output.contains("0xC8"))
+{
+    tlm_type=2; //Packet is mag
+}
+else if (output.contains("ERROR"))
+{
+    tlm_type=3;
+}
+
+switch (tlm_type)
+{
+case 1:
+{
 ////Initialize telemetry holders
 QString rx_telecmd_pkt_cnt;
 QString val_telecmd_pkt_cnt;
@@ -235,30 +256,42 @@ QString next_img_acq_tm_str;
 QString next_atc_tm_str;
 QString pbk_prog_flag;
 QString sys_tm_str;
+QString header;
 
-ui->txt_messages_out->append("Received Telemety");
+//Save the telemetry to tlm_log
+QString filename;
+        filename="tlm_log.txt";
+QFile tlm_log(filename);
+if (tlm_log.open(QIODevice::Append))
+{
+    QTextStream telemetry(&tlm_log);
+    telemetry << output << endl;
+}
+
+//ui->txt_messages_out->append("Received Telemety"); //uncomment to debug telemetry
 
 //
 ////Get telemetry values from output
-rx_telecmd_pkt_cnt=output.section(',',0,0);
-val_telecmd_pkt_cnt=output.section(',',1,1);
-inv_telecmd_pkt_cnt=output.section(',',2,2);
-val_cmd_cnt=output.section(',',3,3);
-inv_cmd_cnt=output.section(',',4,4);
-cmd_exec_suc_cnt=output.section(',',5,5);
-cmd_exec_err_cnt=output.section(',',6,6);
-tlm_pkt_xfr_frm_seq_cnt=output.section(',',7,7);
-acq_img_cnt=output.section(',',8,8);
-img_acq_prog_flag=output.section(',',9,9);
-ers_rly_swtch_state=output.section(',',10,10);
-mdq_scan_state=output.section(',',11,11);
-flt_tbl_mode=output.section(',',12,12);
-img_accpt_cnt=output.section(',',13,13);
-img_rej_cnt=output.section(',',14,14);
-next_img_acq_tm_str=output.section(',',15,15);
-next_atc_tm_str=output.section(',',16,16);
-pbk_prog_flag=output.section(',',17,17);
-sys_tm_str=output.section(',',18,18);
+header=output.section(':',0,0);
+rx_telecmd_pkt_cnt=output.section(',',1,1);
+val_telecmd_pkt_cnt=output.section(',',2,2);
+inv_telecmd_pkt_cnt=output.section(',',3,3);
+val_cmd_cnt=output.section(',',4,4);
+inv_cmd_cnt=output.section(',',5,5);
+cmd_exec_suc_cnt=output.section(',',6,6);
+cmd_exec_err_cnt=output.section(',',7,7);
+tlm_pkt_xfr_frm_seq_cnt=output.section(',',8,8);
+acq_img_cnt=output.section(',',9,9);
+img_acq_prog_flag=output.section(',',10,10);
+ers_rly_swtch_state=output.section(',',11,11);
+mdq_scan_state=output.section(',',12,12);
+flt_tbl_mode=output.section(',',13,13);
+img_accpt_cnt=output.section(',',14,14);
+img_rej_cnt=output.section(',',15,15);
+next_img_acq_tm_str=output.section(',',16,16);
+next_atc_tm_str=output.section(',',17,17);
+pbk_prog_flag=output.section(',',18,18);
+sys_tm_str=output.section(',',19,19);
 
 
 ////Update the GUI's appropriate fields
@@ -280,6 +313,73 @@ ui->lbl_img_rej_cnt->setText(img_rej_cnt);
 ui->lbl_next_img_acq_tm_str->setText(next_img_acq_tm_str);
 ui->lbl_next_atc_tm_str->setText(next_atc_tm_str);
 ui->lbl_pbk_prog_flg->setText(pbk_prog_flag);
+ui->lbl_sys_tm_str->setText(sys_tm_str);
+
+
+
+break;
+} //End case Housekeeping
+
+case 2:
+{
+    //Write mag data to file
+    QString filename;
+            filename="mag_log.txt";
+    QFile mag_log(filename);
+    if (mag_log.open(QIODevice::Append))
+    {
+        QTextStream magdata(&mag_log);
+        magdata << output << endl;
+    }
+   QString header=output.section(':',0,0);
+   QString mag_x=output.section(',',1,1);
+   QString mag_y=output.section(',',2,2);
+   QString mag_z=output.section(',',3,3);
+
+   ui->lbl_magx->setText(mag_x);
+   ui->lbl_magy->setText(mag_y);
+   ui->lbl_magz->setText(mag_z);
+   break;
+}// End case MAG Data
+
+case (3): //rcv_tlm error
+{
+    //Write the error to tlm error file.
+    QString filename;
+            filename="tlm_err_log.txt";
+    QFile err_log(filename);
+    if (err_log.open(QIODevice::Append))
+    {
+        QTextStream errdata(&err_log);
+        errdata << output << endl;
+    }
+ ui->txt_messages_out->setTextColor(Qt::red);
+ ui->txt_messages_out->append(output);
+ ui->txt_messages_out->append("Listeners FAILED. Contact not established.");
+ ui->lbl_link_state->setText("FAILED");
+ ui->txt_messages_out->setTextColor(Qt::black);
+ break;
+}
+
+
+default: //packet may be corrupted
+    {
+        ui->txt_messages_out->append("<TLM ERROR> APID not matched, packet may be corrupted");
+        //Write mag data to file
+        QString filename;
+                filename="tlm_err_log.txt";
+        QFile err_log(filename);
+        if (err_log.open(QIODevice::Append))
+        {
+            QTextStream errdata(&err_log);
+            errdata << output << endl;
+        }
+        break;
+    }//end case default
+
+} //END SWITCH TLM_TYPE
+
+
 
 
 }//END OF SLOT print_to_telem
