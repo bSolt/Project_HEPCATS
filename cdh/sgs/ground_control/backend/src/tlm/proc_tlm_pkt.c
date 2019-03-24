@@ -155,6 +155,7 @@ void proc_tlm_pkt(char* buffer) {
         time_t   next_atc_tm = 0;             // Next absolutely timed command time
         uint8_t  pbk_prog_flg = 0;            // Playback in progress flag
         time_t   sys_tm = 0;                  // System time
+        uint8_t  ips_mdl_ld_state = 0;        // IPS model load state
 
         char next_img_acq_tm_str[200]; // Next image acquisition time string
         char next_atc_tm_str[200];     // Next absolutely timed command time string
@@ -182,6 +183,7 @@ void proc_tlm_pkt(char* buffer) {
         memcpy(&next_atc_tm,pkt_dat_fld_usr_data+23,4);
         memcpy(&pbk_prog_flg,pkt_dat_fld_usr_data+27,1);
         memcpy(&sys_tm,pkt_dat_fld_usr_data+28,4);
+        memcpy(&ips_mdl_ld_state,pkt_dat_fld_usr_data+32,1);
 
         // Convert Unix timestamps to "YYYY/DOY-HH:MM:SS"
         tm = gmtime(&next_img_acq_tm);
@@ -197,7 +199,7 @@ void proc_tlm_pkt(char* buffer) {
             "%Y/%j-%H:%M:%S",tm);
 
         // Print:
-        printf("0x00:%u,%u,%u,%u,%u,%u,%u,%u,%u,%s,%s,%s,%s,%u,%u,%s,%s,%s,%s\n",\
+        printf("0x00:%u,%u,%u,%u,%u,%u,%u,%u,%u,%s,%s,%s,%s,%u,%u,%s,%s,%s,%s,%s\n",\
             rx_telecmd_pkt_cnt,val_telecmd_pkt_cnt,inv_telecmd_pkt_cnt,\
             val_cmd_cnt,inv_cmd_cnt,cmd_exec_suc_cnt,\
             cmd_exec_err_cnt,tlm_pkt_xfr_frm_seq_cnt,acq_img_cnt,\
@@ -207,10 +209,8 @@ void proc_tlm_pkt(char* buffer) {
             flt_tbl_mode == 0 ? "NORM" : flt_tbl_mode == 1 ? \
             "RT" : flt_tbl_mode == 2 ? "PBK" : flt_tbl_mode == 3 ? "IMG" : "MAG",\
             img_accpt_cnt,img_rej_cnt,next_img_acq_tm_str,next_atc_tm_str,\
-            pbk_prog_flg ? "PBK" : "IDLE",sys_tm_str);
-	    
-	    // Update stream to notify GUI
-	    fflush(stdout);
+            pbk_prog_flg ? "PBK" : "IDLE",sys_tm_str,ips_mdl_ld_state == 0 ? \
+            "LOADING" : "READY");
     } else if (pkt_id_apid == APID_MDQ) {
         // Declarations and initializations:
         float mdq_conv_buf[MDQ_BUF_SIZE/2]; // Magnetometer DAQ converted data buffer
@@ -259,9 +259,6 @@ void proc_tlm_pkt(char* buffer) {
         printf("0xC8:%0.3f,%0.3f,%0.3f\n",mdq_chnl0_avg,mdq_chnl1_avg,\
             mdq_chnl2_avg);
 
-    	// Update stream to notify GUI
-    	fflush(stdout);
-	    
         // Set file path:
         strcpy(file_path,"../../raw_record_files/mdq/"); // Relative to bin
 
@@ -280,6 +277,8 @@ void proc_tlm_pkt(char* buffer) {
         // Declarations and initializations:
         char file_path[50];
         char file_name[100];
+
+        char empty_char = "E";
 
         // If first segment, create new file:
         if (pkt_seq_cnt_grp_flg == 1) {
@@ -314,10 +313,10 @@ void proc_tlm_pkt(char* buffer) {
                 // Loop to determine byte position where "E" begins
                 // ("E" indicates that the character is empty)
                 for (int i = 0; i < 1064; ++i) {
-                    if (strcmp(pkt_dat_fld_usr_data[i],"E") == 0) {
+                    if (pkt_dat_fld_usr_data[i] == empty_char) {
                         // Check if the next position is also "E". If yes, then
                         // found the byte position:
-                        if (strcmp(pkt_dat_fld_usr_data[i+1],"E") == 0) {
+                        if (pkt_dat_fld_usr_data[i+1] == empty_char) {
                             empty_ind = i;
                         }
                     }
