@@ -54,7 +54,7 @@
 #include <crt_tlm_pkt_xfr_frm.h> // Create telemetry packet transfer frame
                                  // function declaration
 // Macro definitions:
-#define HK_TLM_SIZE            32 // Housekeeping telemetry size in bytes
+#define HK_TLM_SIZE            33 // Housekeeping telemetry size in bytes
 #define TLM_PKT_XFR_FRM_SIZE 1089 // Telemetry transfer frame size in bytes
 
 #define APID_SW 0x00 // Software origin
@@ -87,6 +87,7 @@ uint32_t next_img_acq_tm;         // Next image acquisition time
 uint32_t next_atc_tm;             // Next absolutely timed command time
 uint8_t  pbk_prog_flg;            // Playback in progress flag
 uint32_t sys_tm;                  // System time
+uint8_t  ips_mdl_ld_state;        // IPS model load state
 
 void get_hk_tlm(void* arg){
     // Print:
@@ -151,6 +152,7 @@ void get_hk_tlm(void* arg){
         memcpy(hk_tlm_buf+23,&next_atc_tm,4);
         memcpy(hk_tlm_buf+27,&pbk_prog_flg,1);
         sys_tm = time(NULL); memcpy(hk_tlm_buf+28,&sys_tm,4);
+        memcpy(hk_tlm_buf+32,&ips_mdl_ld_state,1);
 
         // Set grouping flag:
         tlm_pkt_xfr_frm_grp_flg = 3; // Unsegmented data

@@ -75,7 +75,8 @@ RT_SEM new_img_sem; // For run_cam_sgl and read_usb_img task
 uint8_t img_acq_prog_flag = 0; // Image acquisition in progress flag
 uint16_t acq_img_cnt = 0;      // Acquired images count
 uint8_t cmd_exec_suc_cnt;      // Commands executed successfully counter
-uint32_t next_img_acq_tm = 0;      // Next image acquisition time
+uint32_t next_img_acq_tm = 0;  // Next image acquisition time
+uint8_t  ips_mdl_ld_state;     // IPS model load state
 
 void cmd_img(void* arg) {
     // Print:
@@ -171,7 +172,7 @@ void cmd_img(void* arg) {
         switch (cmd_pkt_name) {
             case CMD_BGNIMGACQ :
                 // Check to see if acquisition is currently in progress:
-                if (img_acq_prog_flag == 0) {
+                if ((img_acq_prog_flag == 0) && (ips_mdl_ld_state == 1)) {
                     // Print:
                     rt_printf("%d (CMD_IMG_TASK) Starting image acquisition"
                         " loop for duration %d seconds\n",time(NULL),cmd_arg);
@@ -254,11 +255,22 @@ void cmd_img(void* arg) {
                     // Exit switch:
                     break;
                 // Currently in progress
-                } else {
+                } else if (img_acq_prog_flag == 1) {
                     // Print:
                     rt_printf("%d (CMD_IMG_TASK) Image acquisition loop"
                         " already in progress; command transfer frame"
                         " ignored\n",time(NULL));
+
+                    // Set reply message data field to indicate command
+                    // did not execute:
+                    cmd_exec_stat = 0;
+
+                    // Exit:
+                    break; 
+                } else if (ips_mdl_ld_state == 0) {
+                    // Print:
+                    rt_printf("%d (CMD_IMG_TASK) IPS model loading (not ready);"
+                        " command transfer frame ignored\n",time(NULL));
 
                     // Set reply message data field to indicate command
                     // did not execute:

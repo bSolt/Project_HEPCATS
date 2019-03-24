@@ -92,6 +92,7 @@ RT_SEM new_img_sem; // For run_cam_sgl and read_usb_img task
 uint16_t tlm_pkt_xfr_frm_seq_cnt = 0; // Packet sequence count
 uint16_t img_accpt_cnt = 0;           // Accepted images (from IPS) count
 uint16_t img_rej_cnt = 0;             // Rejected images (from IPS) count
+uint8_t  ips_mdl_ld_state = 0;        // IPS model load state
 
 void read_img(void) {
     // Print:
@@ -141,6 +142,9 @@ void read_img(void) {
 
     // Print:
     rt_printf("%d (READ_IMG_TASK) IPS is ready; continuing\n",time(NULL));
+
+    // Set state:
+    ips_mdl_ld_state = 1; // Ready
 
     // Print:
     rt_printf("%d (READ_IMG_TASK) Ready to process images, interface with"
