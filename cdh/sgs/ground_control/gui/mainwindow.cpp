@@ -90,17 +90,18 @@ void MainWindow::cmd_return_pressed() //Sends cmd_prompt string to command inter
     QString command=ui->txt_prompt->text();
 
     //Call ben's command interpreter
-    QString command_to_send="./../../../../ground_control/backend/bin/gc_prompt " + command;
+    QString command_to_send="./../backend/bin/gc_prompt_gui " + command;
     QProcess commanding;
             commanding.start(command_to_send);
             commanding.waitForFinished(-1);
             QString stdout=commanding.readAllStandardOutput();
             QString stderr=commanding.readAllStandardError();
-
+            QString cmderror=commanding.errorString();
     //Display the command in the prompt window.
 
     QString prompt_out=cmd_time+" PROMPT: "+command;
     ui->cmd_txt_messages->append(prompt_out);
+    ui->cmd_txt_messages->append(cmderror);
     QString rtn_time=QTime::currentTime().toString();
 
     //Check for commanding error
@@ -177,7 +178,7 @@ void MainWindow::start_listeners() //Spawns telemetry listeners
     {
         QString current_time=QTime::currentTime().toString();
         //Start the gc_listener
-       QString gc_listen_cmd="./../../../../ground_control/backend/bin/rcv_tlm";
+       QString gc_listen_cmd="./../backend/bin/rcv_tlm";
        tlm_reader=new QProcess(this);
        tlm_reader->setProcessChannelMode(QProcess::MergedChannels);
        connect(tlm_reader,SIGNAL(readyReadStandardOutput()),this,SLOT(print_to_telem()));
