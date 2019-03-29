@@ -25,14 +25,9 @@ private slots:
     void start_listeners();
     void print_to_telem();
     void stop_listeners();
-    void load_command_list();
-    void remove_cmd_item();
-    void set_cmd_list_active();
-    void add_custom_to_inactive();
-    void add_custom_to_active();
-    void add_all_to_inactive();
-    void active_to_inactive_list();
     void print_to_msgs();
+    void add_custom_to_active();
+    void startfsw();
 
 
 private:

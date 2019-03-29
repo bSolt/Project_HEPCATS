@@ -38,12 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->btn_start_listen,SIGNAL(clicked(bool)),this,SLOT(start_listeners()));
     connect(ui->btn_stop_listeners,SIGNAL(clicked(bool)),this,SLOT(stop_listeners()));
     connect(ui->btn_tab_cmd_add_cmd,SIGNAL(clicked(bool)),this,SLOT(add_custom_to_active()));
-    connect(ui->btn_add_all,SIGNAL(clicked(bool)),this,SLOT(add_all_to_inactive()));
-
-    //Command List Tab Signals
-    connect(ui->btn_load_commands,SIGNAL(clicked(bool)),this,SLOT(load_command_list()));
-    connect(ui->btn_cmd_list_remove, SIGNAL(clicked(bool)),this,SLOT(remove_cmd_item()));
-    connect(ui->btn_add_cmd,SIGNAL(clicked(bool)),this,SLOT(add_custom_to_inactive()));
+    connect(ui->btn_start_program,SIGNAL(clicked(bool)),this,SLOT(startfsw()));
 
 
 }//END MAINWINDOW
@@ -90,19 +85,32 @@ void MainWindow::cmd_return_pressed() //Sends cmd_prompt string to command inter
     QString command=ui->txt_prompt->text();
 
     //Call ben's command interpreter
-    QString command_to_send="./../backend/bin/gc_prompt_gui " + command;
+    QString command_to_send="./backend/bin/gc_prompt_gui " + command;
     QProcess commanding;
             commanding.start(command_to_send);
             commanding.waitForFinished(-1);
             QString stdout=commanding.readAllStandardOutput();
             QString stderr=commanding.readAllStandardError();
-            QString cmderror=commanding.errorString();
-    //Display the command in the prompt window.
+            int cmderror=commanding.error();
+           //Display the command in the prompt window.
 
     QString prompt_out=cmd_time+" PROMPT: "+command;
     ui->cmd_txt_messages->append(prompt_out);
-    ui->cmd_txt_messages->append(cmderror);
+    //ui->cmd_txt_messages->append(cmderror); //uncomment to debug commanding errors
     QString rtn_time=QTime::currentTime().toString();
+
+
+    //Check to see if  gc_prompt segfaulted:
+    if (cmderror == 1){
+        ui->txt_messages_out->setTextColor(Qt::red);
+        ui->cmd_txt_messages->setTextColor(Qt::red);
+        ui->cmd_txt_messages->append(rtn_time+" <ERROR>: Command not trasmitted");
+        ui->cmd_txt_messages->append(rtn_time+" <GC_PROMPT> ERROR: Segmentation fault");
+        ui->txt_messages_out->append(rtn_time+" <ERROR> Command interpreter encounted segfault:");
+        ui->txt_messages_out->append("Check path to command.csv is correct in interp_cmd_str.c and recompile gc_prompt_gui");
+        ui->txt_messages_out->setTextColor(Qt::black);
+        ui->cmd_txt_messages->setTextColor(Qt::black);
+    }
 
     //Check for commanding error
     bool is_cmd_error;
@@ -178,7 +186,7 @@ void MainWindow::start_listeners() //Spawns telemetry listeners
     {
         QString current_time=QTime::currentTime().toString();
         //Start the gc_listener
-       QString gc_listen_cmd="./../backend/bin/rcv_tlm";
+       QString gc_listen_cmd="./backend/bin/rcv_tlm";
        tlm_reader=new QProcess(this);
        tlm_reader->setProcessChannelMode(QProcess::MergedChannels);
        connect(tlm_reader,SIGNAL(readyReadStandardOutput()),this,SLOT(print_to_telem()));
@@ -258,6 +266,7 @@ QString next_atc_tm_str;
 QString pbk_prog_flag;
 QString sys_tm_str;
 QString header;
+QString ips_mdl_state;
 
 //Save the telemetry to tlm_log
 QString filename;
@@ -293,6 +302,7 @@ next_img_acq_tm_str=output.section(',',16,16);
 next_atc_tm_str=output.section(',',17,17);
 pbk_prog_flag=output.section(',',18,18);
 sys_tm_str=output.section(',',19,19);
+ips_mdl_state=output.section(',',20,20);
 
 
 ////Update the GUI's appropriate fields
@@ -410,84 +420,20 @@ void MainWindow::print_to_msgs()
 
 }
 
-
-
-///////////////////////////////////////////////////////////////////////////////////////////
-/// Command Browser Tab SLOTS
-///
-///
-
-
-void MainWindow::load_command_list()
+void MainWindow::startfsw()
 {
-      QString name=QFileDialog::getOpenFileName(this,tr("Open Command List"),"./../../../../testing/sgs_sim_ieu_test/sgs/",tr("HEPCATS Command Lists *.hcl"));
-      QString data;
-      QFile commandList(name);
-      QStringList rows;
-      QStringList rowData;
-//Directly from the documentation doc.qt.io/qt-5/qfile
-      if (!commandList.open(QIODevice::ReadOnly | QIODevice::Text))
-          return;
+    QProcess fsw;
+    ui->txt_messages_out->append("Commanding onboard flight software to start, standby.");
+    QString command = "./../backend/scripts/start_program.sh";
+    fsw.start(command);
+    fsw.waitForFinished(-1);
+    QString output=fsw.readAllStandardOutput();
+    QString errors=fsw.readAllStandardError();
+    QString errorrtn = fsw.errorString();
 
-      QTextStream in(&commandList);
-      QStringList lines;
-      QString CurrentLine;
-      QStringList parsed_commands;
-      QStringList titles;
-
-      //Get all the lines from the CSV and put in a StringList
-      while (!in.atEnd()) {
-          CurrentLine = in.readLine();
-          lines.append(CurrentLine);
-
-      }
-      //Get category titles and setup the table model
-      titles=lines[0].split(",");
-      //Setup table dimensions
-      ui->tbl_cmd_list->setRowCount(lines.size());
-      ui->tbl_cmd_list->setColumnCount(titles.size());
-
-      for (int i=0; i<titles.size(); i++)
-      {
-          ui->tbl_cmd_list->setItem(0,i, new QTableWidgetItem(titles[0,i]));
-      }
-
-      for (int i=1; i < lines.size(); i ++) //Iterate through each saved line, putting contents into the table, initiate i at ONE because titles are defined at ZERO
-      {
-          parsed_commands=lines[i].split(","); //
-          //Populate the table with parsed commands
-          for (int x=0; x<titles.size();x++)
-          {
-              ui->tbl_cmd_list->setItem(i,x, new QTableWidgetItem(parsed_commands[0,x]));
-          }
-      }
-
-}
-
-void MainWindow::remove_cmd_item()
-{
-    delete ui->tree_inactive_cmds->currentItem();
-
-}
-
-void MainWindow::set_cmd_list_active()
-{
-/*
- *TODO
- * Take items from tree_inactive_cmds and copy to  tree_active_cmds
-*/
-
-
-}
-
-void MainWindow::add_custom_to_inactive() //Adds the text in the inactive custom command box to the inactive command list.
-{
-//Get the custom command string
-    QString custom_cmd=ui->txt_browser_add_cmd->text();
-    QTreeWidgetItem *command = new QTreeWidgetItem();
-    command->setText(0,custom_cmd);
-    QTreeWidgetItem *location=ui->tree_inactive_cmds->currentItem();
-    location->insertChild(0,command);
+    ui->txt_messages_out->append("Start script complete.");
+    ui->txt_messages_out->append(output);
+    //ui->txt_messages_out->append(errorrtn); //uncomment to debug
 }
 
 void MainWindow::add_custom_to_active() //Adds the text in the active custom command box to the active command list
@@ -495,44 +441,18 @@ void MainWindow::add_custom_to_active() //Adds the text in the active custom com
     QString custom_cmd=ui->txt_cmd_add_cmd->text();
     QTreeWidgetItem *cmd = new QTreeWidgetItem();
     cmd->setText(0,custom_cmd);
-    QTreeWidgetItem *location=ui->tree_active_cmds->currentItem();
+    QTreeWidgetItem *location;
+    location=ui->tree_active_cmds->currentItem();
+    if (location != 0x0){ //check to see if the user has selected a location
     location->insertChild(0,cmd);
-}
-
-void MainWindow::add_all_to_inactive() //Takes all commands from loaded CSV and puts them in the inactive command list
-{
-    //Need to iterate through each command category, for now only three:
-    for (int x=0; x<3; x++)
-    {
-        QString title=ui->tbl_cmd_list->item(0,x)->text();
-        QTreeWidgetItem *tbl_title= new QTreeWidgetItem();
-        tbl_title->setText(0,title);
-        ui->tree_inactive_cmds->addTopLevelItem(tbl_title);
-
-        //Get the number of items in the command category
-        int num_items=ui->tbl_cmd_list->rowCount();
-        for (int y=1; y<num_items;y++)
-        {
-            QString command_to_add=ui->tbl_cmd_list->item(y,x)->text();
-            QTreeWidgetItem *command_item=new QTreeWidgetItem();
-            command_item->setText(0,command_to_add);
-            tbl_title->addChild(command_item);
-        }
-
     }
-
+    else{
+        ui->txt_messages_out->setTextColor(Qt::red);
+        ui->txt_messages_out->append("Could not add custom mnemonic:");
+        ui->txt_messages_out->append("You must select a subsystem or command set first.");
+        ui->txt_messages_out->setTextColor(Qt::black);
+    }
 }
-
-void MainWindow::active_to_inactive_list() //Takes current active command list, overwrites the current inactive list
-{
-
-}
-
-
-
-
-
-
 
 
 

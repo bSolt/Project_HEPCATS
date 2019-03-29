@@ -169,24 +169,104 @@ p, li { white-space: pre-wrap; }
           </property>
           <item>
            <property name="text">
-            <string>cmd HEPCATS NOOP with HOLD 0</string>
+            <string>cmd hepcats noop</string>
            </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Telemetry Playback</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>cmd hepcats bgnpbk hk</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>cmd hepcats bgnpgk mag</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>cmd hepcats bgnpgk img</string>
+            </property>
+           </item>
+          </item>
+          <item>
+           <property name="text">
+            <string>Flight Table Mode</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>cmd hepcats setflttblmd norm</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>cmd hepcats setflttblmd pbk</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>cmd hepcats setflttblmd img</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>cmd hepcats setflttblmd mag</string>
+            </property>
+           </item>
           </item>
          </item>
          <item>
           <property name="text">
            <string>Imaging</string>
           </property>
+          <item>
+           <property name="text">
+            <string>cmd hepcats bgnimgacq roi</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>cmd hepcats haltimgacq</string>
+           </property>
+          </item>
          </item>
          <item>
           <property name="text">
            <string>Magnetometer</string>
           </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>IPS</string>
-          </property>
+          <item>
+           <property name="text">
+            <string>Relay</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>cmd hepcats erson</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>cmd hepcats ersoff</string>
+            </property>
+           </item>
+          </item>
+          <item>
+           <property name="text">
+            <string>DAQ</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>cmd hepcats bgnmdqscan</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>cmd hepcats haltmdqscan</string>
+            </property>
+           </item>
+          </item>
          </item>
         </widget>
        </item>
@@ -202,7 +282,7 @@ p, li { white-space: pre-wrap; }
        </rect>
       </property>
       <property name="title">
-       <string>Setup: PANEL INOP</string>
+       <string>Setup:</string>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
@@ -243,13 +323,6 @@ p, li { white-space: pre-wrap; }
           <widget class="QPushButton" name="btn_start_program">
            <property name="text">
             <string>Start Onboard FSW</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_start_ips">
-           <property name="text">
-            <string>Start IPS</string>
            </property>
           </widget>
          </item>
@@ -1130,7 +1203,7 @@ p, li { white-space: pre-wrap; }
            </property>
           </widget>
          </item>
-         <item row="9" column="0">
+         <item row="10" column="0">
           <widget class="QLabel" name="label_17">
            <property name="text">
             <string/>
@@ -1140,12 +1213,26 @@ p, li { white-space: pre-wrap; }
          <item row="8" column="0">
           <widget class="QLabel" name="label_22">
            <property name="text">
-            <string>System Time</string>
+            <string>System Time:</string>
            </property>
           </widget>
          </item>
          <item row="8" column="1">
           <widget class="QLabel" name="lbl_sys_tm_str">
+           <property name="text">
+            <string>NO TLM</string>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="0">
+          <widget class="QLabel" name="label_28">
+           <property name="text">
+            <string>IPS Model State:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="1">
+          <widget class="QLabel" name="lbl_ips_mdl_state">
            <property name="text">
             <string>NO TLM</string>
            </property>
@@ -1234,197 +1321,6 @@ p, li { white-space: pre-wrap; }
       <property name="text">
        <string>Quit</string>
       </property>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="tab_2">
-     <attribute name="title">
-      <string>Command List Browser</string>
-     </attribute>
-     <widget class="QWidget" name="horizontalLayoutWidget">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>0</y>
-        <width>1231</width>
-        <height>591</height>
-       </rect>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <widget class="QTableWidget" name="tbl_cmd_list">
-         <property name="editTriggers">
-          <set>QAbstractItemView::NoEditTriggers</set>
-         </property>
-         <property name="dragEnabled">
-          <bool>true</bool>
-         </property>
-         <property name="dragDropMode">
-          <enum>QAbstractItemView::DragOnly</enum>
-         </property>
-         <property name="defaultDropAction">
-          <enum>Qt::CopyAction</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QTreeWidget" name="tree_inactive_cmds">
-         <property name="palette">
-          <palette>
-           <active>
-            <colorrole role="Base">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>227</red>
-               <green>227</green>
-               <blue>227</blue>
-              </color>
-             </brush>
-            </colorrole>
-           </active>
-           <inactive>
-            <colorrole role="Base">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>227</red>
-               <green>227</green>
-               <blue>227</blue>
-              </color>
-             </brush>
-            </colorrole>
-           </inactive>
-           <disabled>
-            <colorrole role="Base">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>255</red>
-               <green>255</green>
-               <blue>255</blue>
-              </color>
-             </brush>
-            </colorrole>
-           </disabled>
-          </palette>
-         </property>
-         <property name="editTriggers">
-          <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
-         </property>
-         <property name="dragEnabled">
-          <bool>true</bool>
-         </property>
-         <property name="dragDropOverwriteMode">
-          <bool>true</bool>
-         </property>
-         <property name="dragDropMode">
-          <enum>QAbstractItemView::DropOnly</enum>
-         </property>
-         <property name="defaultDropAction">
-          <enum>Qt::MoveAction</enum>
-         </property>
-         <property name="alternatingRowColors">
-          <bool>true</bool>
-         </property>
-         <property name="selectionMode">
-          <enum>QAbstractItemView::ExtendedSelection</enum>
-         </property>
-         <property name="selectionBehavior">
-          <enum>QAbstractItemView::SelectItems</enum>
-         </property>
-         <column>
-          <property name="text">
-           <string/>
-          </property>
-         </column>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="horizontalLayoutWidget_2">
-      <property name="geometry">
-       <rect>
-        <x>640</x>
-        <y>600</y>
-        <width>591</width>
-        <height>51</height>
-       </rect>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
-       <item>
-        <widget class="QLineEdit" name="txt_browser_add_cmd">
-         <property name="text">
-          <string/>
-         </property>
-         <property name="placeholderText">
-          <string>Custom command mnemonic</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btn_add_cmd">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="text">
-          <string>Add</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btn_cmd_list_remove">
-         <property name="text">
-          <string>Remove Item</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btn_set_cmd_list_active">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string>Set List as Active (INOP)</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="horizontalLayoutWidget_4">
-      <property name="geometry">
-       <rect>
-        <x>6</x>
-        <y>600</y>
-        <width>621</width>
-        <height>51</height>
-       </rect>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_4">
-       <item>
-        <widget class="QPushButton" name="btn_active_to_inactive">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string>INOP Get Active List</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btn_add_all">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="text">
-          <string>Add All to List</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btn_load_commands">
-         <property name="text">
-          <string>Load Command List from Disk</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
      </widget>
     </widget>
    </widget>
