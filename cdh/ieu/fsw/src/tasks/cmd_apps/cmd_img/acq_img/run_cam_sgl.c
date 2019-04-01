@@ -107,7 +107,7 @@ spinError run_cam_sgl(spinCamera hCamera, spinNodeMapHandle hNodeMap,\
     }
 
     // Convert image:
-    spin_ret_val = spinImageConvert(hResultImage,PixelFormat_RGB8,\
+    spin_ret_val = spinImageConvert(hResultImage,PixelFormat_BayerRG8,\
         hConvertedImage);
 
     // Check success:
