@@ -33,6 +33,11 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+	// Wait for message for IPS script to be ready
+	int junk;
+	size_t sz = read(pid, &junk, 1);
+	printf("[C] Recieved ready message: %d\n", junk);
+
 	// We now want to read from a RAW image file and then write the bytes to the message pipe
 
 	char* DATA = argv[1];
