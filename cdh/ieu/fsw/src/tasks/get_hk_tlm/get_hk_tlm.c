@@ -39,6 +39,7 @@
 #include <string.h>  // String function definitions
 #include <stdint.h>  // Standard integer types
 #include <time.h>    // Standard time types
+#include <stdio.h>  //Write to files
 
 // Xenomai libraries:
 #include <alchemy/task.h>  // Task management serives
@@ -153,6 +154,51 @@ void get_hk_tlm(void* arg){
         memcpy(hk_tlm_buf+27,&pbk_prog_flg,1);
         sys_tm = time(NULL); memcpy(hk_tlm_buf+28,&sys_tm,4);
         memcpy(hk_tlm_buf+32,&ips_mdl_ld_state,1);
+
+
+//TELEMETRY HACK
+	//Take all the telemerty values before they're written and write them to a file.
+	//Take all the telemerty values before they're written
+        char next_img_acq_tm_str[200]; // Next image acquisition
+        char next_atc_tm_str[200];     // Next absolutely timed 
+        char sys_tm_str[200];          // System time string
+
+        struct tm* tm;
+         // Convert Unix timestamps to "YYYY/DOY-HH:MM:SS"
+        tm = gmtime(&next_img_acq_tm);
+        strftime(next_img_acq_tm_str,sizeof(next_img_acq_tm_str),\
+            "%Y/%j-%H:%M:%S",tm);
+
+        tm = gmtime(&next_atc_tm);
+        strftime(next_atc_tm_str,sizeof(next_atc_tm_str),\
+            "%Y/%j-%H:%M:%S",tm);
+
+        tm = gmtime(&sys_tm);
+        strftime(sys_tm_str,sizeof(sys_tm_str),\
+            "%Y/%j-%H:%M:%S",tm);
+
+	FILE *hackfd;
+	hackfd = fopen("/tmp/tlmhackfile", "w+");
+	fprintf(hackfd,"0x00:%u,%u,%u,%u,%u,%u,%u,%u,%u,%s,%s,%s,%s,%u,%u,%s,%s,%s,%s,%s\n",\
+            rx_telecmd_pkt_cnt,val_telecmd_pkt_cnt,inv_telecmd_pkt_cnt,\
+            val_cmd_cnt,inv_cmd_cnt,cmd_exec_suc_cnt,\
+            cmd_exec_err_cnt,tlm_pkt_xfr_frm_seq_cnt,acq_img_cnt,\
+            img_acq_prog_flag ? "IN PROGRESS" : "IDLE",\
+            ers_rly_swtch_state ? "ON" : "OFF",\
+            mdq_scan_state ? "SCANNING" : "IDLE",\
+            flt_tbl_mode == 0 ? "NORM" : flt_tbl_mode == 1 ? \
+            "RT" : flt_tbl_mode == 2 ? "PBK" : flt_tbl_mode == 3 ? "IMG" : "MAG",\
+            img_accpt_cnt,img_rej_cnt,next_img_acq_tm_str,next_atc_tm_str,\
+            pbk_prog_flg ? "PBK" : "IDLE",sys_tm_str,ips_mdl_ld_state == 0 ? \
+            "LOADING" : "READY");
+	fclose(hackfd);
+
+
+
+
+
+
+
 
         // Set grouping flag:
         tlm_pkt_xfr_frm_grp_flg = 3; // Unsegmented data
