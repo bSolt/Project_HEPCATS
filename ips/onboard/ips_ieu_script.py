@@ -102,16 +102,16 @@ def main():
 
 		# from matplotlib import pyplot as plts
 		# plt.imshow(rgb_arr); plt.show()
-		if args['debug']:
-			ii = 0
-			iname = 'image{}.png'.format(ii)
-			while os.path.isfile(iname):
-				ii+=1
-				iname = 'image{}.png'.format(ii)
-			print('Saving Image to {}'.format(iname))
-			with open(iname,'wb') as file:
-				result, buf = cv2.imencode('.png', rgb_arr)
-				file.write(buf)
+		# if args['debug']:
+		# 	ii = 0
+		# 	iname = 'image{}.png'.format(ii)
+		# 	while os.path.isfile(iname):
+		# 		ii+=1
+		# 		iname = 'image{}.png'.format(ii)
+		# 	print('Saving Image to {}'.format(iname))
+		# 	with open(iname,'wb') as file:
+		# 		result, buf = cv2.imencode('.png', rgb_arr)
+		# 		file.write(buf)
 		# KIAN'S FUNCTION
 		# Run time is lacking, needs optimization
 		if args['debug']:
@@ -153,6 +153,18 @@ def main():
 			if args['debug']:
 				print("[P] Image compressed to size {}\tratio = {}".format(\
 					len(compr_stream),len(compr_stream)/BYTES))
+				# Save the image to local
+				sind = 0
+				sname = "../positives/{0:05d}.png".format(sind)
+				while os.path.isfile(sname):
+					sind += 1
+					sname = "../positives/{0:05d}.png".format(sind)
+
+				print("[P] Saving image to {}".format(sname))
+				# Do the saving
+				with open(sname,'wb') as file:
+					result, buf = cv2.imencode('.png', rgb_crop)
+					file.write(buf)				
 				# Write to pipe part
 				print("[P] Attempting to write to {}".format(COMM_PIPE))
 			# First we write the size of the compressed buffer as a 32 bit unsigned integer
@@ -170,6 +182,19 @@ def main():
 			os.write(pipe,np.uint32(0))
 			if args['debug']:
 				print('[P] EOF written to pipe')
+
+				# Save the image to local
+				sind = 0
+				sname = "../negatives/{0:05d}.png".format(sind)
+				while os.path.isfile(sname):
+					sind += 1
+					sname = "../negatives/{0:05d}.png".format(sind)
+
+				print("[P] Saving image to {}".format(sname))
+				# Do the saving
+				with open(sname,'wb') as file:
+					result, buf = cv2.imencode('.png', rgb_crop)
+					file.write(buf)
 
 if(__name__=='__main__'):
 	main()
