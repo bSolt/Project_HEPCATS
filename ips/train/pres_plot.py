@@ -75,8 +75,9 @@ def f1_plot(results,title=None,save=None,
 	ax.set_facecolor(face_color)
 	meas = plt.plot(all_epochs,np.transpose(results[metric]),'o',
 	  markersize=8,
-	  alpha=3/(M*epochs**0.2),
-	  color=text_color)
+	  alpha=3/(M*epochs**0.3),
+	  color=text_color,
+	  )
 	# Line for the mean
 	# plt.plot(eax,mean_f1,
 	#   linewidth=2,
@@ -96,7 +97,7 @@ def f1_plot(results,title=None,save=None,
 	  color='xkcd:pale green',
 	  linewidth=2,
 	  label='F1 Score Requirement')
-	if metric.find('f1')>1 or metric.find('acc')>1 :
+	if 'f1' in metric or 'acc' in metric :
 		plt.axis((1,epochs+1,0.8,1))
 	# ax.set_xticks(np.arange(0,epochs+1,2))
 	xbox = [1,epochs+1,epochs+1,1]
@@ -104,19 +105,19 @@ def f1_plot(results,title=None,save=None,
 	plt.fill(xbox,ybox,
 		alpha = 0.15,
 		color='xkcd:light green',
-		label=f'Region for Requirement F1 >= {req:.2f}')
+		label=f'Region for Requirement F1 $\geq$ {req:.2f}')
 	plt.grid(True,color='grey')
-	leg = plt.legend(facecolor=legend_color,fontsize=14)
 	h,l = plt.gca().get_legend_handles_labels()
-	h.append(meas[0])
-	l.append('F1 Score Measuremets')
+	h = [meas[0]] + h
+	l = ['F1 Score Measuremets'] + l
+	leg = plt.legend(h,l,facecolor=legend_color,fontsize=14)
 	plt.setp(leg.get_texts(),color=text_color)
 	# save the fig is we want to
 	if save:
 		if '.' not in save:
 			save += '.png'
 		plt.savefig(save,
-			facecolor=face_color,edgecolor=color)
+			facecolor=color,edgecolor=color)
 
 	plt.show()
 
