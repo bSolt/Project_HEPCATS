@@ -226,15 +226,15 @@ def plot_history(history,title=None,save=None,
 			linewidth=2,
 			label='Loss on Validation Data')
 	else:
-		plt.plot(eax, history['acc'],
-			linewidth=2,
-			label='Accuracy on Training Data')
+		# plt.plot(eax, history['acc'],
+		# 	linewidth=2,
+		# 	label='Accuracy on Training Data')
 		plt.plot(eax, history['f1'],
 			linewidth=2,
 			label='F1 Score on Training Data')
-		plt.plot(eax, history['val_acc'],
-			linewidth=2,
-			label='Accuracy on Validation Data')
+		# plt.plot(eax, history['val_acc'],
+		# 	linewidth=2,
+		# 	label='Accuracy on Validation Data')
 		plt.plot(eax, history['val_f1'],
 			linewidth=2,
 			label='F1 Score on Validation Data')
