@@ -130,13 +130,15 @@ def main():
 		else:
 			# resizing is done using the opencv function
 			rgb_small = cv2.resize(rgb_crop, (256,256))
+			# Convert to grayscale for classifying
+			gray_small = cv2.cvtColor(rgb_small,cv2.COLOR_RGB2GRAY)
 			# expand dims to prepare for input to neural net
-			rgb_small = np.expand_dims(rgb_small,0)
+			gray_small = np.expand_dims(gray_small,0)
 			if args['debug']:
 				print("[P] Now classifying image")
 				t0 = time.time()
 			# apply neural net model
-			pred = model.predict(rgb_small)
+			pred = model.predict(gray_small)
 
 			if args['debug']:
 				dt = datetime.timedelta(seconds=time.time()-t0)
@@ -147,15 +149,16 @@ def main():
 		if (pred > THRESHOLD):
 			# MATT COMPRESSION
 			# NOTE: Could not accieve adequate compression at this time
-			# Current strategy: Encode image to jpeg, then apply zlib
+			# Current strategy: Encode image to png, then apply zlib
 			result, buf = cv2.imencode('.png', rgb_crop)
 			compr_stream = zlib.compress(buf,zlib.Z_BEST_COMPRESSION)
 			if args['debug']:
-				print("[P] Image compressed to size {}\tratio = {}".format(\
+				print("[P] Image compressed to size {}\ttotal ratio = {}".format(\
 					len(compr_stream),len(compr_stream)/BYTES))
 				# Save the image to local
 				sind = 0
 				sname = "../positives/{0:05d}.png".format(sind)
+				# get a unique savename
 				while os.path.isfile(sname):
 					sind += 1
 					sname = "../positives/{0:05d}.png".format(sind)
@@ -163,7 +166,7 @@ def main():
 				print("[P] Saving image to {}".format(sname))
 				# Do the saving
 				with open(sname,'wb') as file:
-					result, buf = cv2.imencode('.png', rgb_crop)
+					# result, buf = cv2.imencode('.png', rgb_crop) see line 153
 					file.write(buf)				
 				# Write to pipe part
 				print("[P] Attempting to write to {}".format(COMM_PIPE))

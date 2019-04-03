@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# DEPRECATED
+
 IMG="../RAW/Aurora1.RAW"
 PIPE="./pipe.fifo"
 
