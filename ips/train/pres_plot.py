@@ -269,6 +269,6 @@ def plot_history(history,title=None,save=None,
 		if '.' not in save:
 			save += '.png'
 		plt.savefig(save,
-			facecolor=face_color,edgecolor=color)
+			facecolor=color,edgecolor=color)
 
 	plt.show()
