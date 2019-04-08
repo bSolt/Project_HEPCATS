@@ -97,7 +97,7 @@ def main():
 			rgb_arr = raw.postprocess(gamma=(1,1))
 		elif ( IMAGE_FORMAT=='ieu'):
 			rgb_arr = read_raw(pipe,BYTES)
-		elif ( IMAGE_FORMAT=='ieu2'):
+		else:
 			rgb_arr = read_raw(pipe,BYTES)
 
 		# from matplotlib import pyplot as plts
