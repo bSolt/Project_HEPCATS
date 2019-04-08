@@ -65,18 +65,22 @@ def main():
 		print('[P] Model file loaded successfully!')
 	# Expected RAW image size
 	if ( IMAGE_FORMAT=='test' ):
-		BYTES = 9861950; #This is for the testing image
+		BYTES = 9861950 #This is for the testing image
 		# Create the custom reading object for appropriate reading within rawpy
 	elif ( IMAGE_FORMAT=='ieu'):
 		BYTES = 2304000 #This is expected image size, from Chris
 	elif ( IMAGE_FORMAT=='ieu2'):
 		BYTES = 2304000*3 #This is expected image size with three channels
+	# default bytes same as ieu
+	else:
+		BYTES = 2304000
 
 	# Create buffer reader object for input
 	pipe = os.open(COMM_PIPE, os.O_RDWR)
 	# Send the message that ips is ready to begin processing
 	os.write(pipe, np.uint8(21))
 
+	print("Ready message sent. Expecting to read {} bytes".format(BYTES))
 	#The program will loop while run is True
 	# It is not designed to stop in its current state
 	run = True
