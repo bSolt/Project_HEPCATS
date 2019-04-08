@@ -31,7 +31,7 @@ def main():
 	from FixedBufferReader import FixedBufferReader
 	# This one is the cropping function based on circle segmentation
 	from croppingScript import auto_crop
-	from ips_helper import recall, f1
+	from ips_helper import recall, f1, fix_colors
 
 	ap = argparse.ArgumentParser()
 	ap.add_argument("pipe", type=str, default="/dev/rtp0",
@@ -138,7 +138,7 @@ def main():
 			# Convert to grayscale for classifying
 			gray_small = cv2.cvtColor(rgb_small,cv2.COLOR_RGB2GRAY)
 			# expand dims to prepare for input to neural net
-			gray_small = np.expand_dims(gray_small,0)
+			gray_small = np.expand_dims(fix_colors(gray_small),0)
 			if args['debug']:
 				print("[P] Now classifying image")
 				t0 = time.time()
