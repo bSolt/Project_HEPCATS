@@ -38,7 +38,7 @@ def main():
 	  help="name of pipe (fifo) to use")
 	ap.add_argument("image_type", type=str, default="ieu",
 	  help="string for method of reading image: test for using rawpy or ieu for direct array file")
-	ap.add_argument("debug", type=bool, default=False, 
+	ap.add_argument("debug", type=bool, default=True, 
 		help = "whether or not to print debug statements including timings")
 
 	args = vars(ap.parse_args())
