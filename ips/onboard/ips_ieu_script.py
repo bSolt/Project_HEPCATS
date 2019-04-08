@@ -80,7 +80,8 @@ def main():
 	# Send the message that ips is ready to begin processing
 	os.write(pipe, np.uint8(21))
 
-	print("Ready message sent. Expecting to read {} bytes".format(BYTES))
+	if args['debug']:
+		print("Ready message sent. Expecting to read {} bytes".format(BYTES))
 	#The program will loop while run is True
 	# It is not designed to stop in its current state
 	run = True
