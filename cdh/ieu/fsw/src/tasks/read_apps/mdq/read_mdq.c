@@ -55,6 +55,7 @@
 #include <errno.h>   // Error number definitions
 #include <stdint.h>  // Standard integer types
 #include <time.h>    // Standard time types
+#include <stdio.h> //write to file for tlm hack
 
 // Xenomai libraries:
 #include <alchemy/task.h>  // Task management service
@@ -139,6 +140,9 @@ void read_mdq(void) {
                                                     // packet transfer frame
                                                     // buffer
 
+    float chan0;
+    float chan1;
+    float chan2; //Channel defs for telemetry hack 
     // Print:
     rt_printf("%d (READ_MDQ_TASK) Ready to read magnetometer DAQ and"
         " create telemetry packets\n",time(NULL));
@@ -182,6 +186,42 @@ void read_mdq(void) {
             ret_val = rt_queue_write(&flt_tbl_msg_queue,\
                 &tlm_pkt_xfr_frm_buf,TLM_PKT_XFR_FRM_SIZE,\
                 Q_NORMAL); // Append message to queue
+
+
+
+////////////////////////////////////////////////////////
+	    //Telemetry hack
+		//Not interested in averages, we want the full data!
+		//Convert from char to number
+		//from proc_tlm_pkt.c
+
+		float mdq_conv_buf[MDQ_READ_SIZE/2];
+		for (int i = 0; i < MDQ_READ_SIZE/2; ++i) {
+            // Convert two char to signed 16 bit number
+            mdq_conv_buf[i] = (mdq_buf[2*i+1] << 8) | \
+                (mdq_buf[2*i] & 0xFF);
+            // Convert from counts to nT:
+            mdq_conv_buf[i] = \
+                ((mdq_conv_buf[i]*10)/32768)*10000;
+        }//END: Convert char to number 
+
+	//Write everything to a file
+	char* hackfile;
+	hackfile="/tmp/mdqhackfile";
+	FILE* hack_fd = fopen(hackfile,"w+");
+	
+        // Print converted user data for channel 0, 1, and 2:
+
+	for (int i = 0; i < (MDQ_READ_SIZE/2-2); i+=3) {
+            chan0 = mdq_conv_buf[i];
+            chan1 = mdq_conv_buf[i+1];
+            chan2 = mdq_conv_buf[i+2];
+	fprintf(hack_fd,"x%0.3f, y%0.3f, z%0.3f\n",chan0,chan1,chan2);
+        }//END write to data file
+	fclose(hack_fd);//close the file so we can read it
+
+
+//////////////////////////////////////////////////////
 
             // Check success:
             if ((ret_val > 0) || (ret_val == 0)) {
