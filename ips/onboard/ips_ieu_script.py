@@ -22,7 +22,7 @@ def read_raw(pipe, read_size):
 		os.read(pipe, read_size)
 		,np.uint8).reshape((col,row))
 	# De-mosaic using openCV
-	rgb_arr = cv2.cvtColor(raw_arr, cv2.COLOR_BayerBG2RGB)
+	rgb_arr = cv2.cvtColor(raw_arr, cv2.COLOR_BayerRG2RGB)
 	return rgb_arr
 
 # MAIN FUNCTION
@@ -118,7 +118,7 @@ if(__name__=='__main__'):
 		if (pcode!=0 or ecode!=0):
 			print("[P] Cropping Error")
 			# set the output image to the full image for saving purposes
-			rgb_crop = rgb_arr;
+			rgb_crop = rgb_arr
 			# Set pred to 0 so that it is equivalent to aurora not found
 			pred=0
 		# Detect aurora after cropping
@@ -140,6 +140,10 @@ if(__name__=='__main__'):
 				print('[P] Classify time: {}'.format(dt))
 		# Convert cropped image to png buffer
 		result, buf = cv2.imencode('.png', rgb_crop)
+		gresult, gbuf = cv2.imencode('.png', gray_small)
+		# Save gray image
+		with open('gray.png','rb') as file:
+			file.write(gbuf)
 		if args['debug']:
 			print('[P] PNG buffer created with reasult {}'.format(result))
 		# Check if the auroral threshold is met or not
