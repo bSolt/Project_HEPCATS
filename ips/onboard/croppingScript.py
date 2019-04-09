@@ -4,14 +4,13 @@ import numpy as np
 
 
 def auto_crop(im_array,
-    startingRadius = 50, radiusDelta = 25, endingRadius = 1000):
+    startingRadius = 50, radiusDelta = 25, endingRadius = 1000, minAccumulatorVotes = 150):
     # Radii Parameters
     radiusDelta = (endingRadius-startingRadius)//20
 
     # Detection Parameters
     blurSigma = 15
     sens = 15
-    minAccumulatorVotes = 150
     startingAccumulatorVotes = 240
     accumulatorThresh = startingAccumulatorVotes
 
