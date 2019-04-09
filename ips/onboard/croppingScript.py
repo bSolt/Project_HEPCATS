@@ -11,7 +11,7 @@ def auto_crop(im_array,
     # Detection Parameters
     blurSigma = 15
     sens = 15
-    minAccumulatorVotes = 170
+    minAccumulatorVotes = 150
     startingAccumulatorVotes = 240
     accumulatorThresh = startingAccumulatorVotes
 
