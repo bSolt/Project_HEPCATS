@@ -327,6 +327,13 @@ p, li { white-space: pre-wrap; }
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="btn_start_ips">
+           <property name="text">
+            <string>Start IPS</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="btn_stop_listeners">
            <property name="enabled">
             <bool>true</bool>
@@ -1075,7 +1082,7 @@ p, li { white-space: pre-wrap; }
          <x>270</x>
          <y>30</y>
          <width>311</width>
-         <height>249</height>
+         <height>281</height>
         </rect>
        </property>
        <property name="title">
@@ -1259,7 +1266,7 @@ p, li { white-space: pre-wrap; }
           <x>9</x>
           <y>29</y>
           <width>281</width>
-          <height>191</height>
+          <height>71</height>
          </rect>
         </property>
         <layout class="QFormLayout" name="formLayout_4">
@@ -1307,6 +1314,32 @@ p, li { white-space: pre-wrap; }
          </item>
         </layout>
        </widget>
+       <widget class="QLabel" name="label_31">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>110</y>
+          <width>131</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Images Downlinked:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lbl_num_downlinked">
+        <property name="geometry">
+         <rect>
+          <x>160</x>
+          <y>110</y>
+          <width>54</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>NO TLM</string>
+        </property>
+       </widget>
       </widget>
      </widget>
      <widget class="QPushButton" name="btn_quit">
@@ -1320,6 +1353,57 @@ p, li { white-space: pre-wrap; }
       </property>
       <property name="text">
        <string>Quit</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab_2">
+     <attribute name="title">
+      <string>Debug Utilities</string>
+     </attribute>
+     <widget class="QTextBrowser" name="txt_ips_log">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>50</y>
+        <width>421</width>
+        <height>581</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_29">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>30</y>
+        <width>91</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>IPS Script Log</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_30">
+      <property name="geometry">
+       <rect>
+        <x>480</x>
+        <y>30</y>
+        <width>121</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>FSW Output</string>
+      </property>
+     </widget>
+     <widget class="QTextBrowser" name="txt_fsw">
+      <property name="geometry">
+       <rect>
+        <x>450</x>
+        <y>50</y>
+        <width>921</width>
+        <height>581</height>
+       </rect>
       </property>
      </widget>
     </widget>

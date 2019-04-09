@@ -28,14 +28,23 @@ private slots:
     void print_to_msgs();
     void add_custom_to_active();
     void startfsw();
+    void startips();
+    void ipsNotifyLog();
+    void print_to_mag();
+    void print_to_fsw();
+    void print_to_img();
 
 
 private:
     Ui::MainWindow *ui;
     //Make pointer for telemetry listener
     QProcess *listeners;
-        //Pointers for sim connection processes
     QProcess *tlm_reader;
+    QProcess *ipsNotify;
+    QProcess *mag_reader;
+    QProcess *fsw;
+    QProcess *img_reader;
+
 
 
 };
