@@ -141,11 +141,11 @@ if(__name__=='__main__'):
 		# Convert cropped image to png buffer
 		result, buf = cv2.imencode('.png', rgb_crop)
 		gresult, gbuf = cv2.imencode('.png', gray_small)
-		# Save gray image
-		with open('gray.png','rb') as file:
-			file.write(gbuf)
 		if args['debug']:
 			print('[P] PNG buffer created with reasult {}'.format(result))
+			# Save gray image
+			with open('gray.png','rb') as file:
+				file.write(gbuf)
 		# Check if the auroral threshold is met or not
 		if (pred > THRESHOLD):
 			# MATT COMPRESSION
