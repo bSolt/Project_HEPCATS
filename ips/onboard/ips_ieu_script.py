@@ -109,7 +109,7 @@ if(__name__=='__main__'):
 			print("[P] Now cropping... Cross your fingers")
 			t0 = time.time()
 		# call cropping function
-		rgb_crop, pcode, ecode = auto_crop(rgb_arr)
+		rgb_crop, pcode, ecode = auto_crop(rgb_arr,minAccumulatorVotes=100)
 		if args['verbose']:
 			dt = datetime.timedelta(seconds=time.time()-t0)
 			print("[P] Crop done: pcode = {} ecode = {}".format(pcode, ecode))

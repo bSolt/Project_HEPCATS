@@ -4,7 +4,7 @@ import numpy as np
 
 
 def auto_crop(im_array,
-    startingRadius = 50, radiusDelta = 25, endingRadius = 1000, minAccumulatorVotes = 150):
+    startingRadius = 50, radiusDelta = 25, endingRadius = 300, minAccumulatorVotes = 150):
     # Radii Parameters
     radiusDelta = (endingRadius-startingRadius)//20
 
