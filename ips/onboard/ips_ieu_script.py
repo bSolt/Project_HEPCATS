@@ -138,14 +138,15 @@ if(__name__=='__main__'):
 				dt = datetime.timedelta(seconds=time.time()-t0)
 				print('[P] {:.2f}% chance of Aurora detected in image'.format(100*pred[0][0]))
 				print('[P] Classify time: {}'.format(dt))
+				# Save gray image
+				with open('gray.png','rb') as file:
+					file.write(gbuf)
+				gresult, gbuf = cv2.imencode('.png', gray_small)
 		# Convert cropped image to png buffer
 		result, buf = cv2.imencode('.png', rgb_crop)
-		gresult, gbuf = cv2.imencode('.png', gray_small)
 		if args['debug']:
 			print('[P] PNG buffer created with reasult {}'.format(result))
-			# Save gray image
-			with open('gray.png','rb') as file:
-				file.write(gbuf)
+			
 		# Check if the auroral threshold is met or not
 		if (pred > THRESHOLD):
 			# MATT COMPRESSION
