@@ -40,6 +40,8 @@ if(__name__=='__main__'):
 	  help="name of pipe (fifo) to use")
 	ap.add_argument("-t","--image_type", type=str, default="ieu",
 	  help="string for method of reading image: test for using rawpy or ieu for direct array file")
+	ap.add_argument("-m","--model", type=str, default = "../models/fine3_300.h5",
+		help = "The path the the model file to load in at the beginning of the script")
 	ap.add_argument("-v","--verbose", action='store_true', default=False, 
 		help = "whether or not to print verbose statements including timings")
 
@@ -55,7 +57,7 @@ if(__name__=='__main__'):
 		import time, datetime
 
 	# This will be the file containing the full neural network model
-	MODEL_FILE = "../models/fine3_500.h5"
+	MODEL_FILE = args['model']
 
 	# Threshold for Aurora Detection
 	THRESHOLD = 0.5
