@@ -25,11 +25,12 @@ def read_raw(pipe, read_size):
 	rgb_arr = cv2.cvtColor(raw_arr, cv2.COLOR_BayerBG2RGB)
 	return rgb_arr
 
-def main():
+# MAIN FUNCTION
+if(__name__=='__main__'):
 	import tensorflow as tf
 	import zlib, argparse
 	# This one is a custom buffer reading object
-	from FixedBufferReader import FixedBufferReader
+	# from FixedBufferReader import FixedBufferReader
 	# This one is the cropping function based on circle segmentation
 	from croppingScript import auto_crop
 	from ips_helper import recall, f1, fix_colors
@@ -66,27 +67,17 @@ def main():
 	if args['debug']:
 		print('[P] Model file loaded successfully!')
 
+	# All supported image sizes
 	image_size = {
 	'test':9861950,
 	'ieu' :2304000,
 	'default':2304000
 	}
+	# assign the number of bytes to be read in
 	if IMAGE_FORMAT in image_size.keys():
 		BYTES = image_size[IMAGE_FORMAT]
 	else:
 		BYTES = image_size['default']
-	
-	# # Expected RAW image size
-	# if ( IMAGE_FORMAT=='test' ):
-	# 	BYTES = 9861950 #This is for the testing image
-	# 	# Create the custom reading object for appropriate reading within rawpy
-	# elif ( IMAGE_FORMAT=='ieu'):
-	# 	BYTES = 2304000 #This is expected image size, from Chris
-	# elif ( IMAGE_FORMAT=='ieu2'):
-	# 	BYTES = 2304000*3 #This is expected image size with three channels
-	# # default bytes same as ieu
-	# else:
-	# 	BYTES = 2304000
 
 	# Open the pipe for reading and writing using os module
 	pipe = os.open(COMM_PIPE, os.O_RDWR)
@@ -194,12 +185,7 @@ def main():
 				while os.path.isfile(sname):
 					sind += 1
 					sname = "../negatives/{0:05d}.png".format(sind)
-
 				print("[P] Saving image to {}".format(sname))
 				# Do the saving
 				with open(sname,'wb') as file:
-					# result, buf = cv2.imencode('.png', rgb_crop)
 					file.write(buf)
-
-if(__name__=='__main__'):
-	main()
