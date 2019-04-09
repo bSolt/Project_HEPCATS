@@ -198,7 +198,7 @@ def main():
 				print("[P] Saving image to {}".format(sname))
 				# Do the saving
 				with open(sname,'wb') as file:
-					result, buf = cv2.imencode('.png', rgb_crop)
+					# result, buf = cv2.imencode('.png', rgb_crop)
 					file.write(buf)
 
 if(__name__=='__main__'):
