@@ -40,8 +40,8 @@ if(__name__=='__main__'):
 	  help="name of pipe (fifo) to use")
 	ap.add_argument("-t","--image_type", type=str, default="ieu",
 	  help="string for method of reading image: test for using rawpy or ieu for direct array file")
-	ap.add_argument("-v","--verbose", type=bool, action='store_true', default=False, 
-		help = "whether or not to print debug statements including timings")
+	ap.add_argument("-v","--verbose", action='store_true', default=False, 
+		help = "whether or not to print verbose statements including timings")
 
 	args = vars(ap.parse_args())
 	# IMAGE_FORMAT = "test"
@@ -51,7 +51,7 @@ if(__name__=='__main__'):
 	COMM_PIPE = args['pipe']
 
 	#import time if necessary
-	if args['debug']:
+	if args['verbose']:
 		import time, datetime
 
 	# This will be the file containing the full neural network model
@@ -64,7 +64,7 @@ if(__name__=='__main__'):
 	model = tf.keras.models.load_model(MODEL_FILE,
 		custom_objects={'recall':recall,'f1':f1})
 
-	if args['debug']:
+	if args['verbose']:
 		print('[P] Model file loaded successfully!')
 
 	# All supported image sizes
@@ -85,7 +85,7 @@ if(__name__=='__main__'):
 	ready_message = np.uint8(21)
 	os.write(pipe, ready_message)
 
-	if args['debug']:
+	if args['verbose']:
 		print("Ready message sent. Expecting to read {} bytes".format(BYTES))
 	#The program will loop while run is True
 	# It is not designed to stop in its current state
@@ -93,8 +93,8 @@ if(__name__=='__main__'):
 
 	# Infinite Loop
 	while(run):
-		# debug message indicating that loop has been entered
-		if args['debug']:
+		# verbose message indicating that loop has been entered
+		if args['verbose']:
 			print("[P] Reading from {}".format(COMM_PIPE))
 		# Read in image
 		if ( IMAGE_FORMAT=='test' ):
@@ -105,12 +105,12 @@ if(__name__=='__main__'):
 			# use read_raw function
 			rgb_arr = read_raw(pipe,BYTES)
 		# Announce cropping and start cropping timer
-		if args['debug']:
+		if args['verbose']:
 			print("[P] Now cropping... Cross your fingers")
 			t0 = time.time()
 		# call cropping function
 		rgb_crop, pcode, ecode = auto_crop(rgb_arr)
-		if args['debug']:
+		if args['verbose']:
 			dt = datetime.timedelta(seconds=time.time()-t0)
 			print("[P] Crop done: pcode = {} ecode = {}".format(pcode, ecode))
 			print("[P] Cropping time: {}".format(dt))
@@ -129,22 +129,22 @@ if(__name__=='__main__'):
 			gray_small = cv2.cvtColor(rgb_small,cv2.COLOR_RGB2GRAY)
 			# expand dims to prepare for input to neural net
 			gray_small = np.expand_dims(fix_colors(gray_small),0)
-			if args['debug']:
+			if args['verbose']:
 				print("[P] Now classifying image")
 				t0 = time.time()
 			# apply neural net model
 			pred = model.predict(gray_small)
-			if args['debug']:
+			if args['verbose']:
 				dt = datetime.timedelta(seconds=time.time()-t0)
 				print('[P] {:.2f}% chance of Aurora detected in image'.format(100*pred[0][0]))
 				print('[P] Classify time: {}'.format(dt))
 				# Save gray image
-				with open('gray.png','ab') as file:
+				with open('gray.png','wb') as file:
 					file.write(gbuf)
 				gresult, gbuf = cv2.imencode('.png', gray_small)
 		# Convert cropped image to png buffer
 		result, buf = cv2.imencode('.png', rgb_crop)
-		if args['debug']:
+		if args['verbose']:
 			print('[P] PNG buffer created with reasult {}'.format(result))
 			
 		# Check if the auroral threshold is met or not
@@ -152,7 +152,7 @@ if(__name__=='__main__'):
 			# MATT COMPRESSION
 			# Current strategy: Encode image to png, then apply zlib
 			compr_stream = zlib.compress(buf,zlib.Z_BEST_COMPRESSION)
-			if args['debug']:
+			if args['verbose']:
 				print("[P] Image compressed to size {}\ttotal ratio = {}".format(\
 					len(compr_stream),len(compr_stream)/BYTES))
 				# Save the image to local
@@ -178,12 +178,12 @@ if(__name__=='__main__'):
 				)
 			# Then we write the compressed buffer
 			os.write(pipe,compr_stream)
-			if args['debug']:
+			if args['verbose']:
 				print('[P] compressed PNG written with size = {} bytes'.format(len(compr_stream)))
 		else:
 			# If no aurora is detected, we simply write EOF (0x00) to the pipe instead
 			os.write(pipe,np.uint32(0))
-			if args['debug']:
+			if args['verbose']:
 				print('[P] EOF written to pipe')
 
 				# Save the image to local
