@@ -15,13 +15,14 @@ import numpy as np
 import cv2, os
 
 def read_raw(pipe, read_size):
+	# Expected size of image
 	row = 1920; col = 1200;
+	# create np array from bufer with type uint8 and reshape to correct size
 	raw_arr = np.frombuffer(
 		os.read(pipe, read_size)
 		,np.uint8).reshape((col,row))
-	# blk_arr = cv2.cvtColor(raw_arr, cv2.COLOR_BayerBG2GRAY)
+	# De-mosaic using openCV
 	rgb_arr = cv2.cvtColor(raw_arr, cv2.COLOR_BayerBG2RGB)
-
 	return rgb_arr
 
 def main():
@@ -48,6 +49,7 @@ def main():
 	# Name of pipe to be used
 	COMM_PIPE = args['pipe']
 
+	#import time if necessary
 	if args['debug']:
 		import time, datetime
 
@@ -63,22 +65,34 @@ def main():
 
 	if args['debug']:
 		print('[P] Model file loaded successfully!')
-	# Expected RAW image size
-	if ( IMAGE_FORMAT=='test' ):
-		BYTES = 9861950 #This is for the testing image
-		# Create the custom reading object for appropriate reading within rawpy
-	elif ( IMAGE_FORMAT=='ieu'):
-		BYTES = 2304000 #This is expected image size, from Chris
-	elif ( IMAGE_FORMAT=='ieu2'):
-		BYTES = 2304000*3 #This is expected image size with three channels
-	# default bytes same as ieu
-	else:
-		BYTES = 2304000
 
-	# Create buffer reader object for input
+	image_size = {
+	'test':9861950,
+	'ieu' :2304000,
+	'default':2304000
+	}
+	if IMAGE_FORMAT in image_size.keys():
+		BYTES = image_size[IMAGE_FORMAT]
+	else:
+		BYTES = image_size['default']
+	
+	# # Expected RAW image size
+	# if ( IMAGE_FORMAT=='test' ):
+	# 	BYTES = 9861950 #This is for the testing image
+	# 	# Create the custom reading object for appropriate reading within rawpy
+	# elif ( IMAGE_FORMAT=='ieu'):
+	# 	BYTES = 2304000 #This is expected image size, from Chris
+	# elif ( IMAGE_FORMAT=='ieu2'):
+	# 	BYTES = 2304000*3 #This is expected image size with three channels
+	# # default bytes same as ieu
+	# else:
+	# 	BYTES = 2304000
+
+	# Open the pipe for reading and writing using os module
 	pipe = os.open(COMM_PIPE, os.O_RDWR)
 	# Send the message that ips is ready to begin processing
-	os.write(pipe, np.uint8(21))
+	ready_message = np.uint8(21)
+	os.write(pipe, ready_message)
 
 	if args['debug']:
 		print("Ready message sent. Expecting to read {} bytes".format(BYTES))
@@ -88,40 +102,22 @@ def main():
 
 	# Infinite Loop
 	while(run):
+		# debug message indicating that loop has been entered
 		if args['debug']:
 			print("[P] Reading from {}".format(COMM_PIPE))
-		# ibuf = os.read(pipe,10)
-		# print("Initial message read from pipe: {}".format(ibuf.decode()))
-		# Peek at the file to cause a block and wait for image data to be input
-		#pipe.peek();
-		# interpret the pipe content as a rawpy object
-
+		# Read in image
 		if ( IMAGE_FORMAT=='test' ):
 			raw = rawpy.imread(pipe)
 			# Convert the raw image to a uint8 numpy array
 			rgb_arr = raw.postprocess(gamma=(1,1))
-		elif ( IMAGE_FORMAT=='ieu'):
-			rgb_arr = read_raw(pipe,BYTES)
 		else:
+			# use read_raw function
 			rgb_arr = read_raw(pipe,BYTES)
-
-		# from matplotlib import pyplot as plts
-		# plt.imshow(rgb_arr); plt.show()
-		# if args['debug']:
-		# 	ii = 0
-		# 	iname = 'image{}.png'.format(ii)
-		# 	while os.path.isfile(iname):
-		# 		ii+=1
-		# 		iname = 'image{}.png'.format(ii)
-		# 	print('Saving Image to {}'.format(iname))
-		# 	with open(iname,'wb') as file:
-		# 		result, buf = cv2.imencode('.png', rgb_arr)
-		# 		file.write(buf)
-		# KIAN'S FUNCTION
-		# Run time is lacking, needs optimization
+		# Announce cropping and start cropping timer
 		if args['debug']:
 			print("[P] Now cropping... Cross your fingers")
 			t0 = time.time()
+		# call cropping function
 		rgb_crop, pcode, ecode = auto_crop(rgb_arr)
 		if args['debug']:
 			dt = datetime.timedelta(seconds=time.time()-t0)
@@ -132,6 +128,7 @@ def main():
 			print("[P] Cropping Error")
 			# Set pred to 0 so that it is equivalent to aurora not found
 			pred=0
+		# Detect aurora after cropping
 		else:
 			# resizing is done using the opencv function
 			rgb_small = cv2.resize(rgb_crop, (256,256))
@@ -144,18 +141,18 @@ def main():
 				t0 = time.time()
 			# apply neural net model
 			pred = model.predict(gray_small)
-
 			if args['debug']:
 				dt = datetime.timedelta(seconds=time.time()-t0)
 				print('[P] {:.2f}% chance of Aurora detected in image'.format(100*pred[0][0]))
 				print('[P] Classify time: {}'.format(dt))
-		
+		# Convert cropped image to png buffer
+		result, buf = cv2.imencode('.png', rgb_crop)
+		if args['debug']:
+			print('[P] PNG buffer created with reasult {}'.format(result))
 		# Check if the auroral threshold is met or not
 		if (pred > THRESHOLD):
 			# MATT COMPRESSION
-			# NOTE: Could not accieve adequate compression at this time
 			# Current strategy: Encode image to png, then apply zlib
-			result, buf = cv2.imencode('.png', rgb_crop)
 			compr_stream = zlib.compress(buf,zlib.Z_BEST_COMPRESSION)
 			if args['debug']:
 				print("[P] Image compressed to size {}\ttotal ratio = {}".format(\
@@ -184,7 +181,7 @@ def main():
 			# Then we write the compressed buffer
 			os.write(pipe,compr_stream)
 			if args['debug']:
-				print('[P] rgb array written, size = {} bytes'.format(len(compr_stream)))
+				print('[P] compressed PNG written with size = {} bytes'.format(len(compr_stream)))
 		else:
 			# If no aurora is detected, we simply write EOF (0x00) to the pipe instead
 			os.write(pipe,np.uint32(0))
