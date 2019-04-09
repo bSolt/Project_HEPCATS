@@ -117,6 +117,8 @@ if(__name__=='__main__'):
 		# Stop the program if there's a cropping error.
 		if (pcode!=0 or ecode!=0):
 			print("[P] Cropping Error")
+			# set the output image to the full image for saving purposes
+			rgb_crop = rgb_arr;
 			# Set pred to 0 so that it is equivalent to aurora not found
 			pred=0
 		# Detect aurora after cropping
