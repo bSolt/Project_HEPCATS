@@ -139,7 +139,7 @@ if(__name__=='__main__'):
 				print('[P] {:.2f}% chance of Aurora detected in image'.format(100*pred[0][0]))
 				print('[P] Classify time: {}'.format(dt))
 				# Save gray image
-				with open('gray.png','rb') as file:
+				with open('gray.png','ab') as file:
 					file.write(gbuf)
 				gresult, gbuf = cv2.imencode('.png', gray_small)
 		# Convert cropped image to png buffer
