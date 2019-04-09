@@ -133,7 +133,7 @@ if(__name__=='__main__'):
 				print("[P] Now classifying image")
 				t0 = time.time()
 			# apply neural net model
-			pred = model.predict(gray_small[0])
+			pred = model.predict(gray_small)
 			if args['verbose']:
 				dt = datetime.timedelta(seconds=time.time()-t0)
 				print('[P] {:.2f}% chance of Aurora detected in image'.format(100*pred[0][0]))
@@ -141,7 +141,7 @@ if(__name__=='__main__'):
 				# Save gray image
 				gresult, gbuf = cv2.imencode('.png', gray_small)
 				with open('gray.png','wb') as file:
-					file.write(gbuf)
+					file.write(gbuf[0])
 		# Convert cropped image to png buffer
 		result, buf = cv2.imencode('.png', rgb_crop)
 		if args['verbose']:
