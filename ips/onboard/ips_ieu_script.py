@@ -36,11 +36,11 @@ if(__name__=='__main__'):
 	from ips_helper import recall, f1, fix_colors
 
 	ap = argparse.ArgumentParser()
-	ap.add_argument("pipe", type=str, default="/dev/rtp0",
+	ap.add_argument("-p","--pipe", type=str, default="/dev/rtp0",
 	  help="name of pipe (fifo) to use")
-	ap.add_argument("image_type", type=str, default="ieu",
+	ap.add_argument("-t","--image_type", type=str, default="ieu",
 	  help="string for method of reading image: test for using rawpy or ieu for direct array file")
-	ap.add_argument("debug", type=bool, default=True, 
+	ap.add_argument("-v","--verbose", type=bool, action='store_true', default=False, 
 		help = "whether or not to print debug statements including timings")
 
 	args = vars(ap.parse_args())
