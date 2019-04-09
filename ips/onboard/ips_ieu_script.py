@@ -133,7 +133,7 @@ if(__name__=='__main__'):
 				print("[P] Now classifying image")
 				t0 = time.time()
 			# apply neural net model
-			pred = model.predict(gray_small)
+			pred = model.predict(gray_small[0])
 			if args['verbose']:
 				dt = datetime.timedelta(seconds=time.time()-t0)
 				print('[P] {:.2f}% chance of Aurora detected in image'.format(100*pred[0][0]))
