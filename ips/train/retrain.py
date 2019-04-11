@@ -20,6 +20,13 @@ if __name__ == '__main__':
 	# Disable fine-tuning
 	model.get_layer('xception').trainable = False
 
+	#recompile
+	model.compile(
+		optimizer=tf.keras.optimizers.RMSprop(lr=1e-5),
+        loss='binary_crossentropy',
+        metrics=['acc',recall,f1]
+    )
+
 	# anonymous function for rotating 90 degrees randomly
 	random_90 = lambda im: np.rot90(im,k=np.random.choice(4))
 	#define the settings for loading in images including value rescale, 
