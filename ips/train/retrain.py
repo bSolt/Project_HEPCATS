@@ -20,7 +20,8 @@ if __name__ == '__main__':
 	args = vars(ap.parse_args())
 
 	model_file = '../models/fine3_300.h5'
-	train_dir = '../OITL'
+	train_dir = '../combined/training/'
+	valid_dir = '../combined/validation/'
 	epochs = args['epochs']
 
 	model = tf.keras.models.load_model(model_file,
@@ -48,8 +49,19 @@ if __name__ == '__main__':
 		preprocessing_function=random_90,
 	)
 
+	datagen = tf.keras.preprocessing.image.ImageDataGenerator(
+		rescale=1./255,
+	)
+
 	training_gen = augmented_gen.flow_from_directory(
 	    train_dir,
+	    target_size=(256, 256),
+	    batch_size=32,
+	    class_mode='binary'
+	)
+
+	validation_gen = datagen.flow_from_directory(
+		valid_dir,
 	    target_size=(256, 256),
 	    batch_size=32,
 	    class_mode='binary'
@@ -58,7 +70,7 @@ if __name__ == '__main__':
 	# Fit once more on augmented data
 	h = model.fit_generator(
 		training_gen,
-		# validation_data=validation_gen,
+		validation_data=validation_gen,
 		epochs=epochs
 	)
 	# pres_plot.plot_history(
