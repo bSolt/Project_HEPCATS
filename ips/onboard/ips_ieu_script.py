@@ -42,6 +42,8 @@ if(__name__=='__main__'):
 	  help="string for method of reading image: test for using rawpy or ieu for direct array file")
 	ap.add_argument("-m","--model", type=str, default = "../models/fine3_300.h5",
 		help = "The path the the model file to load in at the beginning of the script")
+	ap.add_argument("-k","--keep_color", action='store_true', default=False, 
+		help = "whether or not to use RGB color when classifying the image")
 	ap.add_argument("-v","--verbose", action='store_true', default=False, 
 		help = "whether or not to print verbose statements including timings")
 
@@ -127,15 +129,20 @@ if(__name__=='__main__'):
 		else:
 			# resizing is done using the opencv function
 			rgb_small = cv2.resize(rgb_crop, (256,256))
-			# Convert to grayscale for classifying
-			gray_small = cv2.cvtColor(rgb_small,cv2.COLOR_RGB2GRAY)
-			# expand dims to prepare for input to neural net
-			gray_small = np.expand_dims(fix_colors(gray_small),0)
+			# create the input for the NN
+			if args['keep_color']: #classify the input image with color
+				classify = np.expand_dims(rgb_small,0)
+			else: #remove color from the image
+				# Convert to grayscale for classifying
+				classify = cv2.cvtColor(rgb_small,cv2.COLOR_RGB2GRAY)
+				# expand dims to prepare for input to neural net
+				classify = np.expand_dims(fix_colors(gray_small),0)
+			
 			if args['verbose']:
 				print("[P] Now classifying image")
 				t0 = time.time()
 			# apply neural net model
-			pred = model.predict(gray_small)
+			pred = model.predict(classify)
 			if args['verbose']:
 				dt = datetime.timedelta(seconds=time.time()-t0)
 				print('[P] {:.2f}% chance of Aurora detected in image'.format(100*pred[0][0]))
