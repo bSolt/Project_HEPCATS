@@ -17,6 +17,8 @@ if __name__ == '__main__':
 
 	model = tf.keras.models.load_model(model_file,
 		custom_objects={'recall':recall,'f1':f1})
+	# Disable fine-tuning
+	model.get_layer('xception').trainable = False
 
 	# anonymous function for rotating 90 degrees randomly
 	random_90 = lambda im: np.rot90(im,k=np.random.choice(4))
@@ -44,9 +46,11 @@ if __name__ == '__main__':
 		# validation_data=validation_gen,
 		epochs=epochs
 	)
-	pres_plot.plot_history(
-		h.history,
-		color='white',
-		title='Re-training on STK data',
-		save='retrain_1.png'
-	)
+	# pres_plot.plot_history(
+	# 	h.history,
+	# 	color='white',
+	# 	title='Re-training on STK data',
+	# 	save='retrain_1.png'
+	# )
+
+	model.save('../models/retrained.h5')
