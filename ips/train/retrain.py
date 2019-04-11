@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import argparse
 from ips_helper import *
 
 if __name__ == '__main__':
@@ -11,9 +12,14 @@ if __name__ == '__main__':
 	# # Build and compile the full model
 	# model = build_full_model(ptdnn, classifier)
 
+	ap = argparse.ArgumentParser()
+  	ap.add_argument("-e", "--epochs", type=int, default=100,
+		help="nuber of epochs to use in the main training loop")
+  	args = vars(ap.parse_args())
+
 	model_file = '../models/fine3_300.h5'
 	train_dir = '../OITL'
-	epochs = 100
+	epochs = args['epochs']
 
 	model = tf.keras.models.load_model(model_file,
 		custom_objects={'recall':recall,'f1':f1})
