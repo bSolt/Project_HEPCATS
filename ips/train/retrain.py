@@ -14,7 +14,9 @@ if __name__ == '__main__':
 
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-e", "--epochs", type=int, default=100,
-		help="nuber of epochs to use in the main training loop")
+		help="Number of epochs to use in the main training loop")
+	ap.add_argument("-lr", "--learn_rate", type=float, default=1e-4,
+		help="Learning rate to use for the classifier retraining")
 	args = vars(ap.parse_args())
 
 	model_file = '../models/fine3_300.h5'
