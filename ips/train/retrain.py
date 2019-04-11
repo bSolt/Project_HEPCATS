@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 import argparse
 from ips_helper import *
+from train import enable_fine_tuning
 
 if __name__ == '__main__':
 	# # Get the pre-trained deep neural network with --the correct input shape
@@ -26,8 +27,8 @@ if __name__ == '__main__':
 
 	model = tf.keras.models.load_model(model_file,
 		custom_objects={'recall':recall,'f1':f1})
-	# Disable fine-tuning
-	model.get_layer('xception').trainable = False
+	# Change fine-tuning to "option 1"
+	enable_fine_tuning(model.get_layer('xception'),'block13_sepconv1_act')
 
 	#recompile
 	model.compile(
