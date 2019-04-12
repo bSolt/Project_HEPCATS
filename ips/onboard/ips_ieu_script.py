@@ -57,6 +57,9 @@ if(__name__=='__main__'):
 	#import time if necessary
 	if args['verbose']:
 		import time, datetime
+		if args['keep_color']:
+			print('[P] Keeping color for classification')
+			print('[P] Using model file: {}'.format(args['model']))
 
 	# This will be the file containing the full neural network model
 	MODEL_FILE = args['model']
@@ -134,7 +137,7 @@ if(__name__=='__main__'):
 				classify = np.expand_dims(rgb_small,0)
 			else: #remove color from the image
 				# Convert to grayscale for classifying
-				classify = cv2.cvtColor(rgb_small,cv2.COLOR_RGB2GRAY)
+				gray_small = cv2.cvtColor(rgb_small,cv2.COLOR_RGB2GRAY)
 				# expand dims to prepare for input to neural net
 				classify = np.expand_dims(fix_colors(gray_small),0)
 			
@@ -148,13 +151,18 @@ if(__name__=='__main__'):
 				print('[P] {:.2f}% chance of Aurora detected in image'.format(100*pred[0][0]))
 				print('[P] Classify time: {}'.format(dt))
 				# Save gray image
-				gresult, gbuf = cv2.imencode('.png', gray_small[0])
-				with open('gray.png','wb') as file:
+				gresult, gbuf = cv2.imencode('.png', classify[0])
+				with open('input.png','wb') as file:
 					file.write(gbuf)
-		# Convert cropped image to png buffer
+		# Convert cropped image to png buffer for downlink
 		result, buf = cv2.imencode('.png', rgb_crop)
+		labeled = rgb_crop.copy()
+		label = 'Aurora ' + ('not' if pred<=THRESHOLD else '') + ' present'
+		cv2.putText(labeled, "{}, {:.2f}%".format(label, pred[0][0] * 100),
+			(10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+		result, buf_l = cv2.imencode('.png', labeled)
 		if args['verbose']:
-			print('[P] PNG buffer created with reasult {}'.format(result))
+			print('[P] PNG buffer created with result {}'.format(result))
 			
 		# Check if the auroral threshold is met or not
 		if (pred > THRESHOLD):
@@ -176,7 +184,7 @@ if(__name__=='__main__'):
 				# Do the saving
 				with open(sname,'wb') as file:
 					# result, buf = cv2.imencode('.png', rgb_crop) see line 153
-					file.write(buf)				
+					file.write(buf_l)				
 				# Write to pipe part
 				print("[P] Attempting to write to {}".format(COMM_PIPE))
 			# First we write the size of the compressed buffer as a 32 bit unsigned integer
@@ -204,4 +212,4 @@ if(__name__=='__main__'):
 				print("[P] Saving image to {}".format(sname))
 				# Do the saving
 				with open(sname,'wb') as file:
-					file.write(buf)
+					file.write(buf_l)
