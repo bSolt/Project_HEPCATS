@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-import argparse
+import argparse, os
 from ips_helper import *
 from train import enable_fine_tuning
 
@@ -26,6 +26,8 @@ if __name__ == '__main__':
 	train_dir = args["train_dir"]
 	valid_dir = '../combined/validation/'
 	epochs = args['epochs']
+
+	print('Re-training the model from {} using images from {}'.format(model_file,train_dir))
 
 	model = tf.keras.models.load_model(model_file,
 		custom_objects={'recall':recall,'f1':f1})
@@ -90,4 +92,5 @@ if __name__ == '__main__':
 	ii=0
 	while os.path.isfile(mname):
 		mname = '../models/retrained_{}.h5'.format(ii)
+	print('Saving new model to {}'.format(mname))
 	model.save(mname)

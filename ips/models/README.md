@@ -3,4 +3,4 @@ This folder is supposed to hold tersorflow (keras) model files with extension .h
 
 Unfortunately, GitHub will not allow these files to be downloaded, due to their large size. So intead, needed model files will be uploaded to the Google Drive under Subsystems>IPS>models
 
-Sorry if this is an inconvenience!
+Sorry for this inconvenience!
