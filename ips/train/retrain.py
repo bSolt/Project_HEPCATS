@@ -16,7 +16,7 @@ if __name__ == '__main__':
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-e", "--epochs", type=int, default=100,
 		help="Number of epochs to use in the main training loop")
-	ap.add_argument("-td", "--train_dir", type-str, default = "../stk_all",
+	ap.add_argument("-td", "--train_dir", type=str, default = "../stk_all",
 		help="Name of the directory which contains data to retrain the network on")
 	ap.add_argument("-lr", "--learn_rate", type=float, default=1e-4,
 		help="Learning rate to use for the classifier retraining")
@@ -46,10 +46,14 @@ if __name__ == '__main__':
 	augmented_gen = tf.keras.preprocessing.image.ImageDataGenerator(
 		rescale=1./255,
 		zoom_range=0.1,
+		rotation_range = 180,
 		cval=0,
 		horizontal_flip=True,
 		vertical_flip = True,
-		preprocessing_function=random_90,
+		width_shift_range=0.2,
+		height_shift_range=0.2,
+		brightness_range=(0.5,1.5)
+		# preprocessing_function=random_90,
 	)
 
 	datagen = tf.keras.preprocessing.image.ImageDataGenerator(
@@ -64,7 +68,7 @@ if __name__ == '__main__':
 	)
 
 	validation_gen = datagen.flow_from_directory(
-		valid_dir,
+		train_dir,
 	    target_size=(256, 256),
 	    batch_size=32,
 	    class_mode='binary'
@@ -82,5 +86,8 @@ if __name__ == '__main__':
 	# 	title='Re-training on STK data',
 	# 	save='retrain_1.png'
 	# )
-
-	model.save('../models/retrained.h5')
+	mname = '../models/retrained.h5'
+	ii=0
+	while os.path.isfile(mname):
+		mname = '../models/retrained_{}.h5'.format(ii)
+	model.save(mname)
