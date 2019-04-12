@@ -59,7 +59,7 @@ if(__name__=='__main__'):
 		import time, datetime
 		if args['keep_color']:
 			print('[P] Keeping color for classification')
-			print('[P] Using model file: {}'.format(args['model']))
+		print('[P] Using model file: {}'.format(args['model']))
 
 	# This will be the file containing the full neural network model
 	MODEL_FILE = args['model']
@@ -156,11 +156,15 @@ if(__name__=='__main__'):
 					file.write(gbuf)
 		# Convert cropped image to png buffer for downlink
 		result, buf = cv2.imencode('.png', rgb_crop)
-		labeled = rgb_crop.copy()
-		label = 'Aurora ' + ('not' if pred<=THRESHOLD else '') + ' present'
-		cv2.putText(labeled, "{}, {:.2f}%".format(label, pred[0][0] * 100),
-			(10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
-		result, buf_l = cv2.imencode('.png', labeled)
+		do_label = False
+		if do_label:
+			labeled = rgb_crop.copy()
+			label = 'Aurora ' + ('not' if pred<=THRESHOLD else '') + ' present'
+			cv2.putText(labeled, "{}, {:.2f}%".format(label, pred[0][0] * 100),
+				(10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+			result, buf_l = cv2.imencode('.png', labeled)
+		else:
+			buf_l = buf
 		if args['verbose']:
 			print('[P] PNG buffer created with result {}'.format(result))
 			
