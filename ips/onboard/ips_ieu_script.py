@@ -18,17 +18,21 @@ def read_raw(pipe, read_size):
 	# Expected size of image
 	row = 1920; col = 1200;
 	# create np array from bufer with type uint8 and reshape to correct size
-	raw_arr = np.frombuffer(
-		os.read(pipe, read_size)
-		,np.uint8).reshape((col,row))
-	# De-mosaic using openCV
-	rgb_arr = cv2.cvtColor(raw_arr, cv2.COLOR_BayerRG2RGB)
+	try:
+		buf = os.read(pipe, read_size)
+		raw_arr = np.frombuffer(
+			buf,np.uint8).reshape((col,row))
+		# De-mosaic using openCV
+		rgb_arr = cv2.cvtColor(raw_arr, cv2.COLOR_BayerRG2RGB)
+	except ValueError as e:
+		print('Invalid message was recieved: {}'.format(buf.decode()))
+		raise e
 	return rgb_arr
 
 # MAIN FUNCTION
 if(__name__=='__main__'):
 	import tensorflow as tf
-	import zlib, argparse
+	import zlib, argparse, time, datetime
 	# This one is a custom buffer reading object
 	# from FixedBufferReader import FixedBufferReader
 	# This one is the cropping function based on circle segmentation
@@ -44,6 +48,8 @@ if(__name__=='__main__'):
 		help = "The path the the model file to load in at the beginning of the script")
 	ap.add_argument("-k","--keep_color", action='store_true', default=False, 
 		help = "whether or not to use RGB color when classifying the image")
+	ap.add_argument("-l","--label_images", action='store_true', default=False, 
+		help = "whether or not to overlay red text with prediction onto output images")
 	ap.add_argument("-v","--verbose", action='store_true', default=False, 
 		help = "whether or not to print verbose statements including timings")
 
@@ -56,7 +62,7 @@ if(__name__=='__main__'):
 
 	#import time if necessary
 	if args['verbose']:
-		import time, datetime
+		# import time, datetime
 		if args['keep_color']:
 			print('[P] Keeping color for classification')
 		print('[P] Using model file: {}'.format(args['model']))
@@ -92,6 +98,7 @@ if(__name__=='__main__'):
 	ready_message = np.uint8(21)
 	os.write(pipe, ready_message)
 
+
 	if args['verbose']:
 		print("Ready message sent. Expecting to read {} bytes".format(BYTES))
 	#The program will loop while run is True
@@ -100,6 +107,7 @@ if(__name__=='__main__'):
 
 	# Infinite Loop
 	while(run):
+		# time.sleep(0.1)
 		# verbose message indicating that loop has been entered
 		if args['verbose']:
 			print("[P] Reading from {}".format(COMM_PIPE))
@@ -156,12 +164,12 @@ if(__name__=='__main__'):
 					file.write(gbuf)
 		# Convert cropped image to png buffer for downlink
 		result, buf = cv2.imencode('.png', rgb_crop)
-		do_label = False
+		do_label = args["label_images"]
 		if do_label:
 			labeled = rgb_crop.copy()
 			label = 'Aurora ' + ('not' if pred<=THRESHOLD else '') + ' present'
 			cv2.putText(labeled, "{}, {:.2f}%".format(label, pred[0][0] * 100),
-				(10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+				(10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 189, 255), 2)
 			result, buf_l = cv2.imencode('.png', labeled)
 		else:
 			buf_l = buf
