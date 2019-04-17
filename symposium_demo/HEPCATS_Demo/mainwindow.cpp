@@ -37,6 +37,27 @@ void MainWindow::video_aurora()
     p.setColor(QPalette::Base, Qt::gray); // set color "Red" for textedit base
     p.setColor(QPalette::Text, Qt::black); // set text color which is selected from color pallete
     ui->is_aurora->setPalette(p); // change textedit palette
+
+    qint64 aurora_present = 100;
+
+    if (aurora_present >= 50) // Aurora Present
+    {
+        ui->is_aurora->setHtml("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\"> <html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\"> p, li { white-space: pre-wrap; } </style></head><body style=\" font-family:'Noto Sans'; font-size:9pt; font-weight:400; font-style:normal;\"> <p align=\"center\" style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p> <p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:24pt; font-weight:600;\">Aurora Present</span></p></body></html>");
+        p = ui->is_aurora->palette(); // define pallete for textEdit..
+        p.setColor(QPalette::Base, Qt::green); // set color "Red" for textedit base
+        p.setColor(QPalette::Text, Qt::black); // set text color which is selected from color pallete
+        ui->is_aurora->setPalette(p); // change textedit palette
+    }
+
+    if(aurora_present < 50) //Aurora Not Present
+    {
+        ui->is_aurora->setHtml("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\"> <html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\"> p, li { white-space: pre-wrap; } </style></head><body style=\" font-family:'Noto Sans'; font-size:9pt; font-weight:400; font-style:normal;\"> <p align=\"center\" style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p> <p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:24pt; font-weight:600;\">No Aurora Present . . .</span></p></body></html>");
+        p = ui->is_aurora->palette(); // define pallete for textEdit..
+        p.setColor(QPalette::Base, Qt::red); // set color "Red" for textedit base
+        p.setColor(QPalette::Text, Qt::black); // set text color which is selected from color pallete
+        ui->is_aurora->setPalette(p); // change textedit palette
+    }
+
 }
 
 void MainWindow::video_no_aurora()
@@ -54,20 +75,25 @@ void MainWindow::video_no_aurora()
     p.setColor(QPalette::Text, Qt::black); // set text color which is selected from color pallete
     ui->is_aurora->setPalette(p); // change textedit palette
 
-    qint64 aurora_present = 60;
+    qint64 aurora_present = 1;
 
     if (aurora_present >= 50) // Aurora Present
+    {
         ui->is_aurora->setHtml("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\"> <html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\"> p, li { white-space: pre-wrap; } </style></head><body style=\" font-family:'Noto Sans'; font-size:9pt; font-weight:400; font-style:normal;\"> <p align=\"center\" style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p> <p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:24pt; font-weight:600;\">Aurora Present</span></p></body></html>");
         p = ui->is_aurora->palette(); // define pallete for textEdit..
         p.setColor(QPalette::Base, Qt::green); // set color "Red" for textedit base
         p.setColor(QPalette::Text, Qt::black); // set text color which is selected from color pallete
         ui->is_aurora->setPalette(p); // change textedit palette
+    }
+
     if(aurora_present < 50) //Aurora Not Present
+    {
         ui->is_aurora->setHtml("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\"> <html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\"> p, li { white-space: pre-wrap; } </style></head><body style=\" font-family:'Noto Sans'; font-size:9pt; font-weight:400; font-style:normal;\"> <p align=\"center\" style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p> <p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:24pt; font-weight:600;\">No Aurora Present . . .</span></p></body></html>");
         p = ui->is_aurora->palette(); // define pallete for textEdit..
         p.setColor(QPalette::Base, Qt::red); // set color "Red" for textedit base
         p.setColor(QPalette::Text, Qt::black); // set text color which is selected from color pallete
         ui->is_aurora->setPalette(p); // change textedit palette
+    }
 }
 
 // Play or Pause the Movie
