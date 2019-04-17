@@ -25,9 +25,27 @@ MainWindow::~MainWindow()
 
 void MainWindow::video_aurora()
 {
+    int state;
+    qint64 variable;
+    if (player!=0x0)
+        state=player->state();
+    else{
+        variable=1;
+        state=2;
+    }
+    switch (state) {
+    case 1: // Is playing
+        variable=player->position();
+        break;
+    case 0: // Is not playing, do nothing, start at beginning of video
+       variable=1;
+        break;
+     default:
+        break;
+    }
     player = new QMediaPlayer(this, QMediaPlayer::VideoSurface);
     player->setMedia(QUrl::fromLocalFile("/home/colin/Project_HEPCATS/symposium_demo/videos/FromSCView.WMV"));
-
+    player->setPosition(variable);
     player->setVideoOutput(ui->STK_Movie);
     player->play();
 
@@ -62,11 +80,32 @@ void MainWindow::video_aurora()
 
 void MainWindow::video_no_aurora()
 {
+    // Check to see if a video is playing and at what time it is
+    int state;
+    qint64 variable;
+    if (player!=0x0)
+        state=player->state();
+    else{
+        variable=1;
+        state=2;
+    }
+    switch (state) {
+    case 1: // Is playing
+        variable=player->position();
+        break;
+    case 0: // Is not playing, do nothing, start at beginning of video
+       variable=1;
+        break;
+     default:
+        break;
+    }
+
     player = new QMediaPlayer(this, QMediaPlayer::VideoSurface);
     player->setMedia(QUrl::fromLocalFile("/home/colin/Project_HEPCATS/symposium_demo/videos/Video1.WMV"));
 
     player->setVideoOutput(ui->STK_Movie);
     player->play();
+    player->setPosition(variable);
 
     // Set check statement for the aurora
     ui->is_aurora->setHtml("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\"> <html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\"> p, li { white-space: pre-wrap; } </style></head><body style=\" font-family:'Noto Sans'; font-size:9pt; font-weight:400; font-style:normal;\"> <p align=\"center\" style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p> <p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:24pt; font-weight:600;\">Detecting . . .</span></p></body></html>");

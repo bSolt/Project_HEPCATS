@@ -53,14 +53,15 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
-        MainWindow->resize(904, 700);
-        MainWindow->setMinimumSize(QSize(700, 700));
+        MainWindow->resize(1360, 710);
+        MainWindow->setMinimumSize(QSize(1360, 710));
+        MainWindow->setMaximumSize(QSize(1360, 710));
         MainWindow->setDockNestingEnabled(true);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         label = new QLabel(centralWidget);
         label->setObjectName(QStringLiteral("label"));
-        label->setGeometry(QRect(170, 10, 661, 38));
+        label->setGeometry(QRect(170, 10, 1171, 38));
         QFont font;
         font.setFamily(QStringLiteral("Verdana"));
         font.setPointSize(24);
@@ -69,7 +70,7 @@ public:
         label->setFont(font);
         horizontalLayoutWidget = new QWidget(centralWidget);
         horizontalLayoutWidget->setObjectName(QStringLiteral("horizontalLayoutWidget"));
-        horizontalLayoutWidget->setGeometry(QRect(10, 580, 461, 51));
+        horizontalLayoutWidget->setGeometry(QRect(90, 590, 461, 51));
         horizontalLayout = new QHBoxLayout(horizontalLayoutWidget);
         horizontalLayout->setSpacing(6);
         horizontalLayout->setContentsMargins(11, 11, 11, 11);
@@ -94,7 +95,7 @@ public:
 
         is_aurora = new QTextEdit(centralWidget);
         is_aurora->setObjectName(QStringLiteral("is_aurora"));
-        is_aurora->setGeometry(QRect(490, 530, 391, 101));
+        is_aurora->setGeometry(QRect(840, 540, 391, 101));
         QPalette palette;
         QBrush brush(QColor(255, 255, 255, 255));
         brush.setStyle(Qt::SolidPattern);
@@ -106,14 +107,14 @@ public:
         is_aurora->setPalette(palette);
         label_2 = new QLabel(centralWidget);
         label_2->setObjectName(QStringLiteral("label_2"));
-        label_2->setGeometry(QRect(190, 510, 161, 17));
+        label_2->setGeometry(QRect(270, 520, 161, 17));
         label_2->setFont(font1);
         STK_Movie = new QVideoWidget(centralWidget);
         STK_Movie->setObjectName(QStringLiteral("STK_Movie"));
-        STK_Movie->setGeometry(QRect(9, 50, 871, 451));
+        STK_Movie->setGeometry(QRect(9, 50, 1331, 451));
         horizontalLayoutWidget_2 = new QWidget(centralWidget);
         horizontalLayoutWidget_2->setObjectName(QStringLiteral("horizontalLayoutWidget_2"));
-        horizontalLayoutWidget_2->setGeometry(QRect(10, 530, 461, 41));
+        horizontalLayoutWidget_2->setGeometry(QRect(90, 540, 461, 41));
         horizontalLayout_2 = new QHBoxLayout(horizontalLayoutWidget_2);
         horizontalLayout_2->setSpacing(6);
         horizontalLayout_2->setContentsMargins(11, 11, 11, 11);
@@ -132,7 +133,7 @@ public:
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 904, 27));
+        menuBar->setGeometry(QRect(0, 0, 1360, 27));
         menuProject_HEPCATS_Demo = new QMenu(menuBar);
         menuProject_HEPCATS_Demo->setObjectName(QStringLiteral("menuProject_HEPCATS_Demo"));
         MainWindow->setMenuBar(menuBar);
@@ -153,7 +154,7 @@ public:
     void retranslateUi(QMainWindow *MainWindow)
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MainWindow", 0));
-        label->setText(QApplication::translate("MainWindow", "Project HEPCATS Symposium Demo", 0));
+        label->setText(QApplication::translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:20pt; font-weight:600;\">Project HEPCATS Symposium Demo</span></p></body></html>", 0));
         btn_dont_include_aurora->setText(QApplication::translate("MainWindow", "Don't Include Aurora", 0));
         btn_include_aurora->setText(QApplication::translate("MainWindow", "Include Aurora", 0));
         is_aurora->setHtml(QApplication::translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
