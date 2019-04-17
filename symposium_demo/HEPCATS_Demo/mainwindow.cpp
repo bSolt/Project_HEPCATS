@@ -44,7 +44,7 @@ void MainWindow::video_aurora()
         break;
     }
     player = new QMediaPlayer(this, QMediaPlayer::VideoSurface);
-    player->setMedia(QUrl::fromLocalFile("/home/colin/Project_HEPCATS/symposium_demo/videos/FromSCView.WMV"));
+    player->setMedia(QUrl::fromLocalFile("/home/colin/Project_HEPCATS/symposium_demo/videos/MovieWithAurora.wmv"));
     player->setPosition(variable);
     player->setVideoOutput(ui->STK_Movie);
     player->play();
@@ -69,7 +69,7 @@ void MainWindow::video_aurora()
 
     if(aurora_present < 50) //Aurora Not Present
     {
-        ui->is_aurora->setHtml("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\"> <html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\"> p, li { white-space: pre-wrap; } </style></head><body style=\" font-family:'Noto Sans'; font-size:9pt; font-weight:400; font-style:normal;\"> <p align=\"center\" style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p> <p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:24pt; font-weight:600;\">No Aurora Present . . .</span></p></body></html>");
+        ui->is_aurora->setHtml("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\"> <html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\"> p, li { white-space: pre-wrap; } </style></head><body style=\" font-family:'Noto Sans'; font-size:9pt; font-weight:400; font-style:normal;\"> <p align=\"center\" style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p> <p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:24pt; font-weight:600;\">No Aurora Present</span></p></body></html>");
         p = ui->is_aurora->palette(); // define pallete for textEdit..
         p.setColor(QPalette::Base, Qt::red); // set color "Red" for textedit base
         p.setColor(QPalette::Text, Qt::black); // set text color which is selected from color pallete
@@ -101,7 +101,7 @@ void MainWindow::video_no_aurora()
     }
 
     player = new QMediaPlayer(this, QMediaPlayer::VideoSurface);
-    player->setMedia(QUrl::fromLocalFile("/home/colin/Project_HEPCATS/symposium_demo/videos/Video1.WMV"));
+    player->setMedia(QUrl::fromLocalFile("/home/colin/Project_HEPCATS/symposium_demo/videos/MovieNoAurora_8_min.wmv"));
 
     player->setVideoOutput(ui->STK_Movie);
     player->play();
@@ -127,7 +127,7 @@ void MainWindow::video_no_aurora()
 
     if(aurora_present < 50) //Aurora Not Present
     {
-        ui->is_aurora->setHtml("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\"> <html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\"> p, li { white-space: pre-wrap; } </style></head><body style=\" font-family:'Noto Sans'; font-size:9pt; font-weight:400; font-style:normal;\"> <p align=\"center\" style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p> <p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:24pt; font-weight:600;\">No Aurora Present . . .</span></p></body></html>");
+        ui->is_aurora->setHtml("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\"> <html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\"> p, li { white-space: pre-wrap; } </style></head><body style=\" font-family:'Noto Sans'; font-size:9pt; font-weight:400; font-style:normal;\"> <p align=\"center\" style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p> <p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:24pt; font-weight:600;\">No Aurora Present</span></p></body></html>");
         p = ui->is_aurora->palette(); // define pallete for textEdit..
         p.setColor(QPalette::Base, Qt::red); // set color "Red" for textedit base
         p.setColor(QPalette::Text, Qt::black); // set text color which is selected from color pallete
