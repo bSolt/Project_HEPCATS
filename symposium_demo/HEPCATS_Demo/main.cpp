@@ -4,6 +4,8 @@
 #include <QMediaPlayer>
 #include <QMediaPlaylist>
 #include <QVideoWidget>
+#include <qmath.h>
+#include <QtMath>
 
 int main(int argc, char *argv[])
 {
