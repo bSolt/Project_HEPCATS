@@ -73,6 +73,9 @@
        <property name="text">
         <string>Don't Include Aurora</string>
        </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item>
@@ -87,6 +90,9 @@
        </property>
        <property name="text">
         <string>Include Aurora</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

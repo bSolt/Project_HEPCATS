@@ -84,12 +84,14 @@ public:
         font1.setBold(true);
         font1.setWeight(75);
         btn_dont_include_aurora->setFont(font1);
+        btn_dont_include_aurora->setCheckable(true);
 
         horizontalLayout->addWidget(btn_dont_include_aurora);
 
         btn_include_aurora = new QPushButton(horizontalLayoutWidget);
         btn_include_aurora->setObjectName(QStringLiteral("btn_include_aurora"));
         btn_include_aurora->setFont(font1);
+        btn_include_aurora->setCheckable(true);
 
         horizontalLayout->addWidget(btn_include_aurora);
 
