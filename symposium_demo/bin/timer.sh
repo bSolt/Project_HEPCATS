@@ -2,6 +2,6 @@
 while true; do
    counter=$((counter+1))
    echo $counter
-   sleep 30
+   sleep 1
 done
 

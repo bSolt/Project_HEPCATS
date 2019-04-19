@@ -32,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+    timer->terminate();
 }
 
 void MainWindow::video_aurora()
@@ -93,7 +94,7 @@ void MainWindow::aurora_prob_listeners()
     aurora_prob.append(93.08); // 12
 
     qreal timestamp = player->position();
-    qreal index = qFloor(timestamp/5001);
+    qreal index = qFloor(timestamp/30000);
 
     double aurora_present = aurora_prob[index];
 
@@ -126,8 +127,6 @@ void MainWindow::aurora_prob_listeners()
 
 void MainWindow::video_no_aurora()
 {
-    if (timer->state() == 2)
-        timer->terminate();
     // Check to see if a video is playing and at what time it is
     int state;
     qint64 variable;
@@ -156,6 +155,8 @@ void MainWindow::video_no_aurora()
     player->setPosition(variable);
 
     timer=new QProcess(this);
+    if (timer->state() == 2)
+        timer->terminate();
     //timer=new QProcess(this);
     connect(timer,SIGNAL(readyReadStandardOutput()),this,SLOT(no_aurora_probs_listeners()));
     timer->start("/home/colin/Project_HEPCATS/symposium_demo/bin/timer.sh");
@@ -192,7 +193,7 @@ aurora_prob.append(1.38); // 16
 
 // Check where in the video we are
 qreal timestamp = player->position();
-qreal index = qFloor(timestamp/300000);
+qreal index = qFloor(timestamp/30000);
 
 double aurora_present = aurora_prob[index];
 
