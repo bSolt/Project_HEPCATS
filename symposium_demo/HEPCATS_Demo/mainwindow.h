@@ -47,6 +47,5 @@ private:
     Ui::MainWindow *ui;
     QMediaPlayer *player;
     QProcess *timer;
-    QProcess *timer_no;
 };
 #endif // MAINWINDOW_H

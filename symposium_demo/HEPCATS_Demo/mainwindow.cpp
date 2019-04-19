@@ -62,12 +62,8 @@ void MainWindow::video_aurora()
     player->play();
 
     timer=new QProcess(this);
-    if (timer->state() == QProcess::Running)
-        timer->terminate();
-    //timer=new QProcess(this);
     connect(timer,SIGNAL(readyReadStandardOutput()),this,SLOT(aurora_prob_listeners()));
     timer->start("/home/colin/Project_HEPCATS/symposium_demo/bin/timer.sh");
-    timer->waitForFinished(1);
 }
 
 void MainWindow::aurora_prob_listeners()
@@ -94,7 +90,7 @@ void MainWindow::aurora_prob_listeners()
     aurora_prob.append(93.08); // 12
 
     qreal timestamp = player->position();
-    qreal index = qFloor(timestamp/30000);
+    qreal index = qFloor(timestamp/50001);
 
     double aurora_present = aurora_prob[index];
 
@@ -155,12 +151,8 @@ void MainWindow::video_no_aurora()
     player->setPosition(variable);
 
     timer=new QProcess(this);
-    if (timer->state() == 2)
-        timer->terminate();
-    //timer=new QProcess(this);
     connect(timer,SIGNAL(readyReadStandardOutput()),this,SLOT(no_aurora_probs_listeners()));
     timer->start("/home/colin/Project_HEPCATS/symposium_demo/bin/timer.sh");
-    timer->waitForFinished(1);
 }
 
 void MainWindow::no_aurora_probs_listeners()
