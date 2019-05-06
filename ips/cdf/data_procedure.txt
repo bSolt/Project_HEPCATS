@@ -1,0 +1,42 @@
+This text file details the procedure used to download and label data for the HEPCATS project
+
+The procedure is layed out as a series of numbered steps.
+
+# Author: Braden Solt
+# Date Created: 12-27-2018
+
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= PROCEDURE =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+1. Download CDF files
+	a. First navigate to NASA's CDAWeb home page in a web brower. URL: https://cdaweb.sci.gsfc.nasa.gov/index.html/
+
+	b. Select check boxes for the mission we are interested in: "IMAGE" & "Polar"
+
+	c. Click the submit button on this page after checking the boxes. This takes you to the data selector page
+
+	d. On the Data Selector Page, we again want to check the boxes for only the relavent instruments. Click the button to uncheck all boxes, then check only the boxes for "IM_K0+WIC" & "PO_VIS_EARTH-CAMERA-CALIBRATED". Click the submit buttom on this page as well.
+
+	e. You should now be on the "CDAWeb Data Explorer" page. Here you must enter the time range for the data you wish to view or download. To view images, select the option "Plot Data." To download images select the option "Download Original CDFs." You must also select again the data which you desire from below the horizontal line. The proper selections are "---> FUV/WIC LBH Auroral Images, as above (large format)" and "Cleaned and Filtered 256 x 256 Ultra-Violet Image (quasi-logarithmically compressed counts)". After selecting one of these options click submit.
+
+	f. The CDF datasets should now be available for download in a new tab or window. Select the link for combined CDFs and download the "Combined CDFs" link when ready. This page may take a few minutes to load completely. What should be downloaded is a .tar.gz archive containing all of the listed CDF files
+
+	Notes:
+	- I chose to use several holidays over years 2000-2005: Easter, Christmas, St. Patrick's Day, Halloween, and Bastille Day
+	- I downloaded data in 48 hr periods from the day before to the day after at 00:00 UTC
+
+
+2. Collect images from CDF files into PICKLE file
+	The bash script `autocollect.sh` will automatically complete this step for you. Call the script as 
+		$ ./autocollect.sh [name] [archive]
+	where [name] is the name of file you wish to output and [archive] is the name of the downloaded tar/gzip archive. An example call would look like
+		$ ./autocollect.sh easter_01 ~/Downloads/combined_29740.tar.gz
+
+	Notes: 
+	- The script will unzip the CDF files into a local director ./[name] as well as create a [name].pickle file with selected images from the data files. 
+	- The script may have bugs because I didn't test it extensively
+	- If you cannot execute the script make sure the permissions are setup correctly with `ls -l autocollect.sh` If there isn't execute permission for the user you must add it with `sudo chmod u+x autocollect.sh`
+	- The python script collect.py which is necesary for this step is dependent on the spacepy module for reading the CDFs. This in turn is dependent on a few modules and libraries including the NASA CDF C library. Follow the instructions online to get this properly set up, URL: https://pythonhosted.org/SpacePy/install.html, https://cdf.gsfc.nasa.gov/
+	- If you don't want to use the shell script you could execute the series of commands yourself, which are: mkdir, tar, python3 collect.py, rm. See `autocollect.sh` for details.
+	- The script will remove the original tar/gzip archive as well as the extracted CDF files for convenience. This could be disabled by commenting out the last 4 lines of the script.
+	- The python script selects the first image in the CDF and all subsequent images which are at least 30 minutes removed from each other. This is done to largely remove the dependence of one image on the last. This time delay value is hard coded as 30 minutes because I am unaware of an easy way to input it/ too lazy to implement anything and I think 30 minutes is fine.
+
+3. Use Labeler Jupyter Notebook to label images
